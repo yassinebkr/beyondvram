@@ -1,0 +1,33 @@
+0.00.098.193 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.165.798 I srv          init: The UI is disabled
+0.00.165.805 I srv          init: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+0.00.165.961 W srv  llama_server: -----------------
+0.00.165.966 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.165.966 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.165.966 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.165.967 W srv  llama_server: -----------------
+0.00.174.089 I srv    load_model: loading model 'C:\Users\yassi\Documents\code\BeyondVram\models\gpt-oss-20b-GGUF\gpt-oss-20b-MXFP4.gguf'
+0.01.715.819 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 24, abort
+0.02.091.639 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.02.091.803 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.02.096.276 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.02.096.280 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.02.096.292 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.02.130.728 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --no-mmap for better performance
+0.05.776.316 I common_speculative_init_result: loading draft model 'C:\Users\yassi\Documents\code\BeyondVram\models\gpt-oss-20b-GGUF\eagle3-gpt-oss-20b-Q8_0.gguf'
+0.06.244.774 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.06.245.033 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.06.251.357 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.06.251.362 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.06.251.374 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.06.578.358 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 4096, kv_unified = 'true'
+0.06.821.158 I srv  llama_server: model loaded
+0.06.821.166 I srv  llama_server: listening on http://127.0.0.1:8100
+0.08.508.886 I slot get_availabl: id  3 | task -1 | selected slot by LRU, t_last = -1
+0.08.508.920 I slot launch_slot_: id  3 | task 0 | processing task, is_child = 0
+0.13.382.764 I slot print_timing: id  3 | task 0 | n_decoded =    100, tg =  25.89 t/s, tg_3s =  25.89 t/s
+0.14.429.828 I slot print_timing: id  3 | task 0 | prompt eval time =    1010.99 ms /    26 tokens (   38.88 ms per token,    25.72 tokens per second)
+0.14.429.835 I slot print_timing: id  3 | task 0 |        eval time =    4909.88 ms /   128 tokens (   38.36 ms per token,    26.07 tokens per second)
+0.14.429.836 I slot print_timing: id  3 | task 0 |       total time =    5920.87 ms /   154 tokens
+0.14.429.837 I slot print_timing: id  3 | task 0 |    graphs reused =        127
+0.14.429.867 I slot      release: id  3 | task 0 | stop processing: n_tokens = 153, truncated = 0

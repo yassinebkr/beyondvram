@@ -15,6 +15,12 @@ engagement (or a silent fallback) is verifiable, unlike the Track-1 run.
 A config whose server dies at startup is recorded as server_died, not dropped.
 
 Output: results/gpt-oss/speculative-bench.json + spec-server-*.log
+
+N-gram mode (`--ngram`): no draft model — the server's built-in
+`--spec-type ngram-simple|ngram-mod` self-speculation on a repetitive-content
+prompt (code-shaped output), baseline `no_spec`, same placement and protocol.
+Writes speculative-bench-ngram.json. b10355 llama-server --spec-type support:
+ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache.
 """
 
 from __future__ import annotations
@@ -49,6 +55,19 @@ CONFIGS = [
     ("draft_gpu_ngld1", ["-md", str(DRAFT), "-ngld", "1", "--spec-draft-n-max", "8"]),
 ]
 
+PROMPT_REPETITIVE = (
+    "Write a Python module defining twenty dataclasses, one per common farm "
+    "animal. Every dataclass has the same fields (name: str, legs: int, "
+    "habitat: str, diet: str) and an identical describe method that returns "
+    "a one-line summary. Follow exactly the same pattern for all twenty."
+)
+
+NGRAM_CONFIGS = [
+    ("no_spec", []),
+    ("ngram_simple", ["--spec-type", "ngram-simple"]),
+    ("ngram_mod", ["--spec-type", "ngram-mod"]),
+]
+
 
 def start_server(extra: list[str], log_path: Path) -> subprocess.Popen | None:
     log = open(log_path, "w", encoding="utf-8", errors="replace")
@@ -70,9 +89,9 @@ def start_server(extra: list[str], log_path: Path) -> subprocess.Popen | None:
     return None
 
 
-def completion() -> dict:
+def completion(prompt: str) -> dict:
     body = json.dumps({
-        "prompt": PROMPT, "n_predict": N_PREDICT,
+        "prompt": prompt, "n_predict": N_PREDICT,
         "temperature": 0.0, "seed": 42, "cache_prompt": False,
     }).encode()
     req = urllib.request.Request(f"http://127.0.0.1:{PORT}/completion", data=body,
@@ -86,6 +105,13 @@ def main() -> None:
     reps = REPS
     configs = CONFIGS
     out = OUT
+    prompt = PROMPT
+    spec_mode = "eagle3"
+    if "--ngram" in sys.argv:
+        configs = NGRAM_CONFIGS
+        prompt = PROMPT_REPETITIVE
+        spec_mode = "ngram"
+        out = OUT_DIR / "speculative-bench-ngram.json"
     if "--reps" in sys.argv:
         reps = int(sys.argv[sys.argv.index("--reps") + 1])
     if "--configs" in sys.argv:
@@ -112,7 +138,7 @@ def main() -> None:
                     print(f"  server died at startup; see {log_path.name}", flush=True)
                     continue
                 try:
-                    result = completion()
+                    result = completion(prompt)
                     timings = result.get("timings", {})
                     records.append({"config": name, "rep": rep, "status": "ok",
                                     "predicted_per_second": timings.get("predicted_per_second"),
@@ -134,7 +160,7 @@ def main() -> None:
                 continue
             try:
                 for rep in range(reps):
-                    result = completion()
+                    result = completion(prompt)
                     timings = result.get("timings", {})
                     record = {"config": name, "rep": rep, "status": "ok",
                               "predicted_per_second": timings.get("predicted_per_second"),
@@ -148,14 +174,18 @@ def main() -> None:
 
     payload = {
         "server": "llama-server b10355 (unmodified)",
-        "model": MODEL.name, "draft": DRAFT.name,
+        "spec_mode": spec_mode,
+        "model": MODEL.name,
+        "draft": DRAFT.name if spec_mode == "eagle3" else None,
         "placement": "-ngl 24 --n-cpu-moe 10 (measured optimum)",
-        "prompt": PROMPT, "n_predict": N_PREDICT, "reps": reps,
+        "prompt": prompt, "n_predict": N_PREDICT, "reps": reps,
         "protocol": ("rep 0 is warmup (kept, excluded from summary); greedy, seed 42"
                      + ("; arms interleaved rep-outer, alternating order (drift-canceling)"
                         if "--interleave" in sys.argv else
                         "; config-outer batching (pre-drift-discovery protocol)")),
-        "expectation": "weak-to-negative per Track-1 (29.0 vs 29.5) and the survey (-19% to +2% on CPU-expert rigs)",
+        "expectation": ("weak-to-negative per Track-1 (29.0 vs 29.5) and the survey (-19% to +2% on CPU-expert rigs)"
+                        if spec_mode == "eagle3" else
+                        "repetitive content favors lookup speculation; decision rule in docs/next-experiments.md experiment 5"),
         "records": records,
     }
     from statistics import mean, stdev
