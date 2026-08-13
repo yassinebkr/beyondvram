@@ -1,0 +1,4 @@
+0.00.602.892 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 18, abort
+0.00.775.377 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.04.360.508 I main: prompt tokens = 10, predict = 96, trace out = results/moe-locality/vram-probe.jsonl
+0.09.536.146 I main: wrote 5031 trace records to results/moe-locality/vram-probe.jsonl

@@ -1,0 +1,149 @@
+{
+ "bench": "llama-bench b10355 (unmodified)",
+ "model": "Qwen3-32B-Q4_K_M.gguf",
+ "protocol": "128 prompt tokens, 32 generated, 3 repetitions, mmap, f16 KV",
+ "references": {
+  "moe_qwen3_30b_a3b_best": {
+   "config": "-ngl 48 --n-cpu-moe 33",
+   "tok_s": [
+    34.71,
+    3.04
+   ]
+  }
+ },
+ "records": [
+  {
+   "ngl": 0,
+   "rc": 0,
+   "wall_s": 74.9,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 72.833285,
+     "stddev_ts": 6.158149
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.070045,
+     "stddev_ts": 0.010224
+    }
+   ]
+  },
+  {
+   "ngl": 8,
+   "rc": 0,
+   "wall_s": 61.4,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 86.638589,
+     "stddev_ts": 6.039376
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.101215,
+     "stddev_ts": 0.06126
+    }
+   ]
+  },
+  {
+   "ngl": 16,
+   "rc": 0,
+   "wall_s": 53.4,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 103.988247,
+     "stddev_ts": 2.736247
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.462678,
+     "stddev_ts": 0.045384
+    }
+   ]
+  },
+  {
+   "ngl": 20,
+   "rc": 0,
+   "wall_s": 50.9,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 111.220437,
+     "stddev_ts": 3.492083
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.614878,
+     "stddev_ts": 0.079003
+    }
+   ]
+  },
+  {
+   "ngl": 22,
+   "rc": 0,
+   "wall_s": 50.4,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 115.303113,
+     "stddev_ts": 3.574836
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.657839,
+     "stddev_ts": 0.067182
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "rc": 0,
+   "wall_s": 55.8,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 44.10717,
+     "stddev_ts": 1.032044
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.789069,
+     "stddev_ts": 0.099517
+    }
+   ]
+  },
+  {
+   "ngl": 32,
+   "rc": 0,
+   "wall_s": 71.0,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 47.24041,
+     "stddev_ts": 0.994445
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.580741,
+     "stddev_ts": 0.003863
+    }
+   ]
+  }
+ ]
+}

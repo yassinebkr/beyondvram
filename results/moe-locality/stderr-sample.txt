@@ -1,0 +1,5 @@
+0.00.025.528 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.609.291 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 18, abort
+0.00.779.024 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.13.500.103 I main: prompt tokens = 1, predict = 4, trace out = moe-trace.jsonl
+0.14.098.993 I main: wrote 192 trace records to moe-trace.jsonl

@@ -1,0 +1,4 @@
+0.00.616.765 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 18, abort
+0.00.786.497 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.04.315.360 I main: prompt tokens = 12, predict = 128, trace out = C:\Users\yassi\Documents\code\BeyondVram\results\moe-locality\trace-chat-recipe.jsonl
+0.10.486.693 I main: wrote 6661 trace records to C:\Users\yassi\Documents\code\BeyondVram\results\moe-locality\trace-chat-recipe.jsonl

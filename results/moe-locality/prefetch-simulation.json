@@ -1,0 +1,27 @@
+{
+ "scheme": "predict E(t+1)=E(t), LRU residual per layer",
+ "residual_capacities": [
+  4,
+  8,
+  16,
+  24
+ ],
+ "hit_rates": {
+  "4": 0.4224910394265233,
+  "8": 0.4224910394265233,
+  "16": 0.5743854570255249,
+  "24": 0.673240172391276
+ },
+ "traces": [
+  "trace-chat-advice.jsonl",
+  "trace-chat-recipe.jsonl",
+  "trace-code-cpp.jsonl",
+  "trace-code-python.jsonl",
+  "trace-french.jsonl",
+  "trace-math-proof.jsonl",
+  "trace-prose-intro.jsonl",
+  "trace-prose-story.jsonl",
+  "trace-reasoning.jsonl",
+  "trace-tech-explain.jsonl"
+ ]
+}

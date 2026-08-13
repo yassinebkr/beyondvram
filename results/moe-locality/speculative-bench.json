@@ -1,0 +1,142 @@
+{
+ "prompt": "Write a short story about a lighthouse keeper who finds a strange letter. The story should have a beginning, middle, and end.",
+ "n_predict": 128,
+ "records": [
+  {
+   "config": "no_draft",
+   "rep": 0,
+   "predicted_per_second": 19.393974655711496,
+   "prompt_per_second": 3.8058283300786457,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 7094.382,
+    "prompt_per_token_ms": 262.7548888888889,
+    "prompt_per_second": 3.8058283300786457,
+    "predicted_n": 128,
+    "predicted_ms": 6599.988,
+    "predicted_per_token_ms": 51.56240625,
+    "predicted_per_second": 19.393974655711496
+   }
+  },
+  {
+   "config": "no_draft",
+   "rep": 1,
+   "predicted_per_second": 29.28154526034725,
+   "prompt_per_second": 83.80044321123297,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 322.194,
+    "prompt_per_token_ms": 11.933111111111112,
+    "prompt_per_second": 83.80044321123297,
+    "predicted_n": 128,
+    "predicted_ms": 4371.354,
+    "predicted_per_token_ms": 34.151203125,
+    "predicted_per_second": 29.28154526034725
+   }
+  },
+  {
+   "config": "no_draft",
+   "rep": 2,
+   "predicted_per_second": 29.516088343497167,
+   "prompt_per_second": 84.61933833945517,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 319.076,
+    "prompt_per_token_ms": 11.81762962962963,
+    "prompt_per_second": 84.61933833945517,
+    "predicted_n": 128,
+    "predicted_ms": 4336.618,
+    "predicted_per_token_ms": 33.879828125,
+    "predicted_per_second": 29.516088343497167
+   }
+  },
+  {
+   "config": "no_draft",
+   "rep": 3,
+   "predicted_per_second": 29.54711657076165,
+   "prompt_per_second": 84.90726240117738,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 317.994,
+    "prompt_per_token_ms": 11.777555555555557,
+    "prompt_per_second": 84.90726240117738,
+    "predicted_n": 128,
+    "predicted_ms": 4332.064,
+    "predicted_per_token_ms": 33.84425,
+    "predicted_per_second": 29.54711657076165
+   }
+  },
+  {
+   "config": "draft_0.6b_q8",
+   "rep": 0,
+   "predicted_per_second": 18.774461803650812,
+   "prompt_per_second": 3.470741711643837,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 7779.317,
+    "prompt_per_token_ms": 288.12285185185186,
+    "prompt_per_second": 3.470741711643837,
+    "predicted_n": 128,
+    "predicted_ms": 6817.772,
+    "predicted_per_token_ms": 53.26384375,
+    "predicted_per_second": 18.774461803650812
+   }
+  },
+  {
+   "config": "draft_0.6b_q8",
+   "rep": 1,
+   "predicted_per_second": 29.10823510630532,
+   "prompt_per_second": 88.1503126071271,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 306.295,
+    "prompt_per_token_ms": 11.34425925925926,
+    "prompt_per_second": 88.1503126071271,
+    "predicted_n": 128,
+    "predicted_ms": 4397.381,
+    "predicted_per_token_ms": 34.3545390625,
+    "predicted_per_second": 29.10823510630532
+   }
+  },
+  {
+   "config": "draft_0.6b_q8",
+   "rep": 2,
+   "predicted_per_second": 29.20638049889974,
+   "prompt_per_second": 85.79599618684462,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 314.7,
+    "prompt_per_token_ms": 11.655555555555555,
+    "prompt_per_second": 85.79599618684462,
+    "predicted_n": 128,
+    "predicted_ms": 4382.604,
+    "predicted_per_token_ms": 34.23909375,
+    "predicted_per_second": 29.20638049889974
+   }
+  },
+  {
+   "config": "draft_0.6b_q8",
+   "rep": 3,
+   "predicted_per_second": 28.743614370280184,
+   "prompt_per_second": 84.53217701664033,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 27,
+    "prompt_ms": 319.405,
+    "prompt_per_token_ms": 11.829814814814814,
+    "prompt_per_second": 84.53217701664033,
+    "predicted_n": 128,
+    "predicted_ms": 4453.163,
+    "predicted_per_token_ms": 34.7903359375,
+    "predicted_per_second": 28.743614370280184
+   }
+  }
+ ]
+}

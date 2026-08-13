@@ -1,0 +1,17 @@
+# Large local artifacts — not tracked
+models/*
+!models/README.md
+.venv/
+tools/llama.cpp-b10355/
+tools/llama.cpp-source/
+results/real_layer/
+results/*.zip
+
+# Python / test caches
+__pycache__/
+.pytest_cache/
+.pytest_cache_stale/
+tests/.pytest-tmp/
+
+# OS / editor
+Thumbs.db

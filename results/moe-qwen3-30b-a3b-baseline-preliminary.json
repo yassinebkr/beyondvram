@@ -1,0 +1,1 @@
+[{"gpu_layers":0,"prompt_tokens_per_second":50.306038,"generation_tokens_per_second":13.990421,"repetitions":1},{"gpu_layers":12,"prompt_tokens_per_second":30.691315,"generation_tokens_per_second":14.492674,"repetitions":1},{"gpu_layers":24,"prompt_tokens_per_second":35.32104,"generation_tokens_per_second":16.189397,"repetitions":1}]

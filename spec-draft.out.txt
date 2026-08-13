@@ -1,0 +1,36 @@
+
+
+Loading model... 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10355-dd1ea5243
+model      : models/Qwen3-30B-A3B-GGUF/Qwen3-30B-A3B-Q4_K_M.gguf
+ftype      : Q4_K - Medium
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Write a short story about a lighthouse keeper who finds a strange letter.
+
+[Start thinking]
+
+Okay, I need to write a short story about a lighthouse keeper who finds a strange letter. Let me start by brainstorming some ideas. The setting is a lighthouse, so maybe it's isolated, which can add to the mysterious vibe. The lighthouse keeper could be someone who's been there for
+
+[ Prompt: 29.5 t/s | Generation: 31.9 t/s ]
+
+
+Exiting...

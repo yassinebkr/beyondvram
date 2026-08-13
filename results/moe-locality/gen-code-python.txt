@@ -1,0 +1,12 @@
+ Also, write a function that returns the sum of the first n Fibonacci numbers. Finally, write a function that returns the sum of the first n even Fibonacci numbers. Can you explain each of these functions?
+
+Sure! Let's go through each of these functions step by step.
+
+### 1. **n-th Fibonacci Number**
+
+The Fibonacci sequence is defined as:
+- F(0) = 0
+- F(1) = 1
+- F(n) = F(n-1) + F(n-2) for n â‰¥ 2
+
+So, the n-th Fibonacci number can be computed using either an iterative or recursive

@@ -1,0 +1,14 @@
+{
+  "bench": "llama-bench b10355 (unmodified)",
+  "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+  "protocol": "-ngl 48, -p 128 -n 32 -r 5, mmap, f16 KV; run 2026-08-11 second session, machine otherwise idle",
+  "note": "values transcribed from the session log of the refinement runs (stderr files err-32..35.txt); avg over 5 repetitions +/- stddev",
+  "records": [
+    {"ngl": 48, "n_cpu_moe": 31, "pp_avg_ts": 153.0, "tg_avg_ts": 32.76, "tg_stddev_ts": 3.23},
+    {"ngl": 48, "n_cpu_moe": 32, "pp_avg_ts": 175.3, "tg_avg_ts": 33.68, "tg_stddev_ts": 5.27},
+    {"ngl": 48, "n_cpu_moe": 33, "pp_avg_ts": 155.9, "tg_avg_ts": 34.71, "tg_stddev_ts": 3.04},
+    {"ngl": 48, "n_cpu_moe": 33, "pp_avg_ts": 172.0, "tg_avg_ts": 33.47, "tg_stddev_ts": 4.61, "comment": "repeat run for confirmation"},
+    {"ngl": 48, "n_cpu_moe": 34, "pp_avg_ts": 147.8, "tg_avg_ts": 30.66, "tg_stddev_ts": 3.98},
+    {"ngl": 48, "n_cpu_moe": 35, "pp_avg_ts": 144.0, "tg_avg_ts": 29.16, "tg_stddev_ts": 3.22}
+  ]
+}

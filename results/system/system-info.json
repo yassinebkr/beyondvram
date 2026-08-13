@@ -1,0 +1,28 @@
+{
+  "captured_at_utc": "2026-08-10T21:16:13.707839+00:00",
+  "cpu": {
+    "logical_processors": 12,
+    "name": "AMD64 Family 25 Model 33 Stepping 0, AuthenticAMD"
+  },
+  "cuda_toolkit_nvcc": null,
+  "gpu_nvidia_smi_csv": "NVIDIA GeForce RTX 3070 Ti, 610.74, 8192, 6553, 00000000:2B:00.0, 8.6",
+  "nvidia_smi": "Mon Aug 10 23:16:13 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 610.74                 KMD Version: 610.74        CUDA UMD Version: 13.3     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 3070 Ti   WDDM  |   00000000:2B:00.0  On |                  N/A |\n|  0%   46C    P8             26W /  290W |    1465MiB /   8192MiB |     52%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2020    C+G   ...ams\\signal-desktop\\Signal.exe      N/A      |\n|    0   N/A  N/A            3040    C+G   ...App_cw5n1h2txyewy\\LockApp.exe      N/A      |\n|    0   N/A  N/A            3216    C+G   ...ams\\signal-desktop\\Signal.exe      N/A      |\n|    0   N/A  N/A            3280    C+G   ...ntrolPanel\\SystemSettings.exe      N/A      |\n|    0   N/A  N/A            5748    C+G   ...em32\\ApplicationFrameHost.exe      N/A      |\n|    0   N/A  N/A            8200    C+G   ....0.4129.72\\msedgewebview2.exe      N/A      |\n|    0   N/A  N/A            8648    C+G   ...rograms\\VSCodium\\VSCodium.exe      N/A      |\n|    0   N/A  N/A           12068    C+G   ..._cw5n1h2txyewy\\SearchHost.exe      N/A      |\n|    0   N/A  N/A           12076    C+G   ...y\\StartMenuExperienceHost.exe      N/A      |\n|    0   N/A  N/A           13076    C+G   ...2txyewy\\CrossDeviceResume.exe      N/A      |\n|    0   N/A  N/A           13548    C+G   ...indows\\System32\\ShellHost.exe      N/A      |\n|    0   N/A  N/A           15744    C+G   ...xyewy\\ShellExperienceHost.exe      N/A      |\n|    0   N/A  N/A           17896    C+G   ....0.4129.72\\msedgewebview2.exe      N/A      |\n|    0   N/A  N/A           17956    C+G   ...5n1h2txyewy\\TextInputHost.exe      N/A      |\n|    0   N/A  N/A           18476    C+G   ...aries\\Win64\\EpicWebHelper.exe      N/A      |\n|    0   N/A  N/A           18972    C+G   ...\\cef.win64\\steamwebhelper.exe      N/A      |\n|    0   N/A  N/A           19344    C+G   ...cord\\app-1.0.9251\\Discord.exe      N/A      |\n|    0   N/A  N/A           20816    C+G   ...gram Files\\Parsec\\parsecd.exe      N/A      |\n|    0   N/A  N/A           20820    C+G   ...8bbwe\\PhoneExperienceHost.exe      N/A      |\n|    0   N/A  N/A           22380    C+G   ...Browser\\Application\\brave.exe      N/A      |\n|    0   N/A  N/A           22984    C+G   ...s\\Win64\\EpicGamesLauncher.exe      N/A      |\n|    0   N/A  N/A           24940    C+G   ...ayRenderer-Win64-Shipping.exe      N/A      |\n|    0   N/A  N/A           25432    C+G   ...motivApps\\EMOTIV Launcher.exe      N/A      |\n|    0   N/A  N/A           28072    C+G   ...Browser\\Application\\brave.exe      N/A      |\n|    0   N/A  N/A           28080    C+G   ...t\\Edge\\Application\\msedge.exe      N/A      |\n|    0   N/A  N/A           28488    C+G   ...1g1gvanyjgm\\WhatsApp.Root.exe      N/A      |\n|    0   N/A  N/A           29248    C+G   C:\\Windows\\explorer.exe               N/A      |\n|    0   N/A  N/A           29644    C+G   ...em_tray\\lghub_system_tray.exe      N/A      |\n+-----------------------------------------------------------------------------------------+",
+  "os": "Windows-11-10.0.26200-SP0",
+  "python": {
+    "executable": "C:\\Users\\yassi\\Documents\\code\\BeyondVram\\.venv\\Scripts\\python.exe",
+    "version": "3.14.4 (tags/v3.14.4:23116f9, Apr  7 2026, 14:10:54) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "python_packages": {
+    "numpy": "2.5.2",
+    "torch": "2.13.0+cu126\n12.6"
+  },
+  "ram": {
+    "available_bytes": 16060661760,
+    "total_bytes": 34282233856
+  },
+  "workspace_volume": {
+    "free_bytes": 230758313984,
+    "root": "C:\\",
+    "total_bytes": 1023345160192
+  }
+}

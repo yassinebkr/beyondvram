@@ -1,0 +1,252 @@
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 39f802d..6c143f0 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -18,6 +18,8 @@ else()
+     add_subdirectory(debug)
+     add_subdirectory(embedding)
+     add_subdirectory(eval-callback)
++    add_subdirectory(moe-trace)
++    add_subdirectory(moe-cache)
+ 
+     add_subdirectory(gguf-hash)
+     add_subdirectory(gguf)
+diff --git a/ggml/include/ggml-cuda.h b/ggml/include/ggml-cuda.h
+index 1cd81ee..9345e80 100644
+--- a/ggml/include/ggml-cuda.h
++++ b/ggml/include/ggml-cuda.h
+@@ -42,6 +42,19 @@ GGML_BACKEND_API void ggml_backend_cuda_unregister_host_buffer(void * buffer);
+ 
+ GGML_BACKEND_API ggml_backend_reg_t ggml_backend_cuda_reg(void);
+ 
++// MoE expert VRAM cache (BeyondVRAM proof of concept), enabled via
++// LLAMA_MOE_CACHE=<cap>:<first_layer>; inert when the env var is unset.
++// Returns true when the cache is enabled; fills cap/first_layer when non-NULL.
++GGML_BACKEND_API bool ggml_cuda_moe_cache_get_config(int * cap, int * first_layer);
++// Same, also fills last_layer (-1 = unbounded) when non-NULL.
++GGML_BACKEND_API bool ggml_cuda_moe_cache_get_config_range(int * cap, int * first_layer, int * last_layer);
++// Registers a slot tensor (ne[2] = cap, data in a CUDA buffer) and returns a
++// pinned host buffer to be filled with the full n_experts * slot_tensor->nb[2]
++// bytes of expert data. Returns NULL on allocation failure.
++GGML_BACKEND_API void * ggml_cuda_moe_cache_register(struct ggml_tensor * slot_tensor, int64_t n_experts);
++// JSON stats string; pointer is valid until the next call.
++GGML_BACKEND_API const char * ggml_cuda_moe_cache_stats_json(void);
++
+ #ifdef  __cplusplus
+ }
+ #endif
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index 05e8d7f..8e4c3e1 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -32,6 +32,7 @@
+ #include "ggml-cuda/mmq.cuh"
+ #include "ggml-cuda/mmvf.cuh"
+ #include "ggml-cuda/mmvq.cuh"
++#include "ggml-cuda/moe-cache.cuh"
+ #include "ggml-cuda/norm.cuh"
+ #include "ggml-cuda/opt-step-adamw.cuh"
+ #include "ggml-cuda/opt-step-sgd.cuh"
+@@ -1877,6 +1878,13 @@ static void ggml_cuda_mul_mat_id(ggml_backend_cuda_context & ctx, ggml_tensor *
+ 
+     const int cc = ggml_cuda_info().devices[ggml_cuda_get_device()].cc;
+ 
++    // MoE expert VRAM cache (BeyondVRAM PoC): when src0 is a registered cache
++    // slot tensor, the whole mul_mat_id is executed inside the cache module
++    // (per-token remapped mmvq launches). Inert when LLAMA_MOE_CACHE is unset.
++    if (ggml_cuda_moe_cache_forward(ctx, src0, src1, ids, dst)) {
++        return;
++    }
++
+     // [TAG_MUL_MAT_ID_CUDA_GRAPHS]
+     if (src1->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32) {
+         static_assert(MMVQ_MAX_BATCH_SIZE == MMVF_MAX_BATCH_SIZE);
+@@ -3647,7 +3655,14 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+                 fusion_data.gate_scale = gate_scale;
+                 fusion_data.glu_op     = ggml_get_glu_op(glu);
+ 
+-                if (ggml_cuda_should_fuse_mul_mat_vec_q(up_n)) {
++                // MoE expert VRAM cache: the fused kernel indexes both src0 and
++                // fusion_data.gate by global expert id; when either is a cache
++                // slot tensor the fusion must be skipped so that the normal
++                // mul_mat_id path (with id remapping) runs instead
++                const bool moe_cache_skip = op == GGML_OP_MUL_MAT_ID &&
++                    (ggml_cuda_moe_cache_registered(src0) || ggml_cuda_moe_cache_registered(fusion_data.gate));
++
++                if (!moe_cache_skip && ggml_cuda_should_fuse_mul_mat_vec_q(up_n)) {
+                     ggml_cuda_mul_mat_vec_q(*cuda_ctx, src0, src1, ids, cgraph->nodes[glu_idx], &fusion_data);
+                     fused_mul_mat_vec = true;
+                     fused_node_count  = n_ops;
+@@ -3737,7 +3752,13 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+             const ggml_tensor * src1 = up->src[1];
+             const ggml_tensor * ids  = up->src[2];
+ 
+-            if (ggml_cuda_should_fuse_mul_mat_vec_f(up)) {
++            // MoE expert VRAM cache: the fused kernel indexes both src0 and the
++            // gate tensor by global expert id; skip fusion when either is a
++            // cache slot tensor so the normal remapped mul_mat_id path runs
++            const bool moe_cache_skip = op == GGML_OP_MUL_MAT_ID &&
++                (ggml_cuda_moe_cache_registered(src0) || ggml_cuda_moe_cache_registered(gate->src[0]));
++
++            if (!moe_cache_skip && ggml_cuda_should_fuse_mul_mat_vec_f(up)) {
+                 ggml_cuda_mm_fusion_args_host fusion_data{};
+                 fusion_data.gate   = gate->src[0];
+                 fusion_data.glu_op = ggml_get_glu_op(glu);
+@@ -3748,7 +3769,7 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+                 break;
+             }
+ 
+-            if (ggml_cuda_should_fuse_mul_mat_vec_q(up)) {
++            if (!moe_cache_skip && ggml_cuda_should_fuse_mul_mat_vec_q(up)) {
+                 ggml_cuda_mm_fusion_args_host fusion_data{};
+                 fusion_data.gate   = gate->src[0];
+                 fusion_data.glu_op = ggml_get_glu_op(glu);
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 3d50f8a..f6979b8 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include "ggml-alloc.h"
+ #include "ggml.h"
++#include "ggml-cuda.h"
+ #include "gguf.h"
+ #include "llama-hparams.h"
+ #include "llama.h"
+@@ -13,6 +14,31 @@
+ #include <cstring>
+ #include <future>
+ #include <regex>
++#include <set>
++
++// MoE expert VRAM cache (BeyondVRAM PoC): returns the layer index of a fused
++// expert tensor ("blk.<N>.ffn_{gate,up,down}_exps.weight") that should be
++// created as a cap-slot CUDA tensor, or -1 when the tensor is not cacheable.
++static int llama_moe_cache_tensor_layer(const std::string & name) {
++    int cap = 0, first_layer = 0, last_layer = -1;
++    if (!ggml_cuda_moe_cache_get_config_range(&cap, &first_layer, &last_layer)) {
++        return -1;
++    }
++    int layer = -1;
++    char suffix[64];
++    if (sscanf(name.c_str(), "blk.%d.%63s", &layer, suffix) != 2) {
++        return -1;
++    }
++    if (strcmp(suffix, "ffn_gate_exps.weight") != 0 &&
++        strcmp(suffix, "ffn_up_exps.weight")   != 0 &&
++        strcmp(suffix, "ffn_down_exps.weight") != 0) {
++        return -1;
++    }
++    if (layer < first_layer || (last_layer >= 0 && layer > last_layer)) {
++        return -1;
++    }
++    return layer;
++}
+ 
+ static const size_t kiB = 1024;
+ static const size_t MiB = 1024*kiB;
+@@ -1275,6 +1301,30 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+     }
+ 
+     ggml_tensor t_meta = *cur;
++
++    // MoE expert VRAM cache (BeyondVRAM PoC): create cached exps tensors with
++    // ne[2] = cap slots instead of n_experts and force them onto the CUDA
++    // device buffer type; the full expert data is staged in a pinned host
++    // buffer during load_all_data.
++    bool moe_cache_shrunk = false;
++    if (llama_moe_cache_tensor_layer(tn.str()) >= 0 && t_meta.ne[2] > 1) {
++        int cap = 0, first_layer = 0;
++        ggml_cuda_moe_cache_get_config(&cap, &first_layer);
++        if (use_mmap) {
++            throw std::runtime_error("LLAMA_MOE_CACHE requires --no-mmap (mmap + pinned host staging is not supported)");
++        }
++        if (cap >= t_meta.ne[2]) {
++            throw std::runtime_error(format("LLAMA_MOE_CACHE cap %d must be smaller than n_experts %lld for tensor %s",
++                    cap, (long long) t_meta.ne[2], tn.str().c_str()));
++        }
++        t_meta.ne[2] = cap;
++        t_meta.nb[3] = t_meta.nb[2]*t_meta.ne[2];
++        moe_cache_tensors.insert(tn.str());
++        moe_cache_shrunk = true;
++        LLAMA_LOG_INFO("%s: MoE cache slot tensor %s: ne[2] = %d slots (was %lld)\n",
++                __func__, tn.str().c_str(), cap, (long long) cur->ne[2]);
++    }
++
+     if (flags & TENSOR_ALLOW_RESHAPE) {
+         for (size_t dim = 0; dim < GGML_MAX_DIMS; dim++) {
+             t_meta.ne[dim] = dim < ne.size() ? ne.begin()[dim] : 1;
+@@ -1288,9 +1338,20 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+         }
+     }
+ 
+-    GGML_ASSERT(ggml_nbytes(&t_meta) == ggml_nbytes(cur));
++    GGML_ASSERT(moe_cache_shrunk || ggml_nbytes(&t_meta) == ggml_nbytes(cur));
+ 
+-    ggml_backend_buffer_type_t buft = buft_for_tensor(&t_meta);
++    ggml_backend_buffer_type_t buft = nullptr;
++    if (moe_cache_shrunk) {
++        // force the slot tensor onto the CUDA device buffer (the layer's normal
++        // buft list may resolve to CPU, e.g. layers above -ngl)
++        ggml_backend_dev_t gpu_dev = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_GPU);
++        if (gpu_dev == nullptr) {
++            throw std::runtime_error(format("LLAMA_MOE_CACHE requires a GPU device for tensor %s", tn.str().c_str()));
++        }
++        buft = ggml_backend_dev_buffer_type(gpu_dev);
++    } else {
++        buft = buft_for_tensor(&t_meta);
++    }
+     if (buft == nullptr) {
+         return nullptr;
+     }
+@@ -1538,6 +1599,28 @@ bool llama_model_loader::load_all_data(
+             }
+         }
+ 
++        if (!moe_cache_tensors.empty() && moe_cache_tensors.count(ggml_get_name(cur))) {
++            // MoE expert VRAM cache (BeyondVRAM PoC): cur is the shrunk slot
++            // tensor (ne[2] = cap) in a CUDA buffer; read the full expert data
++            // from the file into the registered pinned host buffer instead.
++            GGML_ASSERT(!use_mmap); // enforced at tensor creation time
++            const ggml_tensor * meta = get_tensor_meta(ggml_get_name(cur));
++            GGML_ASSERT(meta != nullptr);
++            const size_t full_size = ggml_nbytes(meta);
++            void * host_base = ggml_cuda_moe_cache_register(cur, meta->ne[2]);
++            if (host_base == nullptr) {
++                throw std::runtime_error(format("failed to allocate pinned host buffer for MoE cache tensor '%s'", ggml_get_name(cur)));
++            }
++            const auto & file = files.at(weight->idx);
++            file->seek(weight->offs, SEEK_SET);
++            file->read_raw(host_base, full_size);
++            if (check_tensors && !ggml_validate_row_data(cur->type, host_base, full_size)) {
++                throw std::runtime_error(format("tensor '%s' has invalid data", ggml_get_name(cur)));
++            }
++            size_done += full_size; // size_data accounts the full GGUF size
++            continue;
++        }
++
+         size_t n_size = ggml_nbytes(cur);
+ 
+         if (use_mmap) {
+diff --git a/src/llama-model-loader.h b/src/llama-model-loader.h
+index d6b31c2..5163348 100644
+--- a/src/llama-model-loader.h
++++ b/src/llama-model-loader.h
+@@ -12,6 +12,7 @@
+ #include <cstddef>
+ #include <cstring>
+ #include <map>
++#include <set>
+ #include <stdexcept>
+ #include <unordered_map>
+ 
+@@ -114,6 +115,9 @@ struct llama_model_loader {
+ 
+     std::map<ggml_backend_buffer_type_t, ggml_context_ptr, ggml_backend_buft_comparator> ctx_map;
+ 
++    // names of MoE exps tensors created as cache slot tensors (LLAMA_MOE_CACHE)
++    std::set<std::string> moe_cache_tensors;
++
+     // track tensors that had to be moved for debugging:
+     size_t n_tensors_moved = 0;
+     std::string first_tensor_moved_name;

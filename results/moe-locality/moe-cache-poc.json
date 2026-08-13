@@ -1,0 +1,293 @@
+{
+ "exe": "llama-moe-cache (pinned dd1ea52 + moe-cache module)",
+ "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+ "n_predict": 128,
+ "reps": 3,
+ "prompts": [
+  "Write a short introduction to the history of the printing press.",
+  "Explain step by step why the square root of 2 is irrational.",
+  "Tell a short story about a lighthouse keeper who finds a strange letter."
+ ],
+ "configs": [
+  "off",
+  "8:0:8",
+  "8:0:23"
+ ],
+ "notes": [
+  "cache-off uses the same binary with LLAMA_MOE_CACHE unset (internal baseline)",
+  "stock b10355 baseline reference: 25.15 +/- 2.40 tok/s at -ngl 18",
+  "--n-cpu-moe 48 ablation reference: 16.87 +/- 0.80 tok/s"
+ ],
+ "records": [
+  {
+   "config": "off",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 21.0,
+   "tok_per_s": 20.85,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 21.7,
+   "tok_per_s": 18.34,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 21.0,
+   "tok_per_s": 20.79,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 22.0,
+   "tok_per_s": 18.72,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 21.2,
+   "tok_per_s": 18.5,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 20.8,
+   "tok_per_s": 20.13,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 20.7,
+   "tok_per_s": 20.35,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 21.9,
+   "tok_per_s": 18.39,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "off",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 20.7,
+   "tok_per_s": 21.0,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 20.6,
+   "tok_per_s": 18.94,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 21.1,
+   "tok_per_s": 18.69,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 21.3,
+   "tok_per_s": 18.42,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 21.4,
+   "tok_per_s": 18.99,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 20.8,
+   "tok_per_s": 19.05,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 21.3,
+   "tok_per_s": 18.58,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 21.0,
+   "tok_per_s": 18.69,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 21.5,
+   "tok_per_s": 18.24,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:8",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 21.0,
+   "tok_per_s": 18.95,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 22.2,
+   "tok_per_s": 15.58,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 22.7,
+   "tok_per_s": 15.57,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Write a short introduction to the history of the printing press.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 22.6,
+   "tok_per_s": 15.13,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 22.9,
+   "tok_per_s": 14.66,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 22.6,
+   "tok_per_s": 15.0,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Explain step by step why the square root of 2 is irrational.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 22.8,
+   "tok_per_s": 14.84,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 0,
+   "rc": 0,
+   "wall_s": 22.5,
+   "tok_per_s": 15.02,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 1,
+   "rc": 0,
+   "wall_s": 22.6,
+   "tok_per_s": 15.19,
+   "eval_runs": 128,
+   "status": "ok"
+  },
+  {
+   "config": "8:0:23",
+   "prompt": "Tell a short story about a lighthouse keeper who finds a strange letter.",
+   "rep": 2,
+   "rc": 0,
+   "wall_s": 24.6,
+   "tok_per_s": 14.37,
+   "eval_runs": 128,
+   "status": "ok"
+  }
+ ]
+}

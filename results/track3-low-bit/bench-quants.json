@@ -1,0 +1,202 @@
+{
+ "bench": "llama-bench b10355 (unmodified)",
+ "protocol": "128 prompt tokens, 32 generated, 3 repetitions, mmap, f16 KV",
+ "anchors": {
+  "qwen3-32b-q4km_best": {
+   "ngl": 22,
+   "tok_s": 2.66
+  },
+  "qwen3-30b-a3b-q4km_best": {
+   "config": "-ngl 48 --n-cpu-moe 33",
+   "tok_s": 34.71
+  }
+ },
+ "records": [
+  {
+   "model": "qwen3-32b-q3km",
+   "size_gb": 15.97,
+   "ngl": 0,
+   "rc": 0,
+   "wall_s": 60.3,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 92.276773,
+     "stddev_ts": 7.747472
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.440372,
+     "stddev_ts": 0.034422
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-q3km",
+   "size_gb": 15.97,
+   "ngl": 22,
+   "rc": 0,
+   "wall_s": 42.6,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 130.821589,
+     "stddev_ts": 2.592135
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 3.14209,
+     "stddev_ts": 0.055811
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-q3km",
+   "size_gb": 15.97,
+   "ngl": 28,
+   "rc": 0,
+   "wall_s": 39.2,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 152.940415,
+     "stddev_ts": 3.634177
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 3.477558,
+     "stddev_ts": 0.149402
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-q3km",
+   "size_gb": 15.97,
+   "ngl": 40,
+   "rc": 0,
+   "wall_s": 52.9,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 55.397415,
+     "stddev_ts": 6.027241
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.890849,
+     "stddev_ts": 0.00368
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-iq2xxs",
+   "size_gb": 9.02,
+   "ngl": 22,
+   "rc": 0,
+   "wall_s": 45.8,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 215.371167,
+     "stddev_ts": 11.957658
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 2.725613,
+     "stddev_ts": 0.05143
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-iq2xxs",
+   "size_gb": 9.02,
+   "ngl": 40,
+   "rc": 0,
+   "wall_s": 29.9,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 313.689915,
+     "stddev_ts": 9.503094
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 4.134065,
+     "stddev_ts": 0.302524
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-iq2xxs",
+   "size_gb": 9.02,
+   "ngl": 56,
+   "rc": 0,
+   "wall_s": 19.1,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 109.073509,
+     "stddev_ts": 1.462951
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 10.616045,
+     "stddev_ts": 0.108051
+    }
+   ]
+  },
+  {
+   "model": "qwen3-32b-iq2xxs",
+   "size_gb": 9.02,
+   "ngl": 64,
+   "rc": 0,
+   "wall_s": 20.5,
+   "rows": [
+    {
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ts": 122.7824,
+     "stddev_ts": 0.67568
+    },
+    {
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ts": 9.471151,
+     "stddev_ts": 0.02234
+    }
+   ]
+  },
+  {
+   "model": "bitnet-2b-i2s",
+   "size_gb": 1.19,
+   "ngl": 0,
+   "rc": 1,
+   "wall_s": 0.2,
+   "status": "error",
+   "stderr_tail": "llama.cpp-b10355\\ggml-cuda.dll\nload_backend: loaded RPC backend from C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\llama.cpp-b10355\\ggml-rpc.dll\nload_backend: loaded CPU backend from C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\llama.cpp-b10355\\ggml-cpu-haswell.dll\nllama_bench: error: failed to load model 'C:\\Users\\yassi\\Documents\\code\\BeyondVram\\models\\bitnet-b1.58-2B-4T\\ggml-model-i2_s.gguf'\n"
+  },
+  {
+   "model": "bitnet-2b-i2s",
+   "size_gb": 1.19,
+   "ngl": 99,
+   "rc": 1,
+   "wall_s": 0.2,
+   "status": "error",
+   "stderr_tail": "llama.cpp-b10355\\ggml-cuda.dll\nload_backend: loaded RPC backend from C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\llama.cpp-b10355\\ggml-rpc.dll\nload_backend: loaded CPU backend from C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\llama.cpp-b10355\\ggml-cpu-haswell.dll\nllama_bench: error: failed to load model 'C:\\Users\\yassi\\Documents\\code\\BeyondVram\\models\\bitnet-b1.58-2B-4T\\ggml-model-i2_s.gguf'\n"
+  }
+ ]
+}

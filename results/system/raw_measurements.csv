@@ -1,0 +1,369 @@
+benchmark_id,test,timestamp_utc,repetition,workload,buffer_bytes,chunk_bytes,operations,seconds,value,unit,status,notes
+B01,NVMe sequential read bandwidth,2026-08-10T20:46:28.070902+00:00,1,direct_io_sequential,2147483648,16777216,128,0.8501774000033038,2.5259241753446453,GB/s_payload,ok,Windows FILE_FLAG_NO_BUFFERING; payload uses decimal GB/s.
+B01,NVMe sequential read bandwidth,2026-08-10T20:46:28.923523+00:00,2,direct_io_sequential,2147483648,16777216,128,0.8525854000035906,2.518790080138548,GB/s_payload,ok,Windows FILE_FLAG_NO_BUFFERING; payload uses decimal GB/s.
+B01,NVMe sequential read bandwidth,2026-08-10T20:46:29.761946+00:00,3,direct_io_sequential,2147483648,16777216,128,0.8383937000035075,2.5614262702487096,GB/s_payload,ok,Windows FILE_FLAG_NO_BUFFERING; payload uses decimal GB/s.
+B01,NVMe sequential read bandwidth,2026-08-10T20:46:30.621000+00:00,4,direct_io_sequential,2147483648,16777216,128,0.859024599994882,2.4999093716440655,GB/s_payload,ok,Windows FILE_FLAG_NO_BUFFERING; payload uses decimal GB/s.
+B01,NVMe sequential read bandwidth,2026-08-10T20:46:31.466266+00:00,5,direct_io_sequential,2147483648,16777216,128,0.8452336000045761,2.5406983915314933,GB/s_payload,ok,Windows FILE_FLAG_NO_BUFFERING; payload uses decimal GB/s.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:36.328250+00:00,1,direct_io_random_4KiB,2147483648,4096,65536,4.845403500003158,0.05540002107148043,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:41.219287+00:00,2,direct_io_random_4KiB,2147483648,4096,65536,4.874189399997704,0.05507284062456139,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:46.102370+00:00,3,direct_io_random_4KiB,2147483648,4096,65536,4.866927000010037,0.05515501999504953,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:50.964799+00:00,4,direct_io_random_4KiB,2147483648,4096,65536,4.846175400001812,0.055391196942624,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:55.897823+00:00,5,direct_io_random_4KiB,2147483648,4096,65536,4.916576000003261,0.05459804872330296,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:56.413364+00:00,1,direct_io_random_64KiB,2147483648,65536,4096,0.5137963000015588,0.5224550196238968,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:56.916930+00:00,2,direct_io_random_64KiB,2147483648,65536,4096,0.5024048000050243,0.5343011372449378,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:57.423761+00:00,3,direct_io_random_64KiB,2147483648,65536,4096,0.5056133000034606,0.5309105911536796,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:57.940353+00:00,4,direct_io_random_64KiB,2147483648,65536,4096,0.5154911999998149,0.5207372230604449,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:58.441454+00:00,5,direct_io_random_64KiB,2147483648,65536,4096,0.4999997999984771,0.536871126750086,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:58.584830+00:00,1,direct_io_random_1024KiB,2147483648,1048576,256,0.14310859999386594,1.87574650308581,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:58.713528+00:00,2,direct_io_random_1024KiB,2147483648,1048576,256,0.1285857000038959,2.0875996008254956,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:58.854359+00:00,3,direct_io_random_1024KiB,2147483648,1048576,256,0.14071449999755714,1.907660234053066,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:58.989475+00:00,4,direct_io_random_1024KiB,2147483648,1048576,256,0.13492920000862796,1.989454143230932,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.117514+00:00,5,direct_io_random_1024KiB,2147483648,1048576,256,0.12792369999806397,2.098402844852538,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.204585+00:00,1,direct_io_random_16384KiB,2147483648,16777216,16,0.08701880001171958,3.0847984109623146,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.313173+00:00,2,direct_io_random_16384KiB,2147483648,16777216,16,0.10853400001360569,2.4732844635445965,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.406678+00:00,3,direct_io_random_16384KiB,2147483648,16777216,16,0.09344589999818709,2.8726295750290576,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.526010+00:00,4,direct_io_random_16384KiB,2147483648,16777216,16,0.11928130000887904,2.2504403957704873,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B02,NVMe random/chunked read behavior,2026-08-10T20:46:59.666166+00:00,5,direct_io_random_16384KiB,2147483648,16777216,16,0.14010279999638442,1.9159892308142836,GB/s_payload,ok,Deterministic random offsets; Windows FILE_FLAG_NO_BUFFERING.
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.040878+00:00,1,numpy.copyto,536870912,536870912,1,0.03446179999446031,15.578725199679104,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.071326+00:00,2,numpy.copyto,536870912,536870912,1,0.030416399997193366,17.650705279044825,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.101499+00:00,3,numpy.copyto,536870912,536870912,1,0.030144600008497946,17.809853567426764,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.131713+00:00,4,numpy.copyto,536870912,536870912,1,0.03018990000418853,17.78312985221928,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.162434+00:00,5,numpy.copyto,536870912,536870912,1,0.030695399997057393,17.49027255065798,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.192331+00:00,6,numpy.copyto,536870912,536870912,1,0.029871300008380786,17.97280037525564,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B03,RAM memcpy bandwidth,2026-08-10T20:47:00.221275+00:00,7,numpy.copyto,536870912,536870912,1,0.02892009999777656,18.56393691727469,GB/s_payload,ok,Payload bandwidth; approximate DRAM traffic is 2x (read plus write).
+B04,pageable RAM to VRAM bandwidth,2026-08-10T20:47:00.406791+00:00,,,,,,,,,skipped,PyTorch is not installed for 3.14.4
+B05,pinned RAM to VRAM bandwidth,2026-08-10T20:47:00.406802+00:00,,,,,,,,,skipped,PyTorch is not installed for 3.14.4
+B06,basic GPU compute and VRAM availability,2026-08-10T20:47:00.406805+00:00,,,,,,,,,skipped,PyTorch is not installed for 3.14.4
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.232505+00:00,1,torch_tensor_copy,268435456,268435456,1,0.023681503295898437,11.33523715306081,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.258202+00:00,2,torch_tensor_copy,268435456,268435456,1,0.02552592086791992,10.516190870800678,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.282971+00:00,3,torch_tensor_copy,268435456,268435456,1,0.024689823150634765,10.872311816988395,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.308884+00:00,4,torch_tensor_copy,268435456,268435456,1,0.025805631637573243,10.40220444010196,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.334658+00:00,5,torch_tensor_copy,268435456,268435456,1,0.025697311401367186,10.44605218839035,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.360020+00:00,6,torch_tensor_copy,268435456,268435456,1,0.025251775741577148,10.63035957340695,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.383396+00:00,7,torch_tensor_copy,268435456,268435456,1,0.023285823822021483,11.527848791252113,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.405329+00:00,8,torch_tensor_copy,268435456,268435456,1,0.02187388801574707,12.271958958862392,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.428705+00:00,9,torch_tensor_copy,268435456,268435456,1,0.02330700874328613,11.517370545344054,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B04,pageable RAM to VRAM bandwidth,2026-08-10T21:16:18.452360+00:00,10,torch_tensor_copy,268435456,268435456,1,0.023589855194091798,11.379275277078898,GB/s_payload,ok,pin_memory=False; non_blocking=False; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.552303+00:00,1,torch_tensor_copy,268435456,268435456,1,0.010389663696289063,25.836780077480146,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.562778+00:00,2,torch_tensor_copy,268435456,268435456,1,0.010309632301330567,26.037345285860052,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.573216+00:00,3,torch_tensor_copy,268435456,268435456,1,0.010292384147644043,26.080979115168926,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.583678+00:00,4,torch_tensor_copy,268435456,268435456,1,0.010301535606384277,26.05780985056633,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.594568+00:00,5,torch_tensor_copy,268435456,268435456,1,0.010707776069641113,25.0692071121167,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.605105+00:00,6,torch_tensor_copy,268435456,268435456,1,0.010376288414001464,25.870084300835444,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.615569+00:00,7,torch_tensor_copy,268435456,268435456,1,0.0102990083694458,26.064204083605844,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.626011+00:00,8,torch_tensor_copy,268435456,268435456,1,0.01029798412322998,26.066796451401476,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.636431+00:00,9,torch_tensor_copy,268435456,268435456,1,0.01027295970916748,26.130293858784537,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B05,pinned RAM to VRAM bandwidth,2026-08-10T21:16:18.646819+00:00,10,torch_tensor_copy,268435456,268435456,1,0.01025868797302246,26.166645940096014,GB/s_payload,ok,pin_memory=True; non_blocking=True; CUDA event timing.
+B06,VRAM available,2026-08-10T21:16:18.647082+00:00,1,NVIDIA GeForce RTX 3070 Ti,8589410304,,,,6.6923828125,GiB_free,ok,total_GiB=8.000; torch=2.13.0+cu126; cuda=12.6
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.814396+00:00,1,torch.mm_4096x4096,,,1,0.004260831832885742,32.256366564675346,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.817783+00:00,2,torch.mm_4096x4096,,,1,0.0033187839984893798,41.4124430919754,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.822855+00:00,3,torch.mm_4096x4096,,,1,0.0050135040283203125,27.413751479131957,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.826845+00:00,4,torch.mm_4096x4096,,,1,0.0039021120071411133,35.22168333981135,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.830228+00:00,5,torch.mm_4096x4096,,,1,0.0033228800296783447,41.36139500808403,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.835032+00:00,6,torch.mm_4096x4096,,,1,0.004734975814819336,29.02632639470916,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.838442+00:00,7,torch.mm_4096x4096,,,1,0.003328000068664551,41.29776160946747,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.842372+00:00,8,torch.mm_4096x4096,,,1,0.0038696959018707277,35.5167323110733,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.845744+00:00,9,torch.mm_4096x4096,,,1,0.0033136639595031736,41.47643066758241,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.850531+00:00,10,torch.mm_4096x4096,,,1,0.004731904029846192,29.045169260642716,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.855144+00:00,11,torch.mm_4096x4096,,,1,0.004375232219696045,31.41295057512356,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.858525+00:00,12,torch.mm_4096x4096,,,1,0.0033185598850250246,41.41523981296592,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.862446+00:00,13,torch.mm_4096x4096,,,1,0.0038727679252624513,35.48855911955685,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.865791+00:00,14,torch.mm_4096x4096,,,1,0.00328601598739624,41.82540620592151,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.870538+00:00,15,torch.mm_4096x4096,,,1,0.004682752132415771,29.350038094178824,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.873963+00:00,16,torch.mm_4096x4096,,,1,0.003318592071533203,41.41483813299856,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.878121+00:00,17,torch.mm_4096x4096,,,1,0.0040796160697937015,33.689188178668495,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.881577+00:00,18,torch.mm_4096x4096,,,1,0.003352384090423584,40.997376722019396,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.886579+00:00,19,torch.mm_4096x4096,,,1,0.004825088024139404,28.484237548498076,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+B06,basic GPU FP16 matrix multiply,2026-08-10T21:16:18.891099+00:00,20,torch.mm_4096x4096,,,1,0.004399104118347168,31.242487055214,TFLOP/s,ok,2*n^3 operation convention; CUDA event timing.
+OVR,sync makespan,2026-08-11T01:15:08.887709+00:00,1,fp16,,,4,2.2857465999986744,2.2857465999986744,s,ok,end-to-end wall time for 4 blocks
+OVR,sync payload throughput,2026-08-11T01:15:08.887730+00:00,1,fp16,1548812288,,,2.2857465999986744,0.6775957964898202,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:15:08.887743+00:00,1,fp16,387203072,387203072,4,1.985057699988829,1.985057699988829,s,ok,sum over 4 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:15:08.887751+00:00,1,fp16,387203072,387203072,4,0.094846600011806,0.094846600011806,s,ok,sum over 4 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:15:08.887756+00:00,1,fp16,387203072,387203072,4,0.059965183258056644,0.059965183258056644,s,ok,sum over 4 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:15:08.887760+00:00,1,fp16,387203072,387203072,4,0.1444648952484131,0.1444648952484131,s,ok,sum over 4 blocks of 387203072 bytes; stage=compute
+OVR,overlap pipeline,2026-08-11T01:15:08.910820+00:00,,fp16,,,,,,,error,"OSError(9, 'Descripteur non valide', None, 6)"
+OVR,sync makespan,2026-08-11T01:15:44.483593+00:00,1,fp16,,,4,2.157406499987701,2.157406499987701,s,ok,end-to-end wall time for 4 blocks
+OVR,sync payload throughput,2026-08-11T01:15:44.483613+00:00,1,fp16,1548812288,,,2.157406499987701,0.7179047101271038,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:15:44.483627+00:00,1,fp16,387203072,387203072,4,1.8687769999814918,1.8687769999814918,s,ok,sum over 4 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:15:44.483634+00:00,1,fp16,387203072,387203072,4,0.08606470000813715,0.08606470000813715,s,ok,sum over 4 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:15:44.483639+00:00,1,fp16,387203072,387203072,4,0.059811903953552244,0.059811903953552244,s,ok,sum over 4 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:15:44.483643+00:00,1,fp16,387203072,387203072,4,0.14145225620269775,0.14145225620269775,s,ok,sum over 4 blocks of 387203072 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:15:44.483801+00:00,1,fp16,,,,,790757888,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:15:44.483888+00:00,1,fp16,,,,,2996666368,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:17:02.849521+00:00,1,fp16,,,6,3.1078687999979593,3.1078687999979593,s,ok,end-to-end wall time for 6 blocks
+OVR,sync payload throughput,2026-08-11T01:17:02.849541+00:00,1,fp16,2323218432,,,3.1078687999979593,0.7475278338652923,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:17:02.849555+00:00,1,fp16,387203072,387203072,6,2.710805900002015,2.710805900002015,s,ok,sum over 6 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:17:02.849563+00:00,1,fp16,387203072,387203072,6,0.13416380000126082,0.13416380000126082,s,ok,sum over 6 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:17:02.849568+00:00,1,fp16,387203072,387203072,6,0.09017964839935302,0.09017964839935302,s,ok,sum over 6 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:17:02.849572+00:00,1,fp16,387203072,387203072,6,0.17073270225524903,0.17073270225524903,s,ok,sum over 6 blocks of 387203072 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:17:02.849720+00:00,1,fp16,,,,,790757888,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:17:02.849810+00:00,1,fp16,,,,,2997235712,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:17:05.672659+00:00,1,fp16,,,6,2.8216986999905203,2.8216986999905203,s,ok,end-to-end wall time for 6 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:17:05.672675+00:00,1,fp16,2323218432,,,2.8216986999905203,0.8233403630259336,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:17:05.672685+00:00,1,fp16,387203072,387203072,6,2.6589213000115706,2.6589213000115706,s,ok,sum over 6 blocks of 387203072 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:17:05.672691+00:00,1,fp16,387203072,387203072,6,0.13070960000914056,0.13070960000914056,s,ok,sum over 6 blocks of 387203072 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:17:05.672695+00:00,1,fp16,387203072,387203072,6,0.09155696105957031,0.09155696105957031,s,ok,sum over 6 blocks of 387203072 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:17:05.672698+00:00,1,fp16,387203072,387203072,6,0.09283891201019287,0.09283891201019287,s,ok,sum over 6 blocks of 387203072 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:17:05.672843+00:00,1,fp16,,,,,790757888,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:17:05.672873+00:00,1,fp16,,,,,2997284864,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:17:08.523245+00:00,1,fp16,,,6,2.849415200005751,2.849415200005751,s,ok,end-to-end wall time for 6 blocks
+OVR,three_stage payload throughput,2026-08-11T01:17:08.523260+00:00,1,fp16,2323218432,,,2.849415200005751,0.8153316624391247,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:17:08.523269+00:00,1,fp16,387203072,387203072,6,2.651282499995432,2.651282499995432,s,ok,sum over 6 blocks of 387203072 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:17:08.523275+00:00,1,fp16,387203072,387203072,6,0.13529910001670942,0.13529910001670942,s,ok,sum over 6 blocks of 387203072 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:17:08.523279+00:00,1,fp16,387203072,387203072,6,0.1047159023284912,0.1047159023284912,s,ok,sum over 6 blocks of 387203072 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:17:08.523282+00:00,1,fp16,387203072,387203072,6,0.17736601638793945,0.17736601638793945,s,ok,sum over 6 blocks of 387203072 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:17:08.523413+00:00,1,fp16,,,,,790757888,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:17:08.523438+00:00,1,fp16,,,,,2997882880,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:23:33.883263+00:00,1,fp16;blocks=36;matmul=4096,,,36,18.197197100002086,18.197197100002086,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:23:33.883283+00:00,1,fp16;blocks=36;matmul=4096,13939310592,,,18.197197100002086,0.766014156762549,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:23:33.883298+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.517249500015168,15.517249500015168,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:23:33.883306+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.78290099996957,0.78290099996957,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:23:33.883311+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.620982816696167,0.620982816696167,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:23:33.883315+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.2599429092407226,1.2599429092407226,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:23:33.883477+00:00,1,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:23:33.883571+00:00,1,fp16;blocks=36;matmul=4096,,,,,2982072320,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:23:52.372445+00:00,2,fp16;blocks=36;matmul=4096,,,36,18.48726149999129,18.48726149999129,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:23:52.372462+00:00,2,fp16;blocks=36;matmul=4096,13939310592,,,18.48726149999129,0.753995425012329,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:23:52.372475+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.460504299990134,15.460504299990134,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:23:52.372481+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7699449999636272,0.7699449999636272,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:23:52.372485+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6623290805816651,0.6623290805816651,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:23:52.372488+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.5753616333007812,1.5753616333007812,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:23:52.372627+00:00,2,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:23:52.372656+00:00,2,fp16;blocks=36;matmul=4096,,,,,2982125568,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:24:10.898142+00:00,3,fp16;blocks=36;matmul=4096,,,36,18.523975300005986,18.523975300005986,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:24:10.898158+00:00,3,fp16;blocks=36;matmul=4096,13939310592,,,18.523975300005986,0.7525010353471748,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:24:10.898169+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.447580800013384,15.447580800013384,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:24:10.898175+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7753488999733236,0.7753488999733236,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:24:10.898184+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6942960338592529,0.6942960338592529,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:24:10.898188+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.5880095329284667,1.5880095329284667,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:24:10.898316+00:00,3,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:24:10.898341+00:00,3,fp16;blocks=36;matmul=4096,,,,,2982141952,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:24:27.230095+00:00,1,fp16;blocks=36;matmul=4096,,,36,16.33015960000921,16.33015960000921,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:24:27.230112+00:00,1,fp16;blocks=36;matmul=4096,13939310592,,,16.33015960000921,0.853593040939547,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:24:27.230125+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.426439199960441,15.426439199960441,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:24:27.230130+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7799282999767456,0.7799282999767456,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:24:27.230135+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6597266187667847,0.6597266187667847,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:24:27.230138+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.7410519161224365,1.7410519161224365,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:24:27.230281+00:00,1,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:24:27.230307+00:00,1,fp16;blocks=36;matmul=4096,,,,,2982133760,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:24:43.556228+00:00,2,fp16;blocks=36;matmul=4096,,,36,16.32422010001028,16.32422010001028,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:24:43.556244+00:00,2,fp16;blocks=36;matmul=4096,13939310592,,,16.32422010001028,0.8539036172387324,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:24:43.556255+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.414733899960993,15.414733899960993,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:24:43.556260+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7806404999864753,0.7806404999864753,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:24:43.556264+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6281459503173829,0.6281459503173829,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:24:43.556267+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.8087168006896972,1.8087168006896972,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:24:43.556394+00:00,2,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:24:43.556454+00:00,2,fp16;blocks=36;matmul=4096,,,,,2982154240,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:24:59.870140+00:00,3,fp16;blocks=36;matmul=4096,,,36,16.312135899992427,16.312135899992427,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:24:59.870156+00:00,3,fp16;blocks=36;matmul=4096,13939310592,,,16.312135899992427,0.8545361979240542,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:24:59.870173+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.419330799995805,15.419330799995805,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:24:59.870179+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7655734000145458,0.7655734000145458,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:24:59.870183+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6255428218841553,0.6255428218841553,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:24:59.870186+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.8732103805541993,1.8732103805541993,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:24:59.870317+00:00,3,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:24:59.870342+00:00,3,fp16;blocks=36;matmul=4096,,,,,2982182912,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:25:16.216066+00:00,1,fp16;blocks=36;matmul=4096,,,36,16.34410889999708,16.34410889999708,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:25:16.216082+00:00,1,fp16;blocks=36;matmul=4096,13939310592,,,16.34410889999708,0.8528645200107844,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:25:16.216093+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.45775259999209,15.45775259999209,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:25:16.216099+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7782856999256182,0.7782856999256182,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:25:16.216103+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6272859859466553,0.6272859859466553,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:25:16.216106+00:00,1,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.801904125213623,1.801904125213623,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:25:16.216235+00:00,1,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:25:16.216260+00:00,1,fp16;blocks=36;matmul=4096,,,,,2982887424,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:25:32.528562+00:00,2,fp16;blocks=36;matmul=4096,,,36,16.310765899994294,16.310765899994294,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:25:32.528578+00:00,2,fp16;blocks=36;matmul=4096,13939310592,,,16.310765899994294,0.8546079734983429,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:25:32.528590+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.423557600050117,15.423557600050117,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:25:32.528595+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7722317000298062,0.7722317000298062,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:25:32.528599+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6278564796447754,0.6278564796447754,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:25:32.528603+00:00,2,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.8316789817810057,1.8316789817810057,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:25:32.528728+00:00,2,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:25:32.528752+00:00,2,fp16;blocks=36;matmul=4096,,,,,2983030784,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:25:48.816393+00:00,3,fp16;blocks=36;matmul=4096,,,36,16.28608140000142,16.28608140000142,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:25:48.816411+00:00,3,fp16;blocks=36;matmul=4096,13939310592,,,16.28608140000142,0.8559032863484757,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:25:48.816423+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,15.409998999981326,15.409998999981326,s,ok,sum over 36 blocks of 387203072 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:25:48.816428+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.7627829000266502,0.7627829000266502,s,ok,sum over 36 blocks of 387203072 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:25:48.816432+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,0.6261181049346923,0.6261181049346923,s,ok,sum over 36 blocks of 387203072 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:25:48.816439+00:00,3,fp16;blocks=36;matmul=4096,387203072,387203072,36,1.8579496955871582,1.8579496955871582,s,ok,sum over 36 blocks of 387203072 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:25:48.816570+00:00,3,fp16;blocks=36;matmul=4096,,,,,885129728,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:25:48.816595+00:00,3,fp16;blocks=36;matmul=4096,,,,,2983051264,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:25:51.841038+00:00,1,int4;blocks=36;matmul=4096,,,36,2.9512053999933414,2.9512053999933414,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:25:51.841054+00:00,1,int4;blocks=36;matmul=4096,4265607168,,,2.9512053999933414,1.445377935405521,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:25:51.841068+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8545222000102513,1.8545222000102513,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:25:51.841073+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.24083180008165073,0.24083180008165073,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:25:51.841078+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.1899025912284851,0.1899025912284851,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:25:51.841081+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.6486396150588989,0.6486396150588989,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:25:51.841238+00:00,1,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:25:51.841269+00:00,1,int4;blocks=36;matmul=4096,,,,,3116998656,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:25:54.702834+00:00,2,int4;blocks=36;matmul=4096,,,36,2.8600590999994893,2.8600590999994893,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:25:54.702855+00:00,2,int4;blocks=36;matmul=4096,4265607168,,,2.8600590999994893,1.4914402181412132,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:25:54.702869+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8327625999663724,1.8327625999663724,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:25:54.702875+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.24447219996363856,0.24447219996363856,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:25:54.702880+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.1799468493461609,0.1799468493461609,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:25:54.702884+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.584829891204834,0.584829891204834,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:25:54.703022+00:00,2,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:25:54.703046+00:00,2,int4;blocks=36;matmul=4096,,,,,3117002752,bytes,ok,psapi WorkingSetSize after pass
+OVR,sync makespan,2026-08-11T01:25:57.594428+00:00,3,int4;blocks=36;matmul=4096,,,36,2.890096799994353,2.890096799994353,s,ok,end-to-end wall time for 36 blocks
+OVR,sync payload throughput,2026-08-11T01:25:57.594444+00:00,3,int4;blocks=36;matmul=4096,4265607168,,,2.890096799994353,1.4759392031465295,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,sync stage read,2026-08-11T01:25:57.594455+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,1.85100190002413,1.85100190002413,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,sync stage stage_copy,2026-08-11T01:25:57.594461+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.24929420000989921,0.24929420000989921,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,sync stage h2d,2026-08-11T01:25:57.594465+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.18585420846939088,0.18585420846939088,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,sync stage compute,2026-08-11T01:25:57.594469+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.5871038398742676,0.5871038398742676,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,sync VRAM allocated,2026-08-11T01:25:57.594605+00:00,3,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,sync process working set,2026-08-11T01:25:57.594630+00:00,3,int4;blocks=36;matmul=4096,,,,,3117010944,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:25:59.736944+00:00,1,int4;blocks=36;matmul=4096,,,36,2.141011100000469,2.141011100000469,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:25:59.736959+00:00,1,int4;blocks=36;matmul=4096,4265607168,,,2.141011100000469,1.9923330467549025,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:25:59.736972+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8594499999890104,1.8594499999890104,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:25:59.736978+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.23351030000776518,0.23351030000776518,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:25:59.736982+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.17235107135772704,0.17235107135772704,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:25:59.736985+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.561557505607605,0.561557505607605,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:25:59.737111+00:00,1,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:25:59.737137+00:00,1,int4;blocks=36;matmul=4096,,,,,3117019136,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:26:01.878379+00:00,2,int4;blocks=36;matmul=4096,,,36,2.1397639000060735,2.1397639000060735,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:26:01.878395+00:00,2,int4;blocks=36;matmul=4096,4265607168,,,2.1397639000060735,1.993494314016557,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:26:01.878406+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8628251000191085,1.8628251000191085,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:26:01.878412+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.22882009999011643,0.22882009999011643,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:26:01.878416+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.16756947231292724,0.16756947231292724,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:26:01.878419+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.5232271318435668,0.5232271318435668,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:26:01.878554+00:00,2,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:26:01.878579+00:00,2,int4;blocks=36;matmul=4096,,,,,3117027328,bytes,ok,psapi WorkingSetSize after pass
+OVR,double_buffer makespan,2026-08-11T01:26:04.033946+00:00,3,int4;blocks=36;matmul=4096,,,36,2.1537922999996226,2.1537922999996226,s,ok,end-to-end wall time for 36 blocks
+OVR,double_buffer payload throughput,2026-08-11T01:26:04.033962+00:00,3,int4;blocks=36;matmul=4096,4265607168,,,2.1537922999996226,1.980509990680507,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,double_buffer stage read,2026-08-11T01:26:04.033973+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8559760999778518,1.8559760999778518,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,double_buffer stage stage_copy,2026-08-11T01:26:04.033980+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.2495638999971561,0.2495638999971561,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,double_buffer stage h2d,2026-08-11T01:26:04.033984+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.16944534349441528,0.16944534349441528,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,double_buffer stage compute,2026-08-11T01:26:04.033989+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.4965498876571655,0.4965498876571655,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,double_buffer VRAM allocated,2026-08-11T01:26:04.034122+00:00,3,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,double_buffer process working set,2026-08-11T01:26:04.034148+00:00,3,int4;blocks=36;matmul=4096,,,,,3117031424,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:26:06.165467+00:00,1,int4;blocks=36;matmul=4096,,,36,2.12996390000626,2.12996390000626,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:26:06.165482+00:00,1,int4;blocks=36;matmul=4096,4265607168,,,2.12996390000626,2.0026664151385214,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:26:06.165492+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8573857000737917,1.8573857000737917,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:26:06.165498+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.23869560004095547,0.23869560004095547,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:26:06.165502+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.16808979177474975,0.16808979177474975,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:26:06.165505+00:00,1,int4;blocks=36;matmul=4096,118489088,118489088,36,0.5344757766723632,0.5344757766723632,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:26:06.165628+00:00,1,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:26:06.165652+00:00,1,int4;blocks=36;matmul=4096,,,,,3117092864,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:26:08.305560+00:00,2,int4;blocks=36;matmul=4096,,,36,2.1384374000044772,2.1384374000044772,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:26:08.305576+00:00,2,int4;blocks=36;matmul=4096,4265607168,,,2.1384374000044772,1.9947309039727181,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:26:08.305586+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8622996000631247,1.8622996000631247,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:26:08.305592+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.23956339999858756,0.23956339999858756,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:26:08.305596+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.16867097616195678,0.16867097616195678,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:26:08.305600+00:00,2,int4;blocks=36;matmul=4096,118489088,118489088,36,0.5215354890823364,0.5215354890823364,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:26:08.305725+00:00,2,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:26:08.305749+00:00,2,int4;blocks=36;matmul=4096,,,,,3117142016,bytes,ok,psapi WorkingSetSize after pass
+OVR,three_stage makespan,2026-08-11T01:26:10.436097+00:00,3,int4;blocks=36;matmul=4096,,,36,2.128808099994785,2.128808099994785,s,ok,end-to-end wall time for 36 blocks
+OVR,three_stage payload throughput,2026-08-11T01:26:10.436117+00:00,3,int4;blocks=36;matmul=4096,4265607168,,,2.128808099994785,2.0037537286758957,GB/s_payload,ok,payload bytes over end-to-end makespan
+OVR,three_stage stage read,2026-08-11T01:26:10.436133+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,1.8537187999900198,1.8537187999900198,s,ok,sum over 36 blocks of 118489088 bytes; stage=read
+OVR,three_stage stage stage_copy,2026-08-11T01:26:10.436140+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.24141509995388333,0.24141509995388333,s,ok,sum over 36 blocks of 118489088 bytes; stage=stage_copy
+OVR,three_stage stage h2d,2026-08-11T01:26:10.436146+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.1708807692527771,0.1708807692527771,s,ok,sum over 36 blocks of 118489088 bytes; stage=h2d
+OVR,three_stage stage compute,2026-08-11T01:26:10.436150+00:00,3,int4;blocks=36;matmul=4096,118489088,118489088,36,0.5424752655029297,0.5424752655029297,s,ok,sum over 36 blocks of 118489088 bytes; stage=compute
+OVR,three_stage VRAM allocated,2026-08-11T01:26:10.436358+00:00,3,int4;blocks=36;matmul=4096,,,,,346161664,bytes,ok,"after pass, steady state"
+OVR,three_stage process working set,2026-08-11T01:26:10.436393+00:00,3,int4;blocks=36;matmul=4096,,,,,3117162496,bytes,ok,psapi WorkingSetSize after pass
+RLS,direct read,2026-08-11T01:40:19.299883+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.5851761000085389,0.5851761000085389,s,ok,FILE_FLAG_NO_BUFFERING aligned layer package
+RLS,RAM to pinned staging,2026-08-11T01:40:19.299900+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.022721299988916144,0.022721299988916144,s,ok,
+RLS,pinned H2D,2026-08-11T01:40:19.299905+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.014887359619140625,0.014887359619140625,s,ok,
+RLS,streamed Qwen decoder layer compute,2026-08-11T01:40:19.299907+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0027985920906066896,0.0027985920906066896,s,ok,
+RLS,reference versus streamed max abs error,2026-08-11T01:40:19.299910+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0,0.0,abs_error,ok,exact BF16 byte package; expected zero
+RLS,direct read,2026-08-11T01:40:33.199095+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.5815288000012515,0.5815288000012515,s,ok,FILE_FLAG_NO_BUFFERING aligned layer package
+RLS,RAM to pinned staging,2026-08-11T01:40:33.199114+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.022781499996199273,0.022781499996199273,s,ok,
+RLS,pinned H2D,2026-08-11T01:40:33.199117+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.014744352340698243,0.014744352340698243,s,ok,
+RLS,streamed Qwen decoder layer compute,2026-08-11T01:40:33.199120+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0028446719646453857,0.0028446719646453857,s,ok,
+RLS,reference versus streamed max abs error,2026-08-11T01:40:33.199123+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0,0.0,abs_error,ok,exact BF16 byte package; expected zero
+RLS,direct read,2026-08-11T01:40:33.747640+00:00,2,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.508813000007649,0.508813000007649,s,ok,FILE_FLAG_NO_BUFFERING aligned layer package
+RLS,RAM to pinned staging,2026-08-11T01:40:33.747651+00:00,2,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.02116260000912007,0.02116260000912007,s,ok,
+RLS,pinned H2D,2026-08-11T01:40:33.747653+00:00,2,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.014743264198303224,0.014743264198303224,s,ok,
+RLS,streamed Qwen decoder layer compute,2026-08-11T01:40:33.747656+00:00,2,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.003143968105316162,0.003143968105316162,s,ok,
+RLS,reference versus streamed max abs error,2026-08-11T01:40:33.747658+00:00,2,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0,0.0,abs_error,ok,exact BF16 byte package; expected zero
+RLS,direct read,2026-08-11T01:40:34.300089+00:00,3,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.5131869999895571,0.5131869999895571,s,ok,FILE_FLAG_NO_BUFFERING aligned layer package
+RLS,RAM to pinned staging,2026-08-11T01:40:34.300100+00:00,3,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.020832700000028126,0.020832700000028126,s,ok,
+RLS,pinned H2D,2026-08-11T01:40:34.300103+00:00,3,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.014731552124023438,0.014731552124023438,s,ok,
+RLS,streamed Qwen decoder layer compute,2026-08-11T01:40:34.300105+00:00,3,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0031255359649658204,0.0031255359649658204,s,ok,
+RLS,reference versus streamed max abs error,2026-08-11T01:40:34.300107+00:00,3,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0,0.0,abs_error,ok,exact BF16 byte package; expected zero
+RLS,direct read,2026-08-11T01:43:48.551051+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.5702942999923835,0.5702942999923835,s,ok,FILE_FLAG_NO_BUFFERING aligned layer package
+RLS,RAM to pinned staging,2026-08-11T01:43:48.551068+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.020985600000130944,0.020985600000130944,s,ok,
+RLS,pinned H2D,2026-08-11T01:43:48.551071+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,385900544,,1,0.014752608299255371,0.014752608299255371,s,ok,
+RLS,streamed Qwen decoder layer compute,2026-08-11T01:43:48.551074+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0034949119091033935,0.0034949119091033935,s,ok,
+RLS,reference versus streamed max abs error,2026-08-11T01:43:48.551077+00:00,1,qwen3-8b;layer=0;seq=1;file=385900544,0,,1,0.0,0.0,abs_error,ok,exact BF16 byte package; expected zero
+RLS,three-layer serial read,2026-08-11T01:48:29.893998+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,1.5669437000178732,1.5669437000178732,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:48:29.894035+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.07860779999464285,0.07860779999464285,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:48:29.894042+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.08964041709899903,0.08964041709899903,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:48:29.894046+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.09214943885803223,0.09214943885803223,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:48:29.894050+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,4.493178199991235,4.493178199991235,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:48:29.894054+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:48:34.678670+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,1.5030842999985907,1.5030842999985907,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:48:34.678684+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.06802520000201184,0.06802520000201184,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:48:34.678687+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.24780464363098142,0.24780464363098142,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:48:34.678689+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.12130761528015135,0.12130761528015135,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:48:34.678692+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,4.783950900004129,4.783950900004129,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:48:34.678694+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:01.083161+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,1.5294358999963151,1.5294358999963151,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:01.083185+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.07058449999021832,0.07058449999021832,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:01.083190+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.04447459220886231,0.04447459220886231,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:01.083192+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.013361247777938842,0.013361247777938842,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:01.083195+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,1.7591003999987151,1.7591003999987151,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:01.083198+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:02.975119+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,1.5387123999826144,1.5387123999826144,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:02.975134+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.06569610002043191,0.06569610002043191,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:02.975138+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.1728815689086914,0.1728815689086914,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:02.975140+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.055587553024292,0.055587553024292,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:02.975142+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,1.891364799987059,1.891364799987059,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:02.975145+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:04.905121+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,1.5123317999823485,1.5123317999823485,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:04.905141+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.06794290001562331,0.06794290001562331,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:04.905145+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.2271536979675293,0.2271536979675293,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:04.905149+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.06556233596801758,0.06556233596801758,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:04.905152+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,1.9291993000078946,1.9291993000078946,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:04.905156+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:07.011632+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,1.6399755000020377,1.6399755000020377,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:07.011646+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.06645179999759421,0.06645179999759421,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:07.011649+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.2351785888671875,0.2351785888671875,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:07.011651+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,0.17219129943847655,0.17219129943847655,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:07.011654+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,3,2.105877200010582,2.105877200010582,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:07.011656+00:00,1,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:08.717191+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,1.554700499997125,1.554700499997125,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:08.717208+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.06371649999346118,0.06371649999346118,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:08.717213+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.044636320114135736,0.044636320114135736,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:08.717217+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,0.013172608137130738,0.013172608137130738,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:08.717220+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,3,1.7052444000000833,1.7052444000000833,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:08.717224+00:00,2,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:10.489314+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,1.548113300013938,1.548113300013938,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:10.489332+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.06389289999788161,0.06389289999788161,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:10.489336+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.09192940711975098,0.09192940711975098,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:10.489340+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,0.0383642554283142,0.0383642554283142,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:10.489343+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,3,1.7693823000008706,1.7693823000008706,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:10.489346+00:00,3,qwen3-8b;layers=0-2;seq=1,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:34.100387+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.5183229000103893,1.5183229000103893,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:34.100422+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.06579200000851415,0.06579200000851415,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:34.100430+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.1298560962677002,0.1298560962677002,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:34.100433+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.04385964679718017,0.04385964679718017,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:34.100436+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.8388613999995869,1.8388613999995869,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:34.100440+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:35.965354+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.5117034999857424,1.5117034999857424,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:35.965369+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.06482619998860173,0.06482619998860173,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:35.965373+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.17295625305175782,0.17295625305175782,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:35.965375+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.06096742343902588,0.06096742343902588,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:35.965378+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.8643248000007588,1.8643248000007588,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:35.965381+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer serial read,2026-08-11T01:49:37.691822+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.4951293999911286,1.4951293999911286,s,ok,
+RLS,three-layer serial stage,2026-08-11T01:49:37.691839+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.06613589999324176,0.06613589999324176,s,ok,
+RLS,three-layer serial h2d,2026-08-11T01:49:37.691842+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.10375062561035156,0.10375062561035156,s,ok,
+RLS,three-layer serial compute,2026-08-11T01:49:37.691844+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.010646016120910644,0.010646016120910644,s,ok,
+RLS,three-layer serial makespan,2026-08-11T01:49:37.691846+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.726134299999103,1.726134299999103,s,ok,
+RLS,three-layer serial max abs error,2026-08-11T01:49:37.691849+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:39.573843+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.6188725999963935,1.6188725999963935,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:39.573854+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.07396790002530906,0.07396790002530906,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:39.573857+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.04552665519714355,0.04552665519714355,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:39.573860+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.012377984046936037,0.012377984046936037,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:39.573862+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.8817826000013156,1.8817826000013156,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:39.573864+00:00,1,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:41.376463+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.5748827000061283,1.5748827000061283,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:41.376475+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.07191600000078324,0.07191600000078324,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:41.376480+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.13111350440979003,0.13111350440979003,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:41.376482+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.04108892917633057,0.04108892917633057,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:41.376484+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.8016225999890594,1.8016225999890594,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:41.376486+00:00,2,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,
+RLS,three-layer storage_overlap read,2026-08-11T01:49:43.219866+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.6299022000021068,1.6299022000021068,s,ok,
+RLS,three-layer storage_overlap stage,2026-08-11T01:49:43.219877+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.06519639999896754,0.06519639999896754,s,ok,
+RLS,three-layer storage_overlap h2d,2026-08-11T01:49:43.219880+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.19648908615112304,0.19648908615112304,s,ok,
+RLS,three-layer storage_overlap compute,2026-08-11T01:49:43.219882+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,0.035363998889923094,0.035363998889923094,s,ok,
+RLS,three-layer storage_overlap makespan,2026-08-11T01:49:43.219885+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,3,1.843176599999424,1.843176599999424,s,ok,
+RLS,three-layer storage_overlap max abs error,2026-08-11T01:49:43.219887+00:00,3,qwen3-8b;layers=0-2;seq=1;scheduler=v2,0,,1,0.0,0.0,abs_error,ok,

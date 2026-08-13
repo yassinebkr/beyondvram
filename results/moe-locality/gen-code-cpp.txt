@@ -1,0 +1,7 @@
+ The program should take input from the user, and then print the sorted vector. The program should be well-documented and follow the standard C++ coding conventions.
+
+Okay, I need to write a C++ program that sorts a vector of integers using merge sort. Let me think about how to approach this.
+
+First, I remember that merge sort is a divide-and-conquer algorithm. It works by recursively splitting the array into halves, sorting each half, and then merging them back together. So the main steps are splitting the vector into two halves, sorting each, and merging.
+
+The program needs to take input from the user. So I'll

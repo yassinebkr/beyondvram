@@ -1,0 +1,8 @@
+ Also, explain how the difference in protocol affects performance.
+
+NVMe (Non-Volatile Memory Express) and SATA (Serial ATA) are both interfaces used to connect solid-state drives (SSDs) to a computer's motherboard, but they differ significantly in terms of protocol, architecture, and performance. Here's a breakdown of the differences at the protocol level and how they affect performance:
+
+### 1. **Protocol and Architecture:**
+- **SATA (Serial ATA):**
+  - SATA is an older interface originally designed for hard disk drives (HDDs) and later adapted for SSDs.
+  - It uses a **parallel command

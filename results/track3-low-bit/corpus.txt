@@ -1,0 +1,597 @@
+# BeyondVRAM
+
+Status: **active research**. Tracks 0–2 closed with measurements; Track 3 (low-bit/ternary) in progress.
+
+This repository records a measurement-first investigation of running LLMs larger than VRAM on an RTX 3070 Ti (8 GiB), 32 GiB DDR4 RAM, and NVMe storage. The overarching question: what actually determines practical inference speed on consumer hardware when the model does not fit in VRAM?
+
+## Results so far
+
+| Track | Question | Measured answer |
+|---|---|---|
+| 0 — dense NVMe streaming (archived) | Can a custom `NVMe -> RAM -> pinned -> VRAM` pipeline make over-VRAM dense models usable? | **No.** Storage dominates decode by orders of magnitude; no overlap gain demonstrated. [Closure](docs/archive-dense-streaming.md) |
+| 1 — MoE expert locality (closed) | Is expert activation local enough to cache, and does a VRAM expert cache pay off? | Locality is **strong** (median reuse 2 tokens, LRU@48/128 = 0.87) but a synchronous LRU expert cache measured **negative** (18.7/15.0 vs 19.7 tok/s baseline). Best llama.cpp placement found: **33–35 tok/s** for Qwen3-30B-A3B at `-ngl 48 --n-cpu-moe 33`. [Full record](docs/moe-track-plan.md) |
+| 2 — dense RAM offload (baseline) | How well does dense 32B run from RAM with partial GPU offload? | **~2.7 tok/s** (Qwen3-32B Q4_K_M, ngl 22) — MoE beats dense **~12×** at similar total size on this RAM-bound machine. [Full record](docs/track2-dense-offload.md) |
+| 3 — low-bit/ternary (in progress) | Do sub-4-bit quants or ternary models change the picture? | Measuring: Qwen3-32B Q3_K_M / IQ2_XXS, BitNet b1.58 2B. Results land in `results/track3-low-bit/`. |
+
+Reference points: llama.cpp b10355 (pinned, commit `dd1ea52`), Qwen3-8B Q4_K_M fully on GPU ≈ 85 tok/s; system characterization (NVMe 2.53 GB/s, pinned H2D 26.06 GB/s) in `docs/system-characterization.md`.
+
+## Method rules
+
+- Record, don't invent: missing dependencies produce `skipped` rows, never estimates.
+- Keep every repetition; failures are data.
+- Exact-output parity gates any modified runtime (the Track-1 cache PoC was validated byte-exact before any perf claim).
+- Docs distinguish measured vs hypothesized; see `docs/` for per-track reports.
+
+## Repository map
+
+- `docs/` — per-track research reports and closure decisions.
+- `benchmarks/system/` — B01–B06 hardware characterization suite (`run_all.py`).
+- `experiments/` — `overlap/` + `real_layer/` (archived Track 0), `moe_trace/` (Track 1: tracing, locality analysis, cache cost model, placement grids), `dense_offload/` (Track 2), `low_bit/` (Track 3).
+- `tools/llama.cpp-source/` — llama.cpp pinned at `dd1ea52` with additive, env-gated experiments (moe-trace, moe-cache; stock behavior when env vars unset). Build: `tools/build-scripts/build-trace.bat`.
+- `tools/llama.cpp-b10355/` — unmodified release binaries (baselines, parity reference).
+- `results/` — all raw measurements, traces, and analysis JSON; nothing extrapolated.
+- `models/` — local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, BitNet).
+
+## Reproduction
+
+Run the existing pure tests:
+
+```powershell
+.venv\Scripts\python.exe -m pytest tests -v
+```
+
+Per-track scripts and commands are listed in `AGENTS.md` and each track's doc. The archived experiments require the local model artifacts described in their READMEs; they are retained for reproducibility, not as an endorsed inference architecture.
+
+
+project:
+  name: consumer-hardware-streamed-llm
+  stage: research-and-poc
+  status: architecture-not-yet-frozen
+
+mission: >
+  Investigate, design, implement and benchmark a proof-of-concept inference
+  system capable of executing transformer models that exceed available GPU VRAM,
+  using an RTX 3070 Ti 8 GB, system DDR4 RAM and NVMe storage.
+
+  Begin around the 7B scale so experiments are practical and correctness can
+  be verified.
+
+  The long-term research question is whether smarter memory hierarchy usage,
+  streaming, caching, quantization, scheduling and asynchronous execution can
+  substantially extend the model sizes practically executable on ordinary
+  consumer hardware.
+
+user_goal: >
+  I want to learn this field from fundamentals while building a real system.
+  Explain important decisions, measurements and failures rather than hiding
+  complexity behind framework calls.
+
+hardware:
+  os: Windows 11
+  gpu:
+    model: NVIDIA RTX 3070 Ti
+    vram_gb: 8
+  ram:
+    installed_gb: 32
+    upgrade_possible: true
+    possible_target_gb: 64
+  storage:
+    type: NVMe
+    exact_model: unknown
+    measured_bandwidth: unknown
+
+known_constraints[4]:
+  - GPU VRAM is limited to 8 GB.
+  - System RAM is currently 32 GB.
+  - Storage and RAM performance must be measured rather than assumed.
+  - The final architecture must be based on experimental evidence.
+
+open_questions[15]{id,question,status}:
+  Q01,"Should the first implementation use Python/PyTorch, modify llama.cpp, or use another runtime?",OPEN
+  Q02,"Would a Python prototype teach us enough before moving to C++/CUDA?",OPEN
+  Q03,"Would modifying llama.cpp give a materially better starting architecture?",OPEN
+  Q04,"Can llama.cpp already provide parts of the desired behavior that should not be reimplemented?",OPEN
+  Q05,"Should the project eventually fork llama.cpp or remain an independent runtime?",OPEN
+  Q06,"Should weights initially remain in GGUF, Safetensors, or another existing format?",OPEN
+  Q07,"Is a custom layer-oriented storage format actually necessary?",OPEN
+  Q08,"Should initial experiments use FP16, INT8, INT4, or multiple formats?",OPEN
+  Q09,"Which specific 7B-class model gives the cleanest experimental baseline?",ANSWERED-WITH-USER-2026-08-10: Qwen3-8B (docs/model-selection.md)
+  Q10,"What is the real sequential and random-read performance of the user's NVMe?",OPEN
+  Q11,"What host-to-device PCIe bandwidth is achievable on this machine?",OPEN
+  Q12,"How effectively can storage IO, H2D transfer and CUDA computation overlap?",OPEN
+  Q13,"What should remain permanently resident in VRAM?",OPEN
+  Q14,"What should remain cached in RAM versus streamed from storage?",OPEN
+  Q15,"How much would increasing RAM from 32 GB to approximately 64 GB improve measured performance?",OPEN
+
+important_rule: >
+  Do not silently resolve OPEN questions. Investigate them.
+
+decision_process:
+  steps[6]:
+    - Identify architectural alternatives.
+    - Inspect relevant existing implementations and documentation.
+    - Build minimal experiments where uncertainty cannot be resolved analytically.
+    - Measure each alternative.
+    - Record advantages, disadvantages and engineering cost.
+    - Recommend a path with evidence before committing to major architecture.
+
+candidate_implementation_paths[3]{id,name,description}:
+  A,Python/PyTorch,"Fast experimental implementation using explicit layer movement, PyTorch CUDA streams and instrumentation."
+  B,llama.cpp fork,"Modify llama.cpp loading/execution machinery to experiment with true streamed weight residency and GGUF."
+  C,hybrid,"Use Python for experiments and instrumentation while implementing performance-critical storage or CUDA components in C++/CUDA."
+
+first_task:
+  objective: >
+    Do NOT begin by implementing the entire inference engine.
+
+    First create an engineering research report comparing candidate paths A, B
+    and C specifically for this project and this hardware.
+
+  investigate[12]:
+    - startup complexity
+    - ease of understanding transformer internals
+    - control over layer residency
+    - control over NVMe reads
+    - control over RAM caching
+    - pinned-memory support
+    - asynchronous H2D support
+    - CUDA stream control
+    - compatibility with quantized weights
+    - ability to validate against reference inference
+    - expected runtime overhead
+    - difficulty of eventually exceeding system RAM
+
+  output:
+    file: docs/implementation-path-analysis.md
+    requirement: >
+      End with a recommendation, but explicitly mark it as provisional until
+      hardware microbenchmarks are completed.
+
+second_task:
+  objective: characterize-the-machine-before-designing-around-assumptions
+
+  benchmarks[6]{id,test}:
+    B01,NVMe sequential read bandwidth
+    B02,NVMe random/chunked read behavior
+    B03,RAM memcpy bandwidth
+    B04,pageable RAM to VRAM bandwidth
+    B05,pinned RAM to VRAM bandwidth
+    B06,basic GPU compute and VRAM availability
+
+  requirements[5]:
+    - Produce reproducible scripts.
+    - Record raw measurements.
+    - Record hardware and software versions.
+    - Run enough repetitions to expose variance.
+    - Do not hardcode expected performance numbers.
+
+  outputs[4]:
+    - benchmarks/system/
+    - results/system_characterization.csv
+    - plots/system_memory_hierarchy.png
+    - docs/system-characterization.md
+
+research_principles[9]:
+  - Correctness before optimization.
+  - Measure instead of guessing.
+  - Keep hypotheses separate from measured facts.
+  - Reuse existing high-quality implementations where beneficial.
+  - Do not reinvent functionality merely for novelty.
+  - Do not treat current framework limitations as fundamental hardware limits.
+  - Make each optimization independently switchable when practical.
+  - Preserve reproducibility.
+  - Document failed experiments because they are useful research results.
+
+core_hypothesis:
+  statement: >
+    Transformer inference does not fundamentally require all weights to reside
+    simultaneously in GPU VRAM.
+
+  possible_memory_hierarchy: NVMe -> DDR4 -> pinned host buffer -> VRAM -> GPU
+
+  status: hypothesis-to-test
+
+possible_execution_model:
+  status: candidate-not-final
+
+  idea: >
+    Maintain activations and required runtime state while making transformer
+    weight blocks transient residents of VRAM.
+
+  candidate_pipeline[3]:
+    - Read future weight block from NVMe into RAM.
+    - Transfer upcoming block from RAM into VRAM.
+    - Compute current block on GPU.
+
+  desired_overlap: >
+    Eventually investigate whether IO(N+2), H2D(N+1), and COMPUTE(N) can execute
+    concurrently.
+
+  warning: >
+    Do not assume this pipeline is optimal. Measurements may indicate a different
+    granularity such as tensors, sublayers, grouped layers or persistent subsets.
+
+correctness_strategy:
+  reference: trusted-normal-inference
+  compare[4]:
+    - hidden states where practical
+    - final logits
+    - selected token probabilities
+    - generated token sequence
+
+  requirement: >
+    Streaming execution must first reproduce reference results within an
+    appropriate numerical tolerance before performance claims are considered.
+
+model_strategy:
+  initial_scale: approximately-7B
+  exact_model: undecided
+
+  selection_criteria[7]:
+    - accessible weights
+    - suitable license
+    - well understood architecture
+    - compatible tokenizer
+    - reference implementation available
+    - useful quantization ecosystem
+    - enough size to exceed 8 GB VRAM in at least one representation
+
+memory_questions:
+  investigate[8]:
+    - layer weight footprint
+    - activation footprint
+    - KV-cache footprint
+    - CUDA workspace
+    - allocator overhead
+    - persistent tensors
+    - RAM filesystem cache behavior
+    - practical staging-buffer size
+
+future_research:
+  status: not-for-initial-poc
+
+  topics[10]:
+    - double buffering
+    - triple buffering
+    - asynchronous direct IO
+    - Windows memory-mapped files
+    - CUDA streams
+    - CUDA graphs
+    - weight-only quantization
+    - KV-cache quantization
+    - MoE expert streaming
+    - speculative decoding
+
+beyond_ram_goal:
+  status: later-milestone
+
+  definition: >
+    Demonstrate bounded-memory inference where the complete model representation
+    exceeds intentionally available system RAM and weights are fetched from
+    backing storage during inference.
+
+  success_requires[4]:
+    - process memory remains bounded
+    - model executes correctly
+    - storage traffic is measured
+    - performance limitations are characterized
+
+documentation:
+  audience: beginner-growing-into-systems-ml-research
+
+  explain_from_scratch[12]:
+    - transformer inference
+    - tensors and matrix multiplication
+    - model parameters
+    - quantization
+    - VRAM
+    - system RAM
+    - virtual memory
+    - memory mapping
+    - NVMe
+    - PCIe
+    - pinned memory
+    - CUDA streams
+
+  diagrams[6]:
+    - normal inference memory architecture
+    - candidate streamed architecture
+    - transformer block anatomy
+    - memory hierarchy
+    - synchronous execution timeline
+    - asynchronous pipeline timeline
+
+  rule: >
+    Diagrams describing unimplemented designs must be labeled conceptual.
+    Measured plots must clearly distinguish measured data from estimates.
+
+repository:
+  initial_structure[9]:
+    - README.md
+    - docs/
+    - experiments/
+    - benchmarks/
+    - results/
+    - plots/
+    - src/
+    - tests/
+    - tools/
+
+agent_behavior:
+  rules[12]:
+    - Work incrementally.
+    - Inspect the existing repository before creating files.
+    - Explain major architectural decisions.
+    - Do not claim a benchmark without running it.
+    - Do not fabricate plots or results.
+    - Do not assume Python is the chosen implementation.
+    - Do not assume llama.cpp is the chosen implementation.
+    - Do not assume GGUF is the chosen storage format.
+    - Do not assume a custom format is required.
+    - Do not prematurely optimize.
+    - Preserve experiments even when they fail.
+    - Ask me before locking in a major architecture when alternatives remain genuinely competitive.
+
+start_here: >
+  Begin with the implementation-path analysis and hardware characterization plan.
+
+  Before writing the inference engine, tell me what you intend to inspect,
+  which assumptions can be answered from source-code research, which require
+  experiments on my machine, and what the smallest useful first experiment is.
+
+# MoE expert-locality track
+
+Status: active research plan, 2026-08-11. This is the successor to the archived dense NVMe-streaming track.
+
+## Why MoE
+
+Qwen3-30B-A3B has 30.5B total parameters but activates 3.3B per token through 8 of 128 experts across 48 layers. Its official Q4_K_M GGUF is 18.6 GB: too large for 8 GiB VRAM, but small enough for the present 32 GiB RAM if other memory pressure is controlled. This makes it a materially different locality problem from Qwen3-8B dense inference: total model size exceeds VRAM, while the active expert subset is limited.
+
+Sources: [official Qwen GGUF model card](https://huggingface.co/Qwen/Qwen3-30B-A3B-GGUF), [llama.cpp feature matrix](https://github.com/ggml-org/llama.cpp/wiki/Feature-matrix). The feature matrix reports CUDA MoE support, but that is compatibility evidence—not a performance guarantee on this machine.
+
+## Track-1 question
+
+How well does unmodified llama.cpp run Qwen3-30B-A3B Q4_K_M from RAM with partial GPU offload on this RTX 3070 Ti, and is expert activation locality stable enough to justify a later cache experiment?
+
+## Baseline protocol
+
+1. Use the official `Qwen3-30B-A3B-Q4_K_M.gguf` and pin the llama.cpp b10355 binary already recorded in this repository.
+2. Record model load outcome, host working set, free VRAM, prompt processing, and generation for CPU-only and several GPU-layer counts that fit without out-of-memory failure.
+3. Keep context, batch size, KV-cache type, power state, and background workload fixed within a comparison set.
+4. Retain every successful run and failures; do not treat a model-load failure as zero performance.
+
+## Measured placement baseline
+
+On 2026-08-11, the official 18,556,685,824-byte Q4_K_M GGUF loaded from the current 32 GiB RAM configuration. A llama.cpp b10355 placement sweep used three repetitions each, 128 prompt tokens, 32 generated tokens, mmap loading, and f16 KV cache. The JSON outputs are `results/moe-qwen3-30b-a3b-placement-sweep.json` and `results/moe-qwen3-30b-a3b-placement-refine.json`.
+
+| GPU layers | Prompt tok/s mean ± SD | Generation tok/s mean ± SD |
+|---:|---:|---:|
+| 0 | 105.92 ± 18.34 | 15.09 ± 1.19 |
+| 6 | 105.56 ± 32.13 | 17.31 ± 2.13 |
+| 12 | 129.15 ± 20.15 | 21.59 ± 1.50 |
+| 18 | 145.19 ± 21.45 | **25.15 ± 2.40** |
+| 24 | 48.23 ± 9.77 | 18.61 ± 0.49 |
+| 30 | 46.22 ± 19.18 | 17.61 ± 0.26 |
+
+The placement relation is non-monotonic: 18 GPU layers is the best tested generation point, while 24 and 30 layers regress. This is measured evidence that partial offload can make a 30.5B-total, 3.3B-active MoE model usable on the current machine, but it does not identify why the optimum occurs or prove that expert locality is responsible. The next Track-1 action is therefore observational expert-routing tracing, not an eviction-policy implementation.
+
+An additional three-repetition ablation at 18 GPU layers forced all 48 MoE layers to CPU with `--n-cpu-moe 48`. Generation fell to 16.87 ± 0.80 tok/s (`results/moe-qwen3-30b-a3b-experts-cpu.json`). This shows that placing MoE work on the GPU is materially beneficial in the tested configuration; it does not reveal individual expert IDs or establish that a small expert cache would have a high hit rate.
+
+## Expert-trace implementation finding
+
+A source inspection found that llama.cpp names the selected expert-index tensor `ffn_moe_topk` in `llm_graph_context::build_moe_ffn`. Its existing scheduler evaluation-callback API can request a tensor after graph evaluation, so a small trace executable can capture actual selected IDs without changing routing or model math. The release binary used for the placement benchmark has no trace flag and does not ship that example. The required native toolchain is now installed and verified: CMake 4.4.2, MSVC 19.44, and CUDA Toolkit 13.3 (`nvcc` 13.3.73). The next session must first pin the source checkout to the b10355 baseline commit `dd1ea5243`, then add only a callback that copies `ffn_moe_topk` I32 tensors with layer/token coordinates to CSV or JSONL. It must not alter scheduling, weights, routing, or expert placement.
+
+## Trace build and parity validation (2026-08-11)
+
+The trace executable exists and is validated:
+
+- `tools/llama.cpp-source` is pinned at `dd1ea52` (tag b10355). The only source changes are additive: `examples/moe-trace/moe-trace.cpp` (+ its `CMakeLists.txt`) and one `add_subdirectory(moe-trace)` line in `examples/CMakeLists.txt`. The callback copies only `ffn_moe_topk-<layer>` I32 tensors ([8, n_tokens]) after evaluation and writes JSONL records `{"pos", "layer", "experts"}` to the path in `MOE_TRACE_OUT`. Routing, weights, scheduling, and placement are untouched.
+- CUDA build: Ninja + vcvars64 + CUDA 13.3 via `tools/build-scripts/configure-trace-build.bat` and `build-trace.bat` (the VS generator cannot resolve CudaToolkitDir; Git Bash needs `MSYS2_ARG_CONV_EXCL="*"` for `cmd /c`). Runtime DLLs `cudart64_13.dll`, `cublas64_13.dll`, `cublasLt64_13.dll` are copied next to `build/bin/llama-moe-trace.exe`.
+- One trace-specific behavior to remember: the last MoE layer only routes tokens whose logits are requested, so prompt-phase positions produce no layer-47 records. The analyzer is position-aware and tolerates these gaps.
+- Parity (`experiments/moe_trace/parity_check.py`): on the fixed prompt "The capital of France is", greedy, seed 42, `-ngl 18`, 32 tokens, the trace build's continuation is byte-identical to the unmodified b10355 `llama-completion.exe -no-cnv` output ("Paris. The capital of Italy is Rome. ..."). Raw outputs: `results/moe-locality/parity-*.txt`. Note: b10355 `llama-cli` is unusable for scripted comparison — it stays in an interactive input loop even with `-no-cnv` and stdin closed; use `llama-completion -no-cnv` instead. `--no-warmup` is not accepted by the trace executable.
+
+## Measured expert-routing locality (2026-08-11)
+
+Ten fixed diverse prompts (prose, code, math, chat, French, reasoning), 128 greedy generated tokens each at `-ngl 18`, captured by `experiments/moe_trace/run_traces.py` into `results/moe-locality/trace-*.jsonl` (~6.6k–8k records per file; generated text kept alongside as `gen-*.txt`). Analysis by `experiments/moe_trace/analyze_locality.py`; full aggregates in `results/moe-locality/locality-analysis.json`. Random-overlap reference: two independent 8-of-128 expert sets share 6.25% on average.
+
+- **Consecutive-token overlap**: mean |E(t) ∩ E(t+1)| / 8 per layer, pooled per file, is 0.393–0.472 across the ten traces. Overlap decays with distance but stays far above random: ~0.45 at d=1, ~0.36 at d=2, ~0.30 at d=8–16.
+- **Reuse distance**: median time between activations of the same expert within a layer is 2 tokens; median per-layer p90 is 14 tokens.
+- **Frequency skew**: per layer, 78–106 of 128 experts are used over ~140 tokens; top-1 expert share 3–9%, top-8 share 20–38%, entropy 5.5–6.3 bits (uniform would be 7). Later layers are more skewed than early layers.
+- **Hypothetical per-layer LRU expert-cache hit rates** (request-weighted, pooled over all layers and traces): capacity 8 → 0.42, 16 → 0.57, 24 → 0.67, 32 → 0.76, 48 → 0.87, 64 → 0.91, 96 → 0.93.
+
+## Track-1 decision: expert-cache PoC is justified
+
+Traces show strong reuse by every measured criterion, so the fourth decision gate applies: build a narrowly scoped RAM-to-VRAM expert-cache proof of concept with exact-output validation. Sizing guidance from the LRU simulation: a 48-expert-per-layer cache (37.5% of the 128 experts) would have served ~87% of expert requests from cache; 64 experts ~91%. Caveats that bound the claim: hit rates come from a single sequence at a time (batch-1, short 128-token continuations, greedy), and the simulation is per-layer with perfect LRU — it says nothing yet about transfer latency, bandwidth, or prefetch scheduling, which is exactly what the PoC must measure.
+
+## Cache cost model (2026-08-11)
+
+`experiments/moe_trace/cache_cost_model.py` joins the LRU hit curves with exact per-expert bytes from the GGUF (2.65–3.06 MB per expert depending on layer, gate+up+down), the measured B05 pinned H2D bandwidth (26.06 GB/s), and the two measured generation anchors at the `-ngl 18` split (25.15 tok/s stock, 16.87 tok/s with `--n-cpu-moe 48`), which give a measured CPU-expert-compute cost of `c - g = 1.084 ms` per layer per token. Note on layer numbering: `-ngl 18` offloads the **last** 18 layers (31–47, since `i_gpu_start = n_layer + 1 - n_gpu_layers`), so the CPU-computed MoE layers are 0–30. The cost model's sums were computed over layers 18–47 (30 layers); because per-layer hit rates and expert sizes vary only modestly across layers, the per-layer estimates transfer to any 30-layer cached range, but the PoC cache targets the CPU layers, i.e. a prefix of layers 0–30. For a hypothetical expert cache on 30 CPU-computed layers, estimated generation rate assuming **synchronous** miss transfers and pinned staging:
+
+| Cache/layer | VRAM | Misses/tok/layer | Est. tok/s (pinned, sync) |
+|---:|---:|---:|---:|
+| 8 | 0.68 GB | 4.56 | 45.0 (34.8 at anchor −20%) |
+| 16 | 1.36 GB | 3.30 | 55.2 |
+| 32 | 2.73 GB | 1.80 | 76.0 |
+| 48 | 4.09 GB | 0.91 | 97.9 |
+| 128 (all) | 10.9 GB | 0.54 (compulsory) | 111.1 |
+
+Compute-only ceiling if transfers hide perfectly under CPU attention work: ~138 tok/s. Full sensitivity table (pageable vs pinned, anchor ±20%): `results/moe-locality/cache-cost-model.json`.
+
+Two measured constraints shape the PoC design:
+
+- **VRAM headroom is ~650 MiB.** Peak VRAM during a `-ngl 18` run is 7540 of 8192 MiB (sampled with nvidia-smi during a trace run). Only a capacity-8 cache fits without changing the layer split; larger caches require trading GPU layers for cache space.
+- **Pinned staging is mandatory.** With pageable transfers (B04: 11.1 GB/s) a capacity-8 cache only matches the 25.15 tok/s baseline in the worst case; pinned transfers beat it even at anchor −20% (34.8 vs 25.15 tok/s). This matches the CUDA pinned-memory requirement already noted in the implementation-path analysis.
+
+Conclusion: the arithmetic closes with margin under conservative assumptions (synchronous transfers, anchor −20%, smallest fitting cache), so the PoC is worth building. The PoC must validate exact outputs against the parity method used for the trace build, and must measure whether real transfers approach the pinned-B05 assumption when interleaved with compute.
+
+## Expert-cache PoC result (2026-08-11, second session): NEGATIVE at cap 8
+
+A synchronous per-expert VRAM cache was implemented in the pinned build (additive, env-gated `LLAMA_MOE_CACHE=<cap>:<first>[:<last>]`, stock behavior unchanged when unset): exps tensors of cached layers become cap-slot CUDA tensors, full expert data is loaded into pinned host buffers (`--no-mmap` required), and `ggml_cuda_mul_mat_id` is intercepted to D2H the top-k ids, LRU-resolve them against a per-tensor slot table, `cudaMemcpyAsync` misses from pinned host, and run the stock mmvq kernels with slot ids (`ggml/src/ggml-cuda/moe-cache.cu`, ~3 touch points in `llama-model-loader.cpp`, fusion guards in `ggml-cuda.cu`, new `examples/moe-cache/` driver with generation timer and stats JSON). Routing, weights, and kernels are untouched.
+
+Validation and measurements (raw: `results/moe-locality/moe-cache-poc.json`, `cache-stats-*.json`, `cache-parity32-*.txt`, `pinned-ladder.txt`):
+
+- **Correctness**: cache-on vs cache-off is byte-identical over 32 greedy tokens when caching GPU-resident layers (`8:42`), and cache-on is cap-invariant (`8:0:8` ≡ `16:0:8`). For CPU-resident prefix layers the continuation diverges from the CPU baseline at token ~17 — traced to kernel-variant numerics (per-token CUDA mmvq vs CPU batch mul_mat_id), not to wrong expert data: an `--override-tensor` control placing the same layers' exps on stock CUDA reproduces the baseline output exactly, and wrong data produces immediate gibberish, not a late fluent flip.
+- **Pinned-host limit**: yesterday `cudaMallocHost` failed at ~4 GiB cumulative; today 8.3 GiB pinned loads fine (24 layers × 3 tensors). The wall is transient system memory pressure, not a fixed ceiling.
+- **Performance** (same binary, `GGML_CUDA_DISABLE_GRAPHS=1`, `--no-mmap`, 3 prompts × 3 reps × 128 tokens; stock b10355 reference is 25.15 ± 2.40 tok/s with mmap + graphs on): cache-off **19.67 ± 1.16**, `8:0:8` **18.73 ± 0.28**, `8:0:23` **15.04 ± 0.39** tok/s. The cache is slower than its own baseline, monotonically worse with more cached layers.
+- **Hit rate**: measured 0.253 (layers 0–8) and 0.313 (layers 0–23) at cap 8 vs 0.389/0.424 simulated — systematically ~0.10 lower (prompt mix + cold-start; the gap partly closes on longer runs).
+
+Why the cost model was wrong, now measured: transfer volume matched the model (~400 MB/token at cap 8, and the implied effective bandwidth ~25 GB/s confirms pinned B05 holds even for ~1 MB expert-slice transfers). What the model missed is the **per-call resolve overhead**: at batch 1 the cache does a D2H of ids + stream sync + remap + up to 72 small kernel launches per token (24 layers × 3 tensors), which costs about as much per layer as the 1.084 ms CPU expert compute it replaces. Transfers are then pure added latency (~15.7 ms/token at 24 layers) with zero overlap. Synchronous LRU caching at cap 8 cannot win on this machine; the model's compute-saving assumption failed, not its bandwidth assumption.
+
+Track-1 state: locality is real (median reuse distance 2, LRU@48 = 0.87) but a naive sync cache does not monetize it. Any revival needs (a) batch-1-friendly resolve without per-layer stream syncs, (b) larger capacity (VRAM-bound — would require trading GPU layers), and (c) prefetch/overlap, likely using a learned or heuristic next-token expert predictor. That is a substantially larger engineering bet with uncertain payoff; per the decision gates, the default next move is Track 2 (RAM-resident partial offload for dense models) unless the user chooses to fund the async-prefetch iteration.
+
+## Track-1 closure: decoupled placement grid (2026-08-11, second session)
+
+The original sweep varied only `-ngl` (whole-layer offload of the last N layers). A two-knob grid over `-ngl` × `--n-cpu-moe K` (forces the first K layers' expert tensors to CPU, decoupling attention from expert placement) found a better interior point (`experiments/moe_trace/placement_grid.py`; raw: `results/moe-locality/placement-grid.json`, `placement-grid-refine.json`). Same bench protocol as the original baseline (llama-bench b10355, 128 prompt / 32 gen tokens, mmap, f16 KV).
+
+First pass (3 reps): all-attention-GPU configs dominate; best `-ngl 48 --n-cpu-moe 34` at 28.02 tok/s. Refinement (5 reps, idle machine): peak zone K=32–33:
+
+| ngl | n-cpu-moe | Prompt tok/s | Generation tok/s |
+|---:|---:|---:|---:|
+| 48 | 31 | 153.0 | 32.76 ± 3.23 |
+| 48 | 32 | 175.3 | 33.68 ± 5.27 |
+| 48 | 33 | 155.9 / 172.0 | 34.71 ± 3.04 / 33.47 ± 4.61 (repeat) |
+| 48 | 34 | 147.8 | 30.66 ± 3.98 |
+| 48 | 35 | 144.0 | 29.16 ± 3.22 |
+
+**New best measured placement: `-ngl 48 --n-cpu-moe 33`, ~33–35 generation tok/s — a ~35% improvement over the previous 25.15 ± 2.40 one-knob optimum.** Interpretation: all 48 layers' attention (~12 MB/layer, always fits) runs on GPU, experts of the last 15 layers (~5.5 GB) sit in VRAM, and the remaining 33 layers' experts compute on CPU from mmap'd RAM. Variance between runs is high (±3–5 tok/s), so K=32–34 should be treated as a plateau, not a sharp peak. This supersedes the earlier recommendation; the earlier table is kept above as evidence of the one-knob sweep.
+
+With this, Track 1 (MoE expert locality + llama.cpp placement for Qwen3-30B-A3B on this machine) is closed: locality measured, sync expert cache PoC measured negative, and the practical placement optimum recorded. The expert-cache machinery stays in the pinned build, env-gated, as preserved evidence for a possible later async-prefetch iteration.
+
+## Locality experiment, only after a baseline
+
+The first locality experiment is observational. Capture expert IDs selected per token/layer from an instrumented runtime or an independently validated reference path, then report reuse-distance and hit-rate curves for hypothetical GPU expert-cache capacities. Do not implement an eviction policy until traces show measurable temporal locality.
+
+## Decision gates
+
+- If the model cannot run reliably in 32 GiB RAM, stop and document the capacity boundary; revisit after a RAM upgrade.
+- If it runs but GPU offload does not materially help, compare ordinary RAM partial offload before designing expert caching.
+- If traces show weak reuse, avoid expert streaming: the NVMe conclusion still applies to cold experts.
+- If traces show strong reuse, build a narrowly scoped RAM-to-VRAM expert-cache proof of concept with exact-output validation.
+
+## Later tracks
+
+Track 2 will compare RAM-resident partial offload for dense over-VRAM models. Track 3 will evaluate low-bit/ternary models on compatibility, quality, memory footprint, and generation rate. Neither is selected yet.
+
+
+# System characterization
+
+Status: B01–B06 measured; dense-streaming track archived 2026-08-11. These measurements remain inputs to successor experiments.
+
+## Purpose
+
+These tests characterize the memory hierarchy that a streamed inference design would actually use. They do not benchmark a model and they do not prove that stages overlap. Raw repetitions live in `results/system/raw_measurements.csv`; medians and variation are in `results/system_characterization.csv`. The plot contains measured values only.
+
+## Known environment snapshot
+
+Initial inspection detected Windows 11, an NVIDIA GeForce RTX 3070 Ti with 8192 MiB reported VRAM, NVIDIA driver 610.74 (CUDA UMD 13.3), compute capability 8.6, and Python 3.14.4. B01–B03 were measured with the system Python (NumPy 2.4.4) before PyTorch existed on this machine. B04–B06 were measured from a project-local virtual environment (`.venv`, Python 3.14.4) containing PyTorch 2.13.0+cu126 and NumPy 2.5.2 — note that the PyPI Windows wheel for torch 2.13 is CPU-only, so the CUDA build was installed from `https://download.pytorch.org/whl/cu126`. No CUDA toolkit compiler (`nvcc`) is installed; none of the current scripts need one. At the B04–B06 capture `nvidia-smi` reported 6553 MiB free with ordinary desktop applications resident on the GPU; that is a transient observation, not a capacity guarantee. The reproducible metadata capture is `collect_system_info.py`; its JSON output is authoritative for the benchmark run.
+
+## Test matrix
+
+| ID | Measurement | Method | Key confounders |
+|---|---|---|---|
+| B01 | NVMe sequential reads | aligned Windows unbuffered reads, full fixture, 5 repetitions | volume/device identity, thermal state, other I/O |
+| B02 | random/chunked reads | deterministic random offsets at 4 KiB–16 MiB, 5 repetitions | queue depth is 1; real pipeline may use overlapped I/O |
+| B03 | RAM memcpy | pre-faulted NumPy copy, 7 repetitions | one thread/library implementation; payload vs bus traffic |
+| B04 | pageable H2D | PyTorch copy with CUDA-event timing, 10 repetitions | pageable staging behavior is implementation-dependent |
+| B05 | pinned H2D | pinned tensor and non-blocking copy, 10 repetitions | pinned allocation excluded; desktop GPU contention |
+| B06 | GPU/VRAM | free/total memory plus repeated FP16 matrix multiply | synthetic GEMM is not a transformer layer |
+
+## Results from this machine
+
+These are medians from the canonical run, not expected specifications:
+
+| ID | Workload | Median | Range | Repetitions |
+|---|---|---:|---:|---:|
+| B01 | 2 GiB direct sequential read, 16 MiB chunks | 2.526 GB/s | 2.500–2.561 GB/s | 5 |
+| B02 | random direct read, 4 KiB chunks | 0.055 GB/s | 0.055–0.055 GB/s | 5 |
+| B02 | random direct read, 64 KiB chunks | 0.531 GB/s | 0.521–0.537 GB/s | 5 |
+| B02 | random direct read, 1 MiB chunks | 1.989 GB/s | 1.876–2.098 GB/s | 5 |
+| B02 | random direct read, 16 MiB chunks | 2.473 GB/s | 1.916–3.085 GB/s | 5 |
+| B03 | 512 MiB NumPy copy payload | 17.783 GB/s | 15.579–18.564 GB/s | 7 |
+| B04 | 256 MiB pageable H2D copy | 11.104 GB/s | 10.402–12.272 GB/s | 10 |
+| B05 | 256 MiB pinned H2D copy | 26.061 GB/s | 25.069–26.167 GB/s | 10 |
+| B06 | VRAM free at capture (of 8 GiB) | 6.692 GiB | n=1, transient | 1 |
+| B06 | 4096×4096 FP16 GEMM | 35.355 TFLOP/s | 27.414–41.825 TFLOP/s | 20 |
+
+The B02 result is the first concrete architectural signal: fine-grained storage access is extremely costly at queue depth one, while layer-scale chunks approach the sequential rate. The 16 MiB result has a standard deviation of 0.470 GB/s and only 16 operations per repetition, so it is evidence for testing coarse reads—not yet a reliable bandwidth constant. B03 is roughly seven times B01 in payload terms, but this comparison does not include H2D and does not by itself determine the value of a RAM cache.
+
+B05 adds the second signal: pinned H2D reaches 26.06 GB/s with low variance, roughly ten times the B01 sequential storage rate, so for weights streamed from NVMe the storage read stage — not the H2D stage — bounds throughput at these access sizes. An idle `nvidia-smi` query (P8 power state) showed the PCIe link at gen 1 ×16 against a gen 4 ×16 maximum; 26 GB/s is not achievable at gen 1, so the link evidently ramps up under transfer load, but link state during the actual repetitions was not recorded and stays an explicit metadata gap. B04 shows the pageable penalty directly: pageable copies reach only about 0.43× the pinned rate on this machine, consistent with the CUDA requirement for page-locked buffers for genuinely asynchronous transfers — the overlap experiment must therefore use pinned staging, as the path analysis assumed.
+
+B06 is the weakest of the six as evidence. The FP16 GEMM median of 35.4 TFLOP/s comes with a standard deviation of 5.4 TFLOP/s and visibly oscillating repetitions (roughly 27 / 35 / 41 TFLOP/s); plausible confounders are clock ramping from the idle P8 state (255 MHz observed against a 2100 MHz maximum) and desktop GPU contention, but neither was tracked per repetition. It establishes that CUDA compute works and gives a coarse compute scale; it is not a transformer-layer measurement. The 6.69 GiB free-VRAM figure was captured with desktop applications resident and must not be treated as a stable inference budget.
+
+Workload sizes are command-line inputs, not expected performance numbers. B01/B02 use `FILE_FLAG_NO_BUFFERING` so the reported storage numbers do not silently become filesystem-cache numbers. This first reader uses queue depth one; an overlapped-I/O benchmark comes later because concurrency and access size should be chosen from these baseline results.
+
+## Reproduction
+
+```powershell
+python benchmarks/system/run_all.py
+```
+
+`run_all.py` invokes each script with whatever Python launches it; to include B04–B06, launch it with the project virtual environment (`.venv\Scripts\python.exe`) that holds the CUDA-enabled PyTorch build. For a short smoke test:
+
+```powershell
+python benchmarks/system/benchmark_storage.py --file-size-mib 512 --random-total-mib 64 --repetitions 3
+python benchmarks/system/benchmark_ram.py --size-mib 256 --repetitions 3
+.venv\Scripts\python.exe benchmarks/system/benchmark_cuda.py --transfer-mib 128 --transfer-repetitions 3 --matmul-repetitions 5
+.venv\Scripts\python.exe benchmarks/system/plot_results.py
+```
+
+The storage fixture is deleted after a successful run unless `--keep-file` is given. Point `--file` at a path on the volume being characterized; the workspace path measures only its current volume. Record power plan, background workload, and any thermal throttling alongside serious comparison runs.
+
+## Interpretation rules
+
+- Report medians plus min/max and standard deviation; do not select the fastest repetition.
+- Treat a skipped test as missing evidence, not zero bandwidth.
+- Distinguish payload GB/s from physical traffic. RAM copy reads and writes approximately twice the payload.
+- A high standalone bandwidth does not imply pipeline overlap. The next experiment must time end-to-end makespan and individual CUDA/I/O events.
+- A 64 GiB RAM upgrade should be evaluated by rerunning the same suite and a controlled cache-capacity trace, not by extrapolating B03.
+
+## Smallest useful follow-up experiment
+
+Implemented as `experiments/overlap/` on 2026-08-11. It uses Qwen3-8B-sized FP16 blocks (387,203,072 bytes) and an INT4-sized proxy (118,489,088 bytes), direct I/O, explicit pinned staging, GPU checksum verification, and three schedules: serial, double-buffered, and three-stage. The canonical 36-block/three-repetition result is documented in `experiments/overlap/README.md`: the pipelined schedules reduced FP16 median makespan from 18.487 s to about 16.31 s and INT4 from 2.890 s to about 2.13 s, leaving storage plus the explicit staging copy as the practical bound. This is a measured synthetic-pipeline result, not a transformer inference claim.
+
+## RLS follow-up
+
+`experiments/real_layer/` now validates one real Qwen3-8B BF16 decoder layer through Windows direct I/O, pinned staging, H2D, and official-layer execution. The retained layer-0 runs had exact hidden-state agreement with an independently loaded reference layer. See that experiment's README for timings and boundaries.
+
+## Current limitations
+
+The exact physical NVMe model could not be queried through the restricted Windows management interface; it remains an explicit metadata gap rather than an assumption. PCIe link state during the B04/B05 repetitions was not recorded (only an idle gen 1 reading exists). B06 compute timings carry no per-repetition clock or contention record. OVR answers only the synthetic, queue-depth-one pipeline question under WDDM desktop contention; it does not validate real Qwen3 weights, quantized kernels, attention/KV-cache behavior, asynchronous NVMe queue depth, or bounded inference beyond system RAM.
+
+
+# Baseline model selection (Q09)
+
+Status: archived dense-streaming baseline, updated 2026-08-11 — **Qwen3-8B** was the correct 7B-class control model, but is no longer the active target because Q4_K_M runs well with llama.cpp on the RTX 3070 Ti. The successor MoE, RAM-offload, and low-bit tracks require new model-selection decisions.
+
+## Requirements
+
+From `initial_prompt.md`: accessible weights, suitable license, well-understood architecture, compatible tokenizer, reference implementation available, useful quantization ecosystem, and large enough to exceed 8 GiB VRAM in at least one representation. Added by the user at decision time: the family must offer a credible path to 30B and 70B+ models so early harness work carries forward.
+
+## Candidates considered
+
+| Family | Ladder | License | Architecture | Notes |
+|---|---|---|---|---|
+| Qwen3 (Apr 2025) | dense 0.6/1.7/4/8/14/32B; MoE 30B-A3B, 235B-A22B | Apache 2.0, all sizes | vanilla GQA decoder | no dense ~70B rung; the big rungs are MoE |
+| Qwen3.5/3.6 (2026) | dense 27B; MoE 35B-A3B, 122B-A10B, 397B-A17B | Apache 2.0 | hybrid Gated DeltaNet/attention, multimodal | linear-attention state and vision tower are the wrong complexity for a fundamentals-first baseline |
+| Llama 3.1 | 8B/70B | Meta community license, gated download | vanilla GQA decoder | true dense 70B sibling, but no ~30B rung |
+| Qwen2.5 | 7/14/32/72B dense | Apache 2.0 at 7B; 72B under restrictive Qwen license | vanilla GQA decoder | complete dense ladder but licensed at the top; older generation, no MoE path |
+
+Sources: [Qwen3 technical report](https://arxiv.org/html/2505.09388v1), [Qwen3 release blog](https://qwenlm.github.io/blog/qwen3/), [Qwen3.5 MoE in HF transformers](https://github.com/huggingface/transformers/blob/main/docs/source/en/model_doc/qwen3_5_moe.md), [Qwen3-8B config.json](https://huggingface.co/Qwen/Qwen3-8B/raw/main/config.json).
+
+## Decision and rationale
+
+Qwen3-8B is Apache 2.0, has a plain, well-documented Llama-like architecture suited to learning transformer internals, a reference implementation in HF transformers, first-class llama.cpp/GGUF support (the measured-baseline runtime from the path analysis), and a ladder that matches the project ambition: 8B → 14B → 32B dense, with MoE rungs (30B-A3B, 235B-A22B) for the 70B+ goal — MoE expert streaming is already on the future-research list. Its FP16 footprint (~16.4 GB) exceeds the 8 GiB VRAM, Q8 (~8.5 GB) is borderline, and Q4 (~5 GB) fits — giving a real quantization axis at every rung.
+
+The honest trade-off: the 70B+ rung will be either Qwen3 MoE (expert streaming, different weight-locality problem) or a cross-family dense model (e.g. Llama 3.1 70B). The streaming harness must therefore stay architecture-generic across Llama-like decoders rather than hard-coding Qwen3 specifics.
+
+## Architecture facts (from the official config.json)
+
+36 layers, hidden 4096, 32 attention heads, 8 KV heads (GQA), head_dim 128, SwiGLU MLP with intermediate 12288, vocab 151936, untied embeddings, BF16 checkpoint. Derived per-layer parameter count: attention ≈ 42.6M (q/o 4096×4096, k/v 4096×1024), MLP ≈ 151.0M, total ≈ 0.194B params/layer; embeddings + untied lm_head ≈ 1.24B.
+
+## Estimated pipeline numbers (estimates, not measurements)
+
+Layer byte sizes: BF16/FP16 ≈ 0.387 GB/layer (369 MiB, exactly 387,203,072 bytes and 4096-aligned); INT8 ≈ 0.194 GB (185 MiB); INT4 ≈ 0.118 GB (113 MiB). Against the measured medians (B01 = 2.526 GB/s NVMe, B05 = 26.06 GB/s pinned H2D), one FP16 layer costs ≈ 153 ms from NVMe vs ≈ 15 ms H2D — storage dominates roughly 10:1, exactly as the B05 result predicted. A full 36-layer FP16 pass (13.9 GB) implies ≈ 5.5 s/token if every layer is re-read from storage with no caching; INT4 (≈ 4.25 GB total) implies ≈ 1.7 s/token storage-bound or ≈ 0.16 s/token H2D-bound from a full RAM cache. These are arithmetic estimates from config sizes and measured bandwidths, stated to size the overlap experiment — not performance claims.
+
+## Consequences for the next experiment
+
+The synthetic overlap benchmark should use blocks of ≈ 387 MiB (one FP16 Qwen3-8B layer) over 36 blocks, plus a quantized-block variant (≈ 113 MiB) since streamed-from-NVMe inference will almost certainly run quantized. Correctness starts with known checksums on synthetic blocks; real weights (and the ~16 GB download) are only needed at the hidden-state/logit comparison stage. The 1.24 GB embedding + lm_head is a first candidate for the permanently-resident set (Q13).

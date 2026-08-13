@@ -1,0 +1,6 @@
+0.00.024.190 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.748.375 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.14.096.037 I main: prompt tokens = 5, predict = 32, trace out = moe-trace.jsonl
+gen time = 1592.72 ms / 32 tokens / 20.09 tokens per second
+0.15.689.385 I main: wrote 1724 trace records to moe-trace.jsonl
+0.15.690.204 I main: wrote MoE cache stats to results/moe-locality/v2-parity32-stats-on.json

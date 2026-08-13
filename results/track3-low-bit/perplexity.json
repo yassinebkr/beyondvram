@@ -1,0 +1,41 @@
+{
+ "tool": "llama-perplexity b10355 (unmodified)",
+ "corpus": "results/track3-low-bit/corpus.txt (project docs; relative comparison only)",
+ "records": [
+  {
+   "model": "qwen3-32b-q4km",
+   "rc": 0,
+   "wall_s": 54.8,
+   "ppl": 12.2877,
+   "ppl_stderr": 0.4813
+  },
+  {
+   "model": "qwen3-32b-q3km",
+   "rc": 0,
+   "wall_s": 49.6,
+   "ppl": 12.5581,
+   "ppl_stderr": 0.49601
+  },
+  {
+   "model": "qwen3-32b-iq2xxs",
+   "rc": 0,
+   "wall_s": 29.9,
+   "ppl": 15.9564,
+   "ppl_stderr": 0.64241
+  },
+  {
+   "model": "bitnet-2b-i2s",
+   "rc": 1,
+   "wall_s": 0.2,
+   "status": "error",
+   "stderr_tail": "ama_model_loader: failed to load model from C:\\Users\\yassi\\Documents\\code\\BeyondVram\\models\\bitnet-b1.58-2B-4T\\ggml-model-i2_s.gguf\n0.00.168.866 E llama_model_load_from_file_impl: failed to load model\n0.00.168.880 E cmn  common_init_: failed to load model 'C:\\Users\\yassi\\Documents\\code\\BeyondVram\\models\\bitnet-b1.58-2B-4T\\ggml-model-i2_s.gguf'\n0.00.168.883 E llama_perplexity: unable to load model\n"
+  },
+  {
+   "model": "qwen3-30b-a3b-q4km",
+   "rc": 0,
+   "wall_s": 42.6,
+   "ppl": 16.1905,
+   "ppl_stderr": 0.70766
+  }
+ ]
+}
