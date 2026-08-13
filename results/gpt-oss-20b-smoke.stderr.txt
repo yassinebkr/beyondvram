@@ -1,0 +1,29 @@
+0.00.105.581 I llama_completion: llama backend init
+0.00.105.589 I llama_completion: load the model and apply lora adapter, if any
+0.05.404.965 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.05.405.117 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.05.409.552 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.05.409.556 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.05.409.567 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.05.449.889 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --no-mmap for better performance
+0.14.352.821 I llama_completion: llama threadpool init, n_threads = 6
+0.14.352.837 I 
+0.14.352.860 I system_info: n_threads = 6 (n_threads_batch = 6) / 12 | CUDA : ARCHS = 750,800,860,890,900,1200,1210 | USE_GRAPHS = 1 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.14.352.861 I 
+0.14.352.986 I sampler seed: 42
+0.14.353.003 I sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+0.14.353.010 I sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+0.14.353.011 I generate: n_ctx = 4096, n_batch = 2048, n_predict = 48, n_keep = 0
+0.14.353.011 I 
+0.16.431.198 I common_perf_print:    sampling time =      14.05 ms
+0.16.431.199 I common_perf_print:    samplers time =       5.43 ms /    58 tokens
+0.16.431.201 I common_perf_print:        load time =    9131.26 ms
+0.16.431.202 I common_perf_print: prompt eval time =     470.88 ms /    10 tokens (   47.09 ms per token,    21.24 tokens per second)
+0.16.431.204 I common_perf_print:        eval time =    1591.92 ms /    47 runs   (   33.87 ms per token,    29.52 tokens per second)
+0.16.431.204 I common_perf_print:       total time =    2078.38 ms /    57 tokens
+0.16.431.206 I common_perf_print: unaccounted time =       1.53 ms /   0.1 %      (total - sampling - prompt eval - eval) / (total)
+0.16.431.206 I common_perf_print:    graphs reused =         46

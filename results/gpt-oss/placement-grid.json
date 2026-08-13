@@ -1,0 +1,225 @@
+{
+ "bench": "llama-bench b10355 (unmodified)",
+ "model": "gpt-oss-20b-MXFP4.gguf",
+ "model_facts": "gpt-oss-20b: 24 layers, 128 experts, top-4, 21B total / 3.6B active, native MXFP4",
+ "protocol": "128 prompt tokens, 32 generated, 3 repetitions, mmap, f16 KV",
+ "references": {
+  "qwen3_30b_a3b_best_tok_s": "33-35 (-ngl 48 --n-cpu-moe 33, docs/moe-track-plan.md)",
+  "smoke_default_fit_tok_s": 29.52,
+  "roofline_prediction_all_cpu_tok_s": "17.8 GB/s measured DDR4 payload / ~1.9 GB active bytes per token = ~9.4 ceiling; expect 5-8 at realistic utilization"
+ },
+ "grid": [
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 16
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 12
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 8
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 4
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 0
+  },
+  {
+   "ngl": 0,
+   "n_cpu_moe": 0
+  }
+ ],
+ "records": [
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "rc": 0,
+   "wall_s": 12.5,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 779918566,
+     "stddev_ns": 30231319,
+     "avg_ts": 164.28272,
+     "stddev_ts": 6.309832
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 1526426933,
+     "stddev_ns": 77299093,
+     "avg_ts": 21.000926,
+     "stddev_ts": 1.094093
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 16,
+   "rc": 0,
+   "wall_s": 10.5,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 532500200,
+     "stddev_ns": 53618343,
+     "avg_ts": 241.936075,
+     "stddev_ts": 23.260548
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 949588233,
+     "stddev_ns": 74721355,
+     "avg_ts": 33.832838,
+     "stddev_ts": 2.555172
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 12,
+   "rc": 0,
+   "wall_s": 9.8,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 434668966,
+     "stddev_ns": 32436107,
+     "avg_ts": 295.529379,
+     "stddev_ts": 21.155229
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 752244600,
+     "stddev_ns": 40392093,
+     "avg_ts": 42.61884,
+     "stddev_ts": 2.220475
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 8,
+   "rc": 0,
+   "wall_s": 12.4,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 774595666,
+     "stddev_ns": 21322719,
+     "avg_ts": 165.329722,
+     "stddev_ts": 4.480159
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 852038400,
+     "stddev_ns": 9030606,
+     "avg_ts": 37.559823,
+     "stddev_ts": 0.400536
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 4,
+   "rc": 0,
+   "wall_s": 13.6,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 625010466,
+     "stddev_ns": 15367027,
+     "avg_ts": 204.878333,
+     "stddev_ts": 4.988456
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 1161681600,
+     "stddev_ns": 6151607,
+     "avg_ts": 27.546789,
+     "stddev_ts": 0.145872
+    }
+   ]
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 0,
+   "rc": 0,
+   "wall_s": 14.2,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 496836400,
+     "stddev_ns": 14209602,
+     "avg_ts": 257.769061,
+     "stddev_ts": 7.289826
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 1403922233,
+     "stddev_ns": 5065205,
+     "avg_ts": 22.793483,
+     "stddev_ts": 0.082082
+    }
+   ]
+  },
+  {
+   "ngl": 0,
+   "n_cpu_moe": 0,
+   "rc": 0,
+   "wall_s": 13.8,
+   "rows": [
+    {
+     "test": null,
+     "n_prompt": 128,
+     "n_gen": 0,
+     "avg_ns": 812687566,
+     "stddev_ns": 54494208,
+     "avg_ts": 157.959408,
+     "stddev_ts": 10.231175
+    },
+    {
+     "test": null,
+     "n_prompt": 0,
+     "n_gen": 32,
+     "avg_ns": 2055113833,
+     "stddev_ns": 16721932,
+     "avg_ts": 15.571601,
+     "stddev_ts": 0.126733
+    }
+   ]
+  }
+ ]
+}

@@ -8,7 +8,9 @@ Track 1 (MoE expert locality) is **closed**: expert-routing locality measured (s
 
 Track 2 (dense RAM-resident partial offload) has its **baseline**: dense Qwen3-32B Q4_K_M peaks at ~2.7 generation tok/s (ngl 22) — ~12× slower than the Track-1 MoE at similar total size, confirming sparse activation beats dense weights by an order of magnitude on this RAM-bound machine. See `docs/track2-dense-offload.md`.
 
-Track 3 (low-bit/ternary) has its **baseline**: Q3_K_M is marginal (3.48 tok/s, +2% PPL), IQ2_XXS reaches 10.62 tok/s because 9 GB nearly fits VRAM (+30% PPL), and the official BitNet i2_s GGUF is incompatible with mainline b10355 (fork-only quant type 36). The MoE Q4_K_M remains the quality/speed frontier. See `docs/track3-low-bit.md`. All three research tracks are now baselined; the deferred item is the async-prefetch MoE expert-cache iteration.
+Track 3 (low-bit/ternary) has its **baseline**: Q3_K_M is marginal (3.48 tok/s, +2% PPL), IQ2_XXS reaches 10.62 tok/s because 9 GB nearly fits VRAM (+30% PPL), and the official BitNet i2_s GGUF is incompatible with mainline b10355 (fork-only quant type 36). The MoE Q4_K_M remains the quality/speed frontier. See `docs/track3-low-bit.md`.
+
+Track 4 (gpt-oss MXFP4, 100B-class path) is **open**: gpt-oss-20b validated MXFP4 on sm_86 (29.52 tok/s smoke) and re-measured the placement optimum on a second architecture — `-ngl 24 --n-cpu-moe 10` ≈ 44.8 tok/s, plateau K=8–12, same interior-optimum shape as Qwen3. The roofline model was refined: the ceiling is min(DDR4 bytes ÷ expert-bytes/token, CPU expert-kernel throughput) — gpt-oss all-CPU sits at 37% of its byte ceiling (kernel-bound), Qwen3 at ~90% (bandwidth-bound). gpt-oss-120b (59 GiB MXFP4, the only ≥100B Q4-class file fitting 64 GiB) is gated on the RAM upgrade; predicted 5–8 tok/s. See `docs/track4-gpt-oss.md`.
 
 The project remains **measurement-first**. No custom inference engine is selected or planned at this point. Read these documents before proposing architecture changes:
 
@@ -19,6 +21,7 @@ The project remains **measurement-first**. No custom inference engine is selecte
 - `docs/moe-track-plan.md` — Track 1 closure: expert-locality measurements, negative cache PoC, best MoE placement, FATE-fork claim non-reproduction.
 - `docs/track2-dense-offload.md` — Track 2 baseline: dense Qwen3-32B sweep and the dense-vs-MoE comparison.
 - `docs/track3-low-bit.md` — Track 3 baseline: low-bit quants, BitNet compatibility boundary, quality/speed frontier.
+- `docs/track4-gpt-oss.md` — Track 4 open: gpt-oss MXFP4 validation, second-architecture roofline, 120b plan.
 - `benchmarks/system/README.md` — how to run the characterization suite.
 
 The working code includes preserved system characterization, OVR, and RLS artifacts. They are evidence, not the active implementation path. The 7B-class control model was **Qwen3-8B**; the measured active models are now **Qwen3-30B-A3B** (MoE, Track 1) and **Qwen3-32B** (dense, Track 2).
@@ -51,8 +54,10 @@ experiments/moe_trace/  MoE expert-locality track: run_traces.py (10-prompt capt
                         fate_repro.py (FATE-fork claim check; --reparse rebuilds JSON from raw logs)
 experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl sweep)
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
+experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine)
 results/track2-dense/   Dense 32B placement sweep results
 results/track3-low-bit/ Low-bit bench + perplexity results and the fixed corpus
+results/gpt-oss/        gpt-oss-20b placement grid + refinement results
 models/                 Local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, BitNet, gpt-oss-20b)
 results/moe-locality/   Raw expert traces (trace-*.jsonl), generated text, parity outputs,
                         locality-analysis.json, cache-cost-model.json, moe-cache-poc.json,

@@ -1,0 +1,6 @@
+Explain in one paragraph why the sky is blue.**
+
+**Answer:**
+
+The sky appears blue due to Rayleigh scattering, which occurs when sunlight interacts with Earth's atmosphere. Sunlight is composed of various colors, each with different wavelengths. Blue light has a shorter wavelength and is scattered more efficiently
+
