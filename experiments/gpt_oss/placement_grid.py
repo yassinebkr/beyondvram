@@ -3,7 +3,7 @@
 Track-1 established the Qwen3-30B-A3B placement optimum and the DDR4 roofline
 model (generation tok/s ~ bandwidth / expert-bytes-per-token). This grid
 re-measures that roofline on a second, independently architected MoE:
-gpt-oss-20b (24 layers, 128 experts, top-4, 21B total / 3.6B active, native
+gpt-oss-20b (24 layers, 32 experts, top-4 — trace-verified, 21B total / 3.6B active, native
 MXFP4 = Q4-class active path, 12.1 GB GGUF). If the model holds, the
 all-experts-CPU point (24, 24) lands near bandwidth/active-bytes and the
 curve bends upward as experts move into VRAM, exactly as Qwen3 did.
@@ -97,12 +97,12 @@ def main() -> None:
     payload = {
         "bench": "llama-bench b10355 (unmodified)",
         "model": MODEL.name,
-        "model_facts": "gpt-oss-20b: 24 layers, 128 experts, top-4, 21B total / 3.6B active, native MXFP4",
+        "model_facts": "gpt-oss-20b: 24 layers, 32 experts (trace-verified), top-4, 21B total / 3.6B active, native MXFP4, 13.22 MB/expert -> 1.27 GB expert bytes/token",
         "protocol": f"128 prompt tokens, 32 generated, {reps} repetitions, mmap, f16 KV",
         "references": {
             "qwen3_30b_a3b_best_tok_s": "33-35 (-ngl 48 --n-cpu-moe 33, docs/moe-track-plan.md)",
             "smoke_default_fit_tok_s": 29.52,
-            "roofline_prediction_all_cpu_tok_s": "17.8 GB/s measured DDR4 payload / ~1.9 GB active bytes per token = ~9.4 ceiling; expect 5-8 at realistic utilization",
+            "roofline_prediction_all_cpu_tok_s": "~26.6 GB/s measured effective DDR4 read (B07 + implied 21.0 tok/s x 1.27 GB/token) -> all-experts-CPU ceiling ~21 tok/s; 120b (1.9 GB/token) ceiling ~14 tok/s",
         },
         "grid": [{"ngl": n, "n_cpu_moe": k} for n, k in grid],
         "records": records,

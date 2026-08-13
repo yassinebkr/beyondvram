@@ -1,0 +1,129 @@
+{
+ "bench": "llama-bench b10355 (unmodified)",
+ "model": "gpt-oss-20b-MXFP4.gguf",
+ "protocol": "128 prompt tokens, 32 generated, 3 repetitions, mmap, f16 KV",
+ "question": "does thread count move effective DDR4 read throughput of the CPU expert path above the ~26.6 GB/s implied by (24,24)?",
+ "references": {
+  "b07_read_ceiling_gb_s": "numpy f64 sum: mt6 25.85, mt12 24.30 median",
+  "implied_effective_gb_s": 26.6
+ },
+ "placements": [
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10
+  }
+ ],
+ "threads": [
+  4,
+  6,
+  8,
+  10,
+  12
+ ],
+ "records": [
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "threads": 4,
+   "rc": 0,
+   "wall_s": 13.7,
+   "tg_avg_ts": 19.41458,
+   "tg_stddev_ts": 1.191896,
+   "pp_avg_ts": 153.214939
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "threads": 6,
+   "rc": 0,
+   "wall_s": 13.5,
+   "tg_avg_ts": 19.740811,
+   "tg_stddev_ts": 1.156153,
+   "pp_avg_ts": 153.887771
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "threads": 8,
+   "rc": 0,
+   "wall_s": 13.6,
+   "tg_avg_ts": 19.337268,
+   "tg_stddev_ts": 0.277231,
+   "pp_avg_ts": 152.908224
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "threads": 10,
+   "rc": 0,
+   "wall_s": 14.0,
+   "tg_avg_ts": 17.718696,
+   "tg_stddev_ts": 1.86551,
+   "pp_avg_ts": 163.239143
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 24,
+   "threads": 12,
+   "rc": 0,
+   "wall_s": 13.8,
+   "tg_avg_ts": 17.929197,
+   "tg_stddev_ts": 1.581799,
+   "pp_avg_ts": 166.463434
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10,
+   "threads": 4,
+   "rc": 0,
+   "wall_s": 11.2,
+   "tg_avg_ts": 33.884679,
+   "tg_stddev_ts": 1.427002,
+   "pp_avg_ts": 286.37954
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10,
+   "threads": 6,
+   "rc": 0,
+   "wall_s": 12.5,
+   "tg_avg_ts": 41.77947,
+   "tg_stddev_ts": 0.64837,
+   "pp_avg_ts": 139.045439
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10,
+   "threads": 8,
+   "rc": 0,
+   "wall_s": 10.9,
+   "tg_avg_ts": 35.150268,
+   "tg_stddev_ts": 1.545522,
+   "pp_avg_ts": 305.418341
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10,
+   "threads": 10,
+   "rc": 0,
+   "wall_s": 13.2,
+   "tg_avg_ts": 32.229512,
+   "tg_stddev_ts": 0.548041,
+   "pp_avg_ts": 140.598328
+  },
+  {
+   "ngl": 24,
+   "n_cpu_moe": 10,
+   "threads": 12,
+   "rc": 0,
+   "wall_s": 13.2,
+   "tg_avg_ts": 32.761662,
+   "tg_stddev_ts": 0.688771,
+   "pp_avg_ts": 135.176862
+  }
+ ]
+}

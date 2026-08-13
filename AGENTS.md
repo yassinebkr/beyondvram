@@ -15,13 +15,14 @@ Track 4 (gpt-oss MXFP4, 100B-class path) is **open**: gpt-oss-20b validated MXFP
 The project remains **measurement-first**. No custom inference engine is selected or planned at this point. Read these documents before proposing architecture changes:
 
 - `docs/implementation-path-analysis.md` — comparative analysis of implementation paths (Python/PyTorch vs llama.cpp fork vs hybrid) and the provisional work sequence.
-- `docs/system-characterization.md` — what the B01–B06 system benchmarks measure, results so far, and interpretation rules.
+- `docs/system-characterization.md` — what the B01–B07 system benchmarks measure, results so far, and interpretation rules.
 - `docs/model-selection.md` — the Qwen3-8B baseline decision (Q09), candidates considered, and derived layer byte sizes for the overlap experiment.
 - `docs/archive-dense-streaming.md` — closure rationale and preserved evidence for the archived first track.
 - `docs/moe-track-plan.md` — Track 1 closure: expert-locality measurements, negative cache PoC, best MoE placement, FATE-fork claim non-reproduction.
 - `docs/track2-dense-offload.md` — Track 2 baseline: dense Qwen3-32B sweep and the dense-vs-MoE comparison.
 - `docs/track3-low-bit.md` — Track 3 baseline: low-bit quants, BitNet compatibility boundary, quality/speed frontier.
 - `docs/track4-gpt-oss.md` — Track 4 open: gpt-oss MXFP4 validation, second-architecture roofline, 120b plan.
+- `docs/next-experiments.md` — the active post-Track-4 program: bandwidth headroom probe, WSL2/ik_llama A/Bs (secondary setups), mixed-precision experts, n-gram speculation.
 - `benchmarks/system/README.md` — how to run the characterization suite.
 
 The working code includes preserved system characterization, OVR, and RLS artifacts. They are evidence, not the active implementation path. The 7B-class control model was **Qwen3-8B**; the measured active models are now **Qwen3-30B-A3B** (MoE, Track 1) and **Qwen3-32B** (dense, Track 2).
@@ -34,6 +35,7 @@ benchmarks/system/     System characterization scripts
   collect_system_info.py  Environment snapshot -> results/system/system-info.json
   benchmark_storage.py    B01/B02: Windows direct-I/O sequential and random reads
   benchmark_ram.py        B03: host RAM memcpy bandwidth (NumPy)
+  benchmark_ram_read.py   B07: host RAM pure-read bandwidth (NumPy float64 sum, 1/N threads)
   benchmark_cuda.py       B04–B06: pageable/pinned H2D and FP16 GEMM (PyTorch CUDA)
   plot_results.py         Renders plots/system_memory_hierarchy.png with Pillow
   common.py               Shared CSV/JSON result-writing helpers
@@ -56,7 +58,8 @@ experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl swe
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
 experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine),
                         speculative_bench.py (EAGLE-3 draft vs no-draft via llama-server),
-                        analyze_predictability.py (predictor recall/over-fetch from traces)
+                        analyze_predictability.py (predictor recall/over-fetch from traces),
+                        thread_sweep.py (llama-bench -t sweep: effective-bandwidth probe)
 results/track2-dense/   Dense 32B placement sweep results
 results/track3-low-bit/ Low-bit bench + perplexity results and the fixed corpus
 results/gpt-oss/        gpt-oss-20b placement grid + refinement, speculative-bench*.json,

@@ -1,6 +1,6 @@
 # System characterization
 
-Status: B01–B06 measured; dense-streaming track archived 2026-08-11. These measurements remain inputs to successor experiments.
+Status: B01–B07 measured; dense-streaming track archived 2026-08-11. These measurements remain inputs to successor experiments.
 
 ## Purpose
 
@@ -17,6 +17,7 @@ Initial inspection detected Windows 11, an NVIDIA GeForce RTX 3070 Ti with 8192 
 | B01 | NVMe sequential reads | aligned Windows unbuffered reads, full fixture, 5 repetitions | volume/device identity, thermal state, other I/O |
 | B02 | random/chunked reads | deterministic random offsets at 4 KiB–16 MiB, 5 repetitions | queue depth is 1; real pipeline may use overlapped I/O |
 | B03 | RAM memcpy | pre-faulted NumPy copy, 7 repetitions | one thread/library implementation; payload vs bus traffic |
+| B07 | RAM pure read | `np.sum` over 512 MiB float64, 1/6/12 threads, 5–7 repetitions | read-only stream; first uint8 batch measured the sum kernel, superseded by float64 rows |
 | B04 | pageable H2D | PyTorch copy with CUDA-event timing, 10 repetitions | pageable staging behavior is implementation-dependent |
 | B05 | pinned H2D | pinned tensor and non-blocking copy, 10 repetitions | pinned allocation excluded; desktop GPU contention |
 | B06 | GPU/VRAM | free/total memory plus repeated FP16 matrix multiply | synthetic GEMM is not a transformer layer |
@@ -33,6 +34,9 @@ These are medians from the canonical run, not expected specifications:
 | B02 | random direct read, 1 MiB chunks | 1.989 GB/s | 1.876–2.098 GB/s | 5 |
 | B02 | random direct read, 16 MiB chunks | 2.473 GB/s | 1.916–3.085 GB/s | 5 |
 | B03 | 512 MiB NumPy copy payload | 17.783 GB/s | 15.579–18.564 GB/s | 7 |
+| B07 | 512 MiB float64 read, 1 thread | 7.389 GB/s | 6.328–7.467 GB/s | 7 |
+| B07 | 512 MiB float64 read, 6 threads | 25.850 GB/s | 22.017–27.838 GB/s | 5 |
+| B07 | 512 MiB float64 read, 12 threads | 24.302 GB/s | 22.071–27.555 GB/s | 7 |
 | B04 | 256 MiB pageable H2D copy | 11.104 GB/s | 10.402–12.272 GB/s | 10 |
 | B05 | 256 MiB pinned H2D copy | 26.061 GB/s | 25.069–26.167 GB/s | 10 |
 | B06 | VRAM free at capture (of 8 GiB) | 6.692 GiB | n=1, transient | 1 |
@@ -43,6 +47,8 @@ The B02 result is the first concrete architectural signal: fine-grained storage 
 B05 adds the second signal: pinned H2D reaches 26.06 GB/s with low variance, roughly ten times the B01 sequential storage rate, so for weights streamed from NVMe the storage read stage — not the H2D stage — bounds throughput at these access sizes. An idle `nvidia-smi` query (P8 power state) showed the PCIe link at gen 1 ×16 against a gen 4 ×16 maximum; 26 GB/s is not achievable at gen 1, so the link evidently ramps up under transfer load, but link state during the actual repetitions was not recorded and stays an explicit metadata gap. B04 shows the pageable penalty directly: pageable copies reach only about 0.43× the pinned rate on this machine, consistent with the CUDA requirement for page-locked buffers for genuinely asynchronous transfers — the overlap experiment must therefore use pinned staging, as the path analysis assumed.
 
 B06 is the weakest of the six as evidence. The FP16 GEMM median of 35.4 TFLOP/s comes with a standard deviation of 5.4 TFLOP/s and visibly oscillating repetitions (roughly 27 / 35 / 41 TFLOP/s); plausible confounders are clock ramping from the idle P8 state (255 MHz observed against a 2100 MHz maximum) and desktop GPU contention, but neither was tracked per repetition. It establishes that CUDA compute works and gives a coarse compute scale; it is not a transformer-layer measurement. The 6.69 GiB free-VRAM figure was captured with desktop applications resident and must not be treated as a stable inference budget.
+
+B07 (added 2026-08-13) separates read-only streaming from the B03 copy: a multi-threaded pure read sustains 24.3–25.9 GB/s payload — ~1.4× the B03 copy payload — with no meaningful scaling from 6 to 12 threads, so the practical DDR4 read constant for this machine is ~26 GB/s. That matches the ~26.6 GB/s effective rate llama.cpp's CPU expert path sustains on gpt-oss-20b (`docs/track4-gpt-oss.md`), which makes the B03 memcpy figure the wrong denominator for read-dominated rooflines. An initial uint8 B07 batch (2.4 GB/s single-thread, 11.0 GB/s at 12 threads) measured the per-byte sum kernel rather than DRAM and is superseded by the float64 rows; both batches remain in the raw CSV.
 
 Workload sizes are command-line inputs, not expected performance numbers. B01/B02 use `FILE_FLAG_NO_BUFFERING` so the reported storage numbers do not silently become filesystem-cache numbers. This first reader uses queue depth one; an overlapped-I/O benchmark comes later because concurrency and access size should be chosen from these baseline results.
 

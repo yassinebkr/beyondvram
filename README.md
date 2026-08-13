@@ -1,6 +1,6 @@
 # BeyondVRAM
 
-Status: **active research**. Tracks 0–3 closed/baselined; the FATE-fork external speedup claim measured **non-reproducible**; Track 4 (gpt-oss MXFP4, 100B-class path) open — gpt-oss-20b validated at **44.8 tok/s**; next hardware step: 64 GiB RAM (arriving in 2–3 weeks) to unlock gpt-oss-120b.
+Status: **active research**. Tracks 0–3 closed/baselined; the FATE-fork external speedup claim measured **non-reproducible**; Track 4 (gpt-oss MXFP4, 100B-class path) open — gpt-oss-20b validated at **44.8 tok/s**; next hardware step: 64 GiB RAM (arriving in 2–3 weeks) to unlock gpt-oss-120b. Five interim experiments (bandwidth headroom, WSL2/ik_llama A/Bs as secondary setups, trace-guided mixed-precision experts, n-gram speculation) are tracked in [docs/next-experiments.md](docs/next-experiments.md).
 
 This repository records a measurement-first investigation of running LLMs larger than VRAM on an RTX 3070 Ti (8 GiB), 32 GiB DDR4 RAM (soon 64 GiB), and NVMe storage. The overarching question: what actually determines practical inference speed on consumer hardware when the model does not fit in VRAM — and which walls are physics versus engineering?
 
@@ -33,7 +33,7 @@ Reference points: llama.cpp b10355 (pinned, commit `dd1ea52`), Qwen3-8B Q4_K_M f
 ## Repository map
 
 - `docs/` — per-track research reports and closure decisions.
-- `benchmarks/system/` — B01–B06 hardware characterization suite (`run_all.py`).
+- `benchmarks/system/` — B01–B07 hardware characterization suite (`run_all.py`).
 - `experiments/` — `overlap/` + `real_layer/` (archived Track 0), `moe_trace/` (Track 1: tracing, locality analysis, cache cost model, placement grids, prefetch simulation, speculative bench, FATE-fork repro), `dense_offload/` (Track 2), `low_bit/` (Track 3), `gpt_oss/` (Track 4).
 - `tools/llama.cpp-source/` — llama.cpp pinned at `dd1ea52` with additive, env-gated experiments (moe-trace, moe-cache v1/v2; stock behavior when env vars unset). Build: `tools/build-scripts/build-trace.bat`.
 - `tools/llama.cpp-b10355/` — unmodified release binaries (baselines, parity reference).

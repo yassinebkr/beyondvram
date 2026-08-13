@@ -20,6 +20,7 @@ def main() -> None:
     run("collect_system_info.py")
     run("benchmark_storage.py")
     run("benchmark_ram.py")
+    run("benchmark_ram_read.py")
     run("benchmark_cuda.py")
     run("plot_results.py")
 

@@ -29,5 +29,7 @@ Outputs:
 - `results/system_characterization.csv`: medians, ranges, and standard deviations
 - `plots/system_memory_hierarchy.png`: measured bandwidths only
 
+`benchmark_ram_read.py` (B07) complements B03 with a pure-read stream (`np.sum` over a float64 buffer, single- and multi-threaded): the denominator for read-dominated rooflines such as MoE expert streaming. It runs with the same interpreter and appends to the same CSVs.
+
 Interpret `GB/s_payload` as bytes useful to the operation divided by elapsed time. For RAM copy, physical memory traffic is approximately twice the payload (one read plus one write). The storage script uses Windows `FILE_FLAG_NO_BUFFERING`; sizes and offsets are 4096-byte aligned to avoid measuring the filesystem cache.
 
