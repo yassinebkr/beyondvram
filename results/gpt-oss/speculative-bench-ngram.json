@@ -1,0 +1,495 @@
+{
+ "server": "llama-server b10355 (unmodified)",
+ "spec_mode": "ngram",
+ "model": "gpt-oss-20b-MXFP4.gguf",
+ "draft": null,
+ "placement": "-ngl 24 --n-cpu-moe 10 (measured optimum)",
+ "prompt": "Write a Python module defining twenty dataclasses, one per common farm animal. Every dataclass has the same fields (name: str, legs: int, habitat: str, diet: str) and an identical describe method that returns a one-line summary. Follow exactly the same pattern for all twenty.",
+ "n_predict": 128,
+ "reps": 8,
+ "protocol": "rep 0 is warmup (kept, excluded from summary); greedy, seed 42; arms interleaved rep-outer, alternating order (drift-canceling)",
+ "expectation": "repetitive content favors lookup speculation; decision rule in docs/next-experiments.md experiment 5",
+ "records": [
+  {
+   "config": "no_spec",
+   "rep": 0,
+   "status": "ok",
+   "predicted_per_second": 35.13328277434359,
+   "prompt_per_second": 39.09732105156154,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1534.632,
+    "prompt_per_token_ms": 25.5772,
+    "prompt_per_second": 39.09732105156154,
+    "predicted_n": 128,
+    "predicted_ms": 3643.269,
+    "predicted_per_token_ms": 28.4630390625,
+    "predicted_per_second": 35.13328277434359
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 0,
+   "status": "ok",
+   "predicted_per_second": 30.847008237838143,
+   "prompt_per_second": 35.75248554258866,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1678.205,
+    "prompt_per_token_ms": 27.97008333333333,
+    "prompt_per_second": 35.75248554258866,
+    "predicted_n": 128,
+    "predicted_ms": 4149.511,
+    "predicted_per_token_ms": 32.4180546875,
+    "predicted_per_second": 30.847008237838143,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 0,
+   "status": "ok",
+   "predicted_per_second": 30.919831158396978,
+   "prompt_per_second": 37.99377661938974,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1579.206,
+    "prompt_per_token_ms": 26.3201,
+    "prompt_per_second": 37.99377661938974,
+    "predicted_n": 128,
+    "predicted_ms": 4139.738,
+    "predicted_per_token_ms": 32.341703125,
+    "predicted_per_second": 30.919831158396978,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 1,
+   "status": "ok",
+   "predicted_per_second": 29.945204953872686,
+   "prompt_per_second": 39.42720161493818,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1521.792,
+    "prompt_per_token_ms": 25.3632,
+    "prompt_per_second": 39.42720161493818,
+    "predicted_n": 128,
+    "predicted_ms": 4274.474,
+    "predicted_per_token_ms": 33.394328125,
+    "predicted_per_second": 29.945204953872686,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 1,
+   "status": "ok",
+   "predicted_per_second": 26.834724720798313,
+   "prompt_per_second": 34.48123272705748,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1740.077,
+    "prompt_per_token_ms": 29.001283333333333,
+    "prompt_per_second": 34.48123272705748,
+    "predicted_n": 128,
+    "predicted_ms": 4769.939,
+    "predicted_per_token_ms": 37.2651484375,
+    "predicted_per_second": 26.834724720798313,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 1,
+   "status": "ok",
+   "predicted_per_second": 33.19549423033783,
+   "prompt_per_second": 38.374875201707944,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1563.523,
+    "prompt_per_token_ms": 26.058716666666665,
+    "prompt_per_second": 38.374875201707944,
+    "predicted_n": 128,
+    "predicted_ms": 3855.945,
+    "predicted_per_token_ms": 30.1245703125,
+    "predicted_per_second": 33.19549423033783
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 2,
+   "status": "ok",
+   "predicted_per_second": 31.67669968385169,
+   "prompt_per_second": 34.920204422876694,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1718.203,
+    "prompt_per_token_ms": 28.636716666666665,
+    "prompt_per_second": 34.920204422876694,
+    "predicted_n": 128,
+    "predicted_ms": 4040.825,
+    "predicted_per_token_ms": 31.5689453125,
+    "predicted_per_second": 31.67669968385169
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 2,
+   "status": "ok",
+   "predicted_per_second": 35.8938752710268,
+   "prompt_per_second": 38.3422106201533,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1564.855,
+    "prompt_per_token_ms": 26.080916666666667,
+    "prompt_per_second": 38.3422106201533,
+    "predicted_n": 128,
+    "predicted_ms": 3566.068,
+    "predicted_per_token_ms": 27.85990625,
+    "predicted_per_second": 35.8938752710268,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 2,
+   "status": "ok",
+   "predicted_per_second": 30.79344359471113,
+   "prompt_per_second": 39.03485031436066,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1537.088,
+    "prompt_per_token_ms": 25.618133333333333,
+    "prompt_per_second": 39.03485031436066,
+    "predicted_n": 128,
+    "predicted_ms": 4156.729,
+    "predicted_per_token_ms": 32.4744453125,
+    "predicted_per_second": 30.79344359471113,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 3,
+   "status": "ok",
+   "predicted_per_second": 27.097075484619555,
+   "prompt_per_second": 34.974451163425115,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1715.538,
+    "prompt_per_token_ms": 28.5923,
+    "prompt_per_second": 34.974451163425115,
+    "predicted_n": 128,
+    "predicted_ms": 4723.757,
+    "predicted_per_token_ms": 36.9043515625,
+    "predicted_per_second": 27.097075484619555,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 3,
+   "status": "ok",
+   "predicted_per_second": 28.037790560771146,
+   "prompt_per_second": 34.71149540593358,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1728.534,
+    "prompt_per_token_ms": 28.8089,
+    "prompt_per_second": 34.71149540593358,
+    "predicted_n": 128,
+    "predicted_ms": 4565.267,
+    "predicted_per_token_ms": 35.6661484375,
+    "predicted_per_second": 28.037790560771146,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 3,
+   "status": "ok",
+   "predicted_per_second": 27.62908557008409,
+   "prompt_per_second": 34.857456242273265,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1721.296,
+    "prompt_per_token_ms": 28.688266666666667,
+    "prompt_per_second": 34.857456242273265,
+    "predicted_n": 128,
+    "predicted_ms": 4632.799,
+    "predicted_per_token_ms": 36.1937421875,
+    "predicted_per_second": 27.62908557008409
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 4,
+   "status": "ok",
+   "predicted_per_second": 26.520109909280507,
+   "prompt_per_second": 34.924594889251196,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1717.987,
+    "prompt_per_token_ms": 28.63311666666667,
+    "prompt_per_second": 34.924594889251196,
+    "predicted_n": 128,
+    "predicted_ms": 4826.526,
+    "predicted_per_token_ms": 37.707234375,
+    "predicted_per_second": 26.520109909280507
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 4,
+   "status": "ok",
+   "predicted_per_second": 32.82976407967271,
+   "prompt_per_second": 37.20944077931453,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1612.494,
+    "prompt_per_token_ms": 26.8749,
+    "prompt_per_second": 37.20944077931453,
+    "predicted_n": 128,
+    "predicted_ms": 3898.901,
+    "predicted_per_token_ms": 30.4601640625,
+    "predicted_per_second": 32.82976407967271,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 4,
+   "status": "ok",
+   "predicted_per_second": 27.87361753389911,
+   "prompt_per_second": 37.19193455707196,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1613.253,
+    "prompt_per_token_ms": 26.887549999999997,
+    "prompt_per_second": 37.19193455707196,
+    "predicted_n": 128,
+    "predicted_ms": 4592.156,
+    "predicted_per_token_ms": 35.87621875,
+    "predicted_per_second": 27.87361753389911,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 5,
+   "status": "ok",
+   "predicted_per_second": 28.235794472534405,
+   "prompt_per_second": 36.633368969460584,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1637.851,
+    "prompt_per_token_ms": 27.29751666666667,
+    "prompt_per_second": 36.633368969460584,
+    "predicted_n": 128,
+    "predicted_ms": 4533.253,
+    "predicted_per_token_ms": 35.4160390625,
+    "predicted_per_second": 28.235794472534405,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 5,
+   "status": "ok",
+   "predicted_per_second": 33.070115879752926,
+   "prompt_per_second": 38.06360301184603,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1576.309,
+    "prompt_per_token_ms": 26.271816666666666,
+    "prompt_per_second": 38.06360301184603,
+    "predicted_n": 128,
+    "predicted_ms": 3870.564,
+    "predicted_per_token_ms": 30.23878125,
+    "predicted_per_second": 33.070115879752926,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 5,
+   "status": "ok",
+   "predicted_per_second": 31.198365790601926,
+   "prompt_per_second": 36.092483379411405,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1662.396,
+    "prompt_per_token_ms": 27.706599999999998,
+    "prompt_per_second": 36.092483379411405,
+    "predicted_n": 128,
+    "predicted_ms": 4102.779,
+    "predicted_per_token_ms": 32.0529609375,
+    "predicted_per_second": 31.198365790601926
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 6,
+   "status": "ok",
+   "predicted_per_second": 28.876944061298534,
+   "prompt_per_second": 38.50386803440962,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1558.285,
+    "prompt_per_token_ms": 25.971416666666666,
+    "prompt_per_second": 38.50386803440962,
+    "predicted_n": 128,
+    "predicted_ms": 4432.602,
+    "predicted_per_token_ms": 34.629703125,
+    "predicted_per_second": 28.876944061298534
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 6,
+   "status": "ok",
+   "predicted_per_second": 32.61075874789972,
+   "prompt_per_second": 37.0311394851931,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1620.258,
+    "prompt_per_token_ms": 27.0043,
+    "prompt_per_second": 37.0311394851931,
+    "predicted_n": 128,
+    "predicted_ms": 3925.085,
+    "predicted_per_token_ms": 30.6647265625,
+    "predicted_per_second": 32.61075874789972,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 6,
+   "status": "ok",
+   "predicted_per_second": 29.826609530067785,
+   "prompt_per_second": 35.15885944659955,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1706.54,
+    "prompt_per_token_ms": 28.442333333333334,
+    "prompt_per_second": 35.15885944659955,
+    "predicted_n": 128,
+    "predicted_ms": 4291.47,
+    "predicted_per_token_ms": 33.527109375,
+    "predicted_per_second": 29.826609530067785,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_mod",
+   "rep": 7,
+   "status": "ok",
+   "predicted_per_second": 28.45839538226962,
+   "prompt_per_second": 37.198805918330024,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1612.955,
+    "prompt_per_token_ms": 26.882583333333333,
+    "prompt_per_second": 37.198805918330024,
+    "predicted_n": 128,
+    "predicted_ms": 4497.794,
+    "predicted_per_token_ms": 35.139015625,
+    "predicted_per_second": 28.45839538226962,
+    "draft_n": 27,
+    "draft_n_accepted": 0
+   }
+  },
+  {
+   "config": "ngram_simple",
+   "rep": 7,
+   "status": "ok",
+   "predicted_per_second": 33.80304602416759,
+   "prompt_per_second": 36.54220594334618,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1641.937,
+    "prompt_per_token_ms": 27.365616666666664,
+    "prompt_per_second": 36.54220594334618,
+    "predicted_n": 128,
+    "predicted_ms": 3786.641,
+    "predicted_per_token_ms": 29.5831328125,
+    "predicted_per_second": 33.80304602416759,
+    "draft_n": 82,
+    "draft_n_accepted": 49
+   }
+  },
+  {
+   "config": "no_spec",
+   "rep": 7,
+   "status": "ok",
+   "predicted_per_second": 23.935308844021822,
+   "prompt_per_second": 34.04465864839301,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 60,
+    "prompt_ms": 1762.391,
+    "prompt_per_token_ms": 29.373183333333333,
+    "prompt_per_second": 34.04465864839301,
+    "predicted_n": 128,
+    "predicted_ms": 5347.748,
+    "predicted_per_token_ms": 41.77928125,
+    "predicted_per_second": 23.935308844021822
+   }
+  }
+ ],
+ "summary_warm": {
+  "no_spec": {
+   "mean": 29.0,
+   "stdev": 3.25,
+   "n": 7
+  },
+  "ngram_simple": {
+   "mean": 31.87,
+   "stdev": 3.24,
+   "n": 7
+  },
+  "ngram_mod": {
+   "mean": 28.89,
+   "stdev": 1.32,
+   "n": 7
+  }
+ }
+}

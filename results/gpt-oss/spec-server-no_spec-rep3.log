@@ -1,0 +1,27 @@
+0.00.115.601 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.181.207 I srv          init: The UI is disabled
+0.00.181.212 I srv          init: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+0.00.181.359 W srv  llama_server: -----------------
+0.00.181.364 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.181.364 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.181.365 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.181.365 W srv  llama_server: -----------------
+0.00.185.871 I srv    load_model: loading model 'C:\Users\yassi\Documents\code\BeyondVram\models\gpt-oss-20b-GGUF\gpt-oss-20b-MXFP4.gguf'
+0.01.398.479 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 24, abort
+0.01.866.584 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.01.866.823 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.01.875.753 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.01.875.758 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.01.875.777 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.01.915.105 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --no-mmap for better performance
+0.06.215.683 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 4096, kv_unified = 'true'
+0.06.220.921 I srv  llama_server: model loaded
+0.06.220.929 I srv  llama_server: listening on http://127.0.0.1:8100
+0.06.527.396 I slot get_availabl: id  3 | task -1 | selected slot by LRU, t_last = -1
+0.06.527.422 I slot launch_slot_: id  3 | task 0 | processing task, is_child = 0
+0.11.965.862 I slot print_timing: id  3 | task 0 | n_decoded =    100, tg =  26.90 t/s, tg_3s =  26.90 t/s
+0.12.881.554 I slot print_timing: id  3 | task 0 | prompt eval time =    1721.30 ms /    60 tokens (   28.69 ms per token,    34.86 tokens per second)
+0.12.881.560 I slot print_timing: id  3 | task 0 |        eval time =    4632.80 ms /   128 tokens (   36.19 ms per token,    27.63 tokens per second)
+0.12.881.561 I slot print_timing: id  3 | task 0 |       total time =    6354.10 ms /   188 tokens
+0.12.881.562 I slot print_timing: id  3 | task 0 |    graphs reused =        127
+0.12.881.590 I slot      release: id  3 | task 0 | stop processing: n_tokens = 187, truncated = 0

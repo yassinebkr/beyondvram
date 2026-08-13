@@ -57,7 +57,8 @@ experiments/moe_trace/  MoE expert-locality track: run_traces.py (10-prompt capt
 experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl sweep)
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
 experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine),
-                        speculative_bench.py (EAGLE-3 draft vs no-draft via llama-server),
+                        speculative_bench.py (EAGLE-3 draft / --ngram self-speculation
+                        vs no-spec via llama-server; --interleave drift-canceling),
                         analyze_predictability.py (predictor recall/over-fetch from traces),
                         thread_sweep.py (llama-bench -t sweep: effective-bandwidth probe)
 results/track2-dense/   Dense 32B placement sweep results

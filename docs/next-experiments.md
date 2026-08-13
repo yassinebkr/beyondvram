@@ -1,6 +1,6 @@
 # Next experiments: the post-Track-4 program
 
-Status: **active** (opened 2026-08-13). Experiments 1 (no bandwidth headroom) and 2 (WSL2: no advantage — native stays host) done; 3–5 queued.
+Status: **active** (opened 2026-08-13). Experiments 1 (no bandwidth headroom), 2 (WSL2: no advantage — native stays host), and 5 (n-gram: +9.9% only on repetitive content — per-workload flag) done; 3–4 queued.
 Owner directive: every alternative environment below is a **secondary/testing setup** — nothing replaces the native Windows 11 + b10355 reference environment, and every comparison is measured against the same-configuration native baseline.
 
 ## Why these five
@@ -49,14 +49,14 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Decision rule.** Ship the variant only if perplexity stays within a few % of the Q4_K_M baseline AND generation improves ≥15% at the best placement. Either arm failing closes the idea at this model size. The technique, if validated, transfers directly to gpt-oss-120b.
 
-## 5 — n-gram self-speculation support check (QUEUED; support CONFIRMED 2026-08-13)
+## 5 — n-gram self-speculation (DONE 2026-08-14: real but narrow — a per-workload flag)
 
-**Question.** EAGLE-3 measured +5.7% steady state (weak). N-gram/lookup self-speculation needs no resident draft model — does it beat EAGLE-3 on repetitive content?
+**Question.** EAGLE-3 measured parity (−0.7% interleaved). N-gram/lookup self-speculation needs no resident draft model — does it beat EAGLE-3 on repetitive content?
 
-**Support check (done).** b10355 `llama-server --help` exposes `--spec-type` values `ngram-simple`, `ngram-map-k`, `ngram-map-k4v`, `ngram-mod`, `ngram-cache` with per-mode lookup/draft/min-hits tunables. Runnable with the Track-4 `speculative_bench.py` harness extended by a spec-type parameter.
+**Support check (done 2026-08-13).** b10355 `llama-server --help` exposes `--spec-type` values `ngram-simple`, `ngram-map-k`, `ngram-map-k4v`, `ngram-mod`, `ngram-cache` with per-mode lookup/draft/min-hits tunables. Runnable via the Track-4 `speculative_bench.py` harness, `--ngram` mode.
 
-**Protocol.** Same server placement as the EAGLE-3 bench (24,10), greedy, repetitive-content prompts (code, structured text), modes `ngram-simple` and `ngram-mod` first, 8-rep steady-state protocol (first rep discarded — the cold-cache artifact from the EAGLE-3 bench).
+**Measurement (interleaved, 8 reps, first discarded; `results/gpt-oss/speculative-bench-ngram.json`).** Same (24,10) server placement, greedy, repetitive code-shaped prompt (twenty identical-pattern dataclasses). `ngram-simple`: **31.87 ± 3.24 vs 29.00 ± 3.25 no-spec = +9.9%**, 6 of 7 rounds positive, mechanism confirmed in server logs — draft acceptance 0.598 (49/82 tokens, mean drafted length 17.33). `ngram-mod`: 28.89 ± 1.32 = parity — acceptance 0.000, it never fired on this prompt, and the miss cost is ~0.4%.
 
-**Decision rule.** <EAGLE-3's +5.7% closes it; >10% on realistic workloads earns a variant bench at the (24,10) optimum.
+**Verdict: real but narrow — a per-workload flag, not a roofline mover.** +9.9% at 60% acceptance is genuine free speed, but only on highly repetitive/structured output (code, tables, templates); verification is exact so it is lossless, and a non-firing mode costs ~0.4%. The mechanism (literal n-gram lookup) implies the gain shrinks on open-ended prose — not separately measured, and it does not touch the bandwidth wall (accepted tokens still re-read the same experts in the verify pass). Recorded as a usable per-workload option (`--spec-type ngram-simple`), carried into the 120b protocol as the code-workload variant; no further bench rounds on the 20b.
 
 Experiments 2 and 3 are independent secondary setups. Experiment 4 depends on 3 only if stock `llama-quantize` cannot express the per-expert split (ik's per-tensor control is the fallback).
