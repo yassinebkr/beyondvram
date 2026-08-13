@@ -42,6 +42,8 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--only", nargs="*", default=None,
                         help="restrict to these prompt ids")
+    parser.add_argument("--out-dir", type=Path, default=OUT_DIR,
+                        help="trace/gen output directory (default: Track-1 results dir)")
     args = parser.parse_args()
 
     if not args.exe.exists():
@@ -49,14 +51,15 @@ def main() -> None:
     if not args.model.exists():
         raise SystemExit(f"model not found: {args.model}")
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = args.out_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
     env_base = dict(os.environ)
 
     for prompt_id, prompt in PROMPTS:
         if args.only and prompt_id not in args.only:
             continue
-        trace_path = OUT_DIR / f"trace-{prompt_id}.jsonl"
-        gen_path = OUT_DIR / f"gen-{prompt_id}.txt"
+        trace_path = out_dir / f"trace-{prompt_id}.jsonl"
+        gen_path = out_dir / f"gen-{prompt_id}.txt"
         env = dict(env_base)
         env["MOE_TRACE_OUT"] = str(trace_path)
         command = [
@@ -73,7 +76,7 @@ def main() -> None:
         result = subprocess.run(command, env=env, capture_output=True, text=True)
         elapsed = time.perf_counter() - start
         gen_path.write_text(result.stdout, encoding="utf-8")
-        (OUT_DIR / f"gen-{prompt_id}.stderr.txt").write_text(result.stderr, encoding="utf-8")
+        (out_dir / f"gen-{prompt_id}.stderr.txt").write_text(result.stderr, encoding="utf-8")
         records = sum(1 for _ in trace_path.open(encoding="utf-8")) if trace_path.exists() else 0
         print(f"[{prompt_id}] rc={result.returncode} records={records} {elapsed:.1f}s", flush=True)
         if result.returncode != 0:

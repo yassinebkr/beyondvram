@@ -199,7 +199,8 @@ def main() -> None:
     for capacity, hit_rate in pooled.items():
         print(f"  capacity {capacity:4d}: {hit_rate:.4f}")
 
-    out_path = TRACE_DIR / "locality-analysis.json"
+    out_dir = traces[0].parent if args.traces else TRACE_DIR
+    out_path = out_dir / "locality-analysis.json"
     payload = {
         "traces": [p.name for p in traces],
         "overlap_distances": OVERLAP_DISTANCES,

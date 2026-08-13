@@ -1,0 +1,100 @@
+{
+ "traces": [
+  "trace-chat-advice.jsonl",
+  "trace-chat-recipe.jsonl",
+  "trace-code-cpp.jsonl",
+  "trace-code-python.jsonl",
+  "trace-french.jsonl",
+  "trace-math-proof.jsonl",
+  "trace-prose-intro.jsonl",
+  "trace-prose-story.jsonl",
+  "trace-reasoning.jsonl",
+  "trace-tech-explain.jsonl"
+ ],
+ "predictors": {
+  "temporal-1": "E(L,t-1) -> E(L,t)",
+  "cross-layer": "E(L-1,t) -> E(L,t)",
+  "fate-union": "E(L-1,t) | E(L,t-1) -> E(L,t) (FATE fork heuristic)",
+  "fate-union-2": "E(L-1,t) | E(L,t-1) | E(L,t-2) -> E(L,t)",
+  "oracle-lastk": "union of last k same-layer sets -> E(L,t), k=2,4,8"
+ },
+ "per_file": {
+  "trace-chat-advice": {
+   "layers": 24,
+   "tokens_per_layer": 140
+  },
+  "trace-chat-recipe": {
+   "layers": 24,
+   "tokens_per_layer": 139
+  },
+  "trace-code-cpp": {
+   "layers": 24,
+   "tokens_per_layer": 142
+  },
+  "trace-code-python": {
+   "layers": 24,
+   "tokens_per_layer": 142
+  },
+  "trace-french": {
+   "layers": 24,
+   "tokens_per_layer": 138
+  },
+  "trace-math-proof": {
+   "layers": 24,
+   "tokens_per_layer": 141
+  },
+  "trace-prose-intro": {
+   "layers": 24,
+   "tokens_per_layer": 139
+  },
+  "trace-prose-story": {
+   "layers": 24,
+   "tokens_per_layer": 141
+  },
+  "trace-reasoning": {
+   "layers": 24,
+   "tokens_per_layer": 165
+  },
+  "trace-tech-explain": {
+   "layers": 24,
+   "tokens_per_layer": 144
+  }
+ },
+ "pooled": {
+  "cross-layer": {
+   "recall": 0.13034363321483913,
+   "over_fetch": 1.0,
+   "actual_requests": 131652
+  },
+  "fate-union": {
+   "recall": 0.5260763224257892,
+   "over_fetch": 1.8612782183331815,
+   "actual_requests": 131652
+  },
+  "fate-union-2": {
+   "recall": 0.6260368243551181,
+   "over_fetch": 2.325562847507064,
+   "actual_requests": 131652
+  },
+  "oracle-last2": {
+   "recall": 0.5660333098756745,
+   "over_fetch": 1.5460576471968097,
+   "actual_requests": 136416
+  },
+  "oracle-last4": {
+   "recall": 0.7032826061459067,
+   "over_fetch": 2.316546446164673,
+   "actual_requests": 136416
+  },
+  "oracle-last8": {
+   "recall": 0.8247273047149895,
+   "over_fetch": 3.2328319258737976,
+   "actual_requests": 136416
+  },
+  "temporal-1": {
+   "recall": 0.4500645085620455,
+   "over_fetch": 1.0,
+   "actual_requests": 136416
+  }
+ }
+}

@@ -1,0 +1,12 @@
+
+
+Sure! The Fibonacci sequence is a series of numbers where each number is the sum of the two preceding ones, usually starting with 0 and 1. That is, the sequence starts 0, 1, 1, 2, 3, 5, 8, 13, 21, and so on. The function below calculates the n-th Fibonacci number using a simple iterative approach:
+
+```python
+def fibonacci(n):
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        a, b = 0, 1

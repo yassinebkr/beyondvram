@@ -10,7 +10,7 @@ Track 2 (dense RAM-resident partial offload) has its **baseline**: dense Qwen3-3
 
 Track 3 (low-bit/ternary) has its **baseline**: Q3_K_M is marginal (3.48 tok/s, +2% PPL), IQ2_XXS reaches 10.62 tok/s because 9 GB nearly fits VRAM (+30% PPL), and the official BitNet i2_s GGUF is incompatible with mainline b10355 (fork-only quant type 36). The MoE Q4_K_M remains the quality/speed frontier. See `docs/track3-low-bit.md`.
 
-Track 4 (gpt-oss MXFP4, 100B-class path) is **open**: gpt-oss-20b validated MXFP4 on sm_86 (29.52 tok/s smoke) and re-measured the placement optimum on a second architecture — `-ngl 24 --n-cpu-moe 10` ≈ 44.8 tok/s, plateau K=8–12, same interior-optimum shape as Qwen3. The roofline model was refined: the ceiling is min(DDR4 bytes ÷ expert-bytes/token, CPU expert-kernel throughput) — gpt-oss all-CPU sits at 37% of its byte ceiling (kernel-bound), Qwen3 at ~90% (bandwidth-bound). gpt-oss-120b (59 GiB MXFP4, the only ≥100B Q4-class file fitting 64 GiB) is gated on the RAM upgrade; predicted 5–8 tok/s. See `docs/track4-gpt-oss.md`.
+Track 4 (gpt-oss MXFP4, 100B-class path) is **open**: gpt-oss-20b validated MXFP4 on sm_86 (29.52 tok/s smoke) and re-measured the placement optimum on a second architecture — `-ngl 24 --n-cpu-moe 10` ≈ 44.8 tok/s, plateau K=8–12, same interior-optimum shape as Qwen3. GGUF-measured expert bytes (13.22 MB/expert → 1.27 GB/token) corrected an early 4× underestimate: the all-experts-CPU point (21.0 tok/s) implies ~26.6 GB/s effective DDR4 read throughput — far above the B03 memcpy-payload figure, and 1.7× what Qwen3's small-expert read shape sustains. EAGLE-3 speculative decoding measured a weak +5.7% steady state (GPU-draft placement broken at b10355); routing-predictability traces cap id-history predictors at 0.53–0.63 recall with ~2× over-fetch — no cache build. gpt-oss-120b (59 GiB MXFP4, the only ≥100B Q4-class file fitting 64 GiB) is gated on the RAM upgrade; predicted 5–8 tok/s. See `docs/track4-gpt-oss.md`.
 
 The project remains **measurement-first**. No custom inference engine is selected or planned at this point. Read these documents before proposing architecture changes:
 
@@ -54,10 +54,14 @@ experiments/moe_trace/  MoE expert-locality track: run_traces.py (10-prompt capt
                         fate_repro.py (FATE-fork claim check; --reparse rebuilds JSON from raw logs)
 experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl sweep)
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
-experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine)
+experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine),
+                        speculative_bench.py (EAGLE-3 draft vs no-draft via llama-server),
+                        analyze_predictability.py (predictor recall/over-fetch from traces)
 results/track2-dense/   Dense 32B placement sweep results
 results/track3-low-bit/ Low-bit bench + perplexity results and the fixed corpus
-results/gpt-oss/        gpt-oss-20b placement grid + refinement results
+results/gpt-oss/        gpt-oss-20b placement grid + refinement, speculative-bench*.json,
+                        predictability.json (+ predictability-qwen3-ref.json cross-check),
+                        traces/ (trace-*.jsonl, gen-*.txt, parity-*, locality-analysis.json)
 models/                 Local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, BitNet, gpt-oss-20b)
 results/moe-locality/   Raw expert traces (trace-*.jsonl), generated text, parity outputs,
                         locality-analysis.json, cache-cost-model.json, moe-cache-poc.json,
@@ -80,7 +84,7 @@ src/                   Empty placeholder for future work
 - Pure Python scripts; there is **no package manifest** (no `pyproject.toml`, `requirements.txt`, etc.) and no build system. Scripts run directly with the active Python interpreter.
 - Target host: Windows 11, NVIDIA GeForce RTX 3070 Ti (8 GiB VRAM, compute capability 8.6), Python 3.14. Scripts are invoked from the repository root.
 - A project-local virtual environment `.venv` (Python 3.14, torch 2.13.0+cu126, NumPy, Pillow, Transformers, Safetensors, Hugging Face Hub, hf_xet, gguf) holds Python experiment dependencies. The PyPI Windows wheel for torch is CPU-only — the CUDA build comes from `https://download.pytorch.org/whl/cu126`.
-- Native trace-build prerequisites were installed on 2026-08-11: CMake 4.4.2, Visual Studio 2022 Build Tools (MSVC 19.44), and CUDA Toolkit 13.3 (`nvcc` 13.3.73). The llama.cpp source checkout in `tools/llama.cpp-source/` is pinned to `dd1ea5243` (tag b10355); its only modifications are the additive `examples/moe-trace/` executable and one `add_subdirectory` line. Rebuild with `MSYS2_ARG_CONV_EXCL="*" cmd /c "tools\build-scripts\build-trace.bat"` (Ninja + vcvars64 + CUDA 13.3; the VS generator fails to resolve CudaToolkitDir). Do not silently move the checkout to a different revision.
+- Native trace-build prerequisites were installed on 2026-08-11: CMake 4.4.2, Visual Studio 2022 Build Tools (MSVC 19.44), and CUDA Toolkit 13.3 (`nvcc` 13.3.73). The llama.cpp source checkout in `tools/llama.cpp-source/` is pinned to `dd1ea5243` (tag b10355); its only modifications are the additive `examples/moe-trace/` executable and one `add_subdirectory` line. Rebuild with `MSYS2_ARG_CONV_EXCL="*" cmd /c "tools\build-scripts\build-trace.bat"` (Ninja + vcvars64 + CUDA 13.3; the VS generator fails to resolve CudaToolkitDir; optional first argument names a different target, default `llama-moe-trace`). Do not silently move the checkout to a different revision.
 - Dependencies: NumPy (required by `benchmark_ram.py`) and Pillow (required by `plot_results.py`). PyTorch with CUDA is an **optional** dependency of `benchmark_cuda.py`; when absent, B04–B06 are recorded as *skipped* rows rather than fabricated. Run `benchmark_cuda.py` and `plot_results.py` with `.venv\Scripts\python.exe`.
 - `benchmark_storage.py` is **Windows-only**: it uses `ctypes` against `kernel32` (`CreateFileW` with `FILE_FLAG_NO_BUFFERING`, `VirtualAlloc`, `ReadFile`) for direct I/O. Do not "port" it silently; POSIX support would be a new design decision.
 - The repository is not currently under version control; `.venv` and other local artifacts live inside the project tree.

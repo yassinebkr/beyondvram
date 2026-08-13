@@ -1,0 +1,100 @@
+{
+ "traces": [
+  "trace-chat-advice.jsonl",
+  "trace-chat-recipe.jsonl",
+  "trace-code-cpp.jsonl",
+  "trace-code-python.jsonl",
+  "trace-french.jsonl",
+  "trace-math-proof.jsonl",
+  "trace-prose-intro.jsonl",
+  "trace-prose-story.jsonl",
+  "trace-reasoning.jsonl",
+  "trace-tech-explain.jsonl"
+ ],
+ "predictors": {
+  "temporal-1": "E(L,t-1) -> E(L,t)",
+  "cross-layer": "E(L-1,t) -> E(L,t)",
+  "fate-union": "E(L-1,t) | E(L,t-1) -> E(L,t) (FATE fork heuristic)",
+  "fate-union-2": "E(L-1,t) | E(L,t-1) | E(L,t-2) -> E(L,t)",
+  "oracle-lastk": "union of last k same-layer sets -> E(L,t), k=2,4,8"
+ },
+ "per_file": {
+  "trace-chat-advice": {
+   "layers": 48,
+   "tokens_per_layer": 139
+  },
+  "trace-chat-recipe": {
+   "layers": 48,
+   "tokens_per_layer": 138
+  },
+  "trace-code-cpp": {
+   "layers": 48,
+   "tokens_per_layer": 141
+  },
+  "trace-code-python": {
+   "layers": 48,
+   "tokens_per_layer": 141
+  },
+  "trace-french": {
+   "layers": 48,
+   "tokens_per_layer": 139
+  },
+  "trace-math-proof": {
+   "layers": 48,
+   "tokens_per_layer": 141
+  },
+  "trace-prose-intro": {
+   "layers": 48,
+   "tokens_per_layer": 138
+  },
+  "trace-prose-story": {
+   "layers": 48,
+   "tokens_per_layer": 141
+  },
+  "trace-reasoning": {
+   "layers": 48,
+   "tokens_per_layer": 167
+  },
+  "trace-tech-explain": {
+   "layers": 48,
+   "tokens_per_layer": 144
+  }
+ },
+ "pooled": {
+  "cross-layer": {
+   "recall": 0.06203871120727984,
+   "over_fetch": 1.0,
+   "actual_requests": 539792
+  },
+  "fate-union": {
+   "recall": 0.46402688442955803,
+   "over_fetch": 1.9327444645344873,
+   "actual_requests": 539792
+  },
+  "fate-union-2": {
+   "recall": 0.557188694904704,
+   "over_fetch": 2.4588137653021906,
+   "actual_requests": 539792
+  },
+  "oracle-last2": {
+   "recall": 0.5252327433757654,
+   "over_fetch": 1.5702267512386185,
+   "actual_requests": 547384
+  },
+  "oracle-last4": {
+   "recall": 0.6329834266255498,
+   "over_fetch": 2.4375502389547377,
+   "actual_requests": 547384
+  },
+  "oracle-last8": {
+   "recall": 0.7425354047615568,
+   "over_fetch": 3.6664644929336627,
+   "actual_requests": 547384
+  },
+  "temporal-1": {
+   "recall": 0.42548558233342587,
+   "over_fetch": 1.0,
+   "actual_requests": 547384
+  }
+ }
+}

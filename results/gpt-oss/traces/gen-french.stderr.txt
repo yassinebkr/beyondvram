@@ -1,0 +1,8 @@
+0.01.151.382 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 24, abort
+0.01.625.267 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.01.625.459 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.01.632.047 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.01.632.052 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.01.632.065 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.07.632.141 I main: prompt tokens = 11, predict = 128, trace out = results\gpt-oss\traces\trace-french.jsonl
+0.15.124.581 I main: wrote 3312 trace records to results\gpt-oss\traces\trace-french.jsonl

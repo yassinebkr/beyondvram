@@ -1,0 +1,17 @@
+ The program should read an integer N from standard input, followed by N integers. It should then output the sorted integers in ascending order, separated by spaces.
+
+**Input Format:**
+- The first line contains an integer N, the number of elements in the array.
+- The second line contains N integers separated by spaces.
+
+**Output Format:**
+- Output the sorted array in ascending order, separated by spaces.
+
+**Constraints:**
+- 1 â‰¤ N â‰¤ 10^5
+- Each element of the array is an integer in the range [-10^9, 10^9].
+
+**Sample Input:**
+```
+5
+

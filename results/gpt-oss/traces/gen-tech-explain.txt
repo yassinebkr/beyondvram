@@ -1,0 +1,9 @@
+ What are the key differences in terms of data transfer and command handling?**
+
+**Answer:**
+
+NVMe (Non-Volatile Memory Express) and SATA SSDs differ significantly at the protocol level, primarily in how they handle data transfer and command execution:
+
+- **Data Transfer**:
+  - **NVMe**: Utilizes the PCIe bus, which offers multiple lanes (x1, x2, x4, etc.) and higher bandwidth per lane. This allows for higher data transfer rates and lower latency.
+  - **SATA SSDs**: Operate over the SATA interface, which is limited to a maximum of 

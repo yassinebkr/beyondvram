@@ -1,0 +1,3 @@
+ Provide a clear and concise proof that demonstrates this fact."
+
+We need to produce a clear, concise proof that sqrt(2) is irrational. The standard proof uses contradiction: assume sqrt(2) = p/q in lowest terms, then 2q^2 = p^2, so p^2 is even, so p is even, so p=2k, then 2q^2 = 4k^2 => q^2 = 2k^2, so q^2 is even, so q is even. Thus p and q share a factor of 2, contradicting that they were in lowest
