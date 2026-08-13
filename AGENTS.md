@@ -60,7 +60,8 @@ experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-m
                         speculative_bench.py (EAGLE-3 draft / --ngram self-speculation
                         vs no-spec via llama-server; --interleave drift-canceling),
                         analyze_predictability.py (predictor recall/over-fetch from traces),
-                        thread_sweep.py (llama-bench -t sweep: effective-bandwidth probe)
+                        thread_sweep.py (llama-bench -t sweep: effective-bandwidth probe),
+                        ik_ab.py (ik_llama.cpp vs mainline interleaved A/B)
 results/track2-dense/   Dense 32B placement sweep results
 results/track3-low-bit/ Low-bit bench + perplexity results and the fixed corpus
 results/gpt-oss/        gpt-oss-20b placement grid + refinement, speculative-bench*.json,
@@ -72,7 +73,7 @@ results/moe-locality/   Raw expert traces (trace-*.jsonl), generated text, parit
                         cache-stats-*.json, moe-cache-poc.patch + moe-cache-new-files/,
                         fate-repro/ (FATE-fork matrix, per-rep logs, fork-patches.patch)
 tools/build-scripts/    Native build helpers (configure-trace-build.bat, build-trace.bat,
-                        build-fate.bat, kill-stale-llama.ps1)
+                        configure-ik.bat, build-ik.bat, build-fate.bat, kill-stale-llama.ps1)
 tools/llama.cpp-source/ llama.cpp pinned at dd1ea52 (b10355) + additive moe-trace example,
                         moe-cache PoC (env-gated, LLAMA_MOE_CACHE unset = stock behavior)
 tools/llama.cpp-b10355/ Unmodified b10355 release binaries (baseline + parity reference)
@@ -82,6 +83,8 @@ tools/llama-moe-cache/  Gitignored FATE-fork clone (commit 77c8767, AGPL-3.0) fo
 tools/wsl2-ab/          WSL2 secondary-testbench A/B scripts (ab_paired.sh, ab_hybrid.sh);
                         vhdx/ and tarballs are gitignored; the WSL2 distro is a test bench
                         only, never a replacement for the native Windows b10355 reference
+tools/ik_llama.cpp/     Gitignored ik_llama.cpp clone (HEAD 981e5ea) for the experiment-3
+                        engine A/B; local MSVC+CUDA build via tools/build-scripts/build-ik.bat
 tests/                 Pytest suite: fixture, rows, timeline, checksums, Windows I/O adapter
 src/                   Empty placeholder for future work
 ```

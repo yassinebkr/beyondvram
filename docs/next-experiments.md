@@ -1,6 +1,6 @@
 # Next experiments: the post-Track-4 program
 
-Status: **active** (opened 2026-08-13). Experiments 1 (no bandwidth headroom), 2 (WSL2: no advantage — native stays host), and 5 (n-gram: +9.9% only on repetitive content — per-workload flag) done; 3–4 queued.
+Status: **active** (opened 2026-08-13). Experiments 1 (no bandwidth headroom), 2 (WSL2: no advantage — native stays host), 3 (ik_llama.cpp: −39..−54% on the MXFP4 regime — closed), and 5 (n-gram: +9.9% only on repetitive content — per-workload flag) done; 4 queued.
 Owner directive: every alternative environment below is a **secondary/testing setup** — nothing replaces the native Windows 11 + b10355 reference environment, and every comparison is measured against the same-configuration native baseline.
 
 ## Why these five
@@ -33,13 +33,15 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Verdict: closed — native Windows stays the benchmarking and reference host.** The cited 15–25% Linux advantage does not reproduce on this box for this workload; the sign flips per phase (Linux wins GPU-fed pp, loses memory-bound tg by 7.6–9.1%, loses CPU-only pp 3.5–4.3×). The 120b base experiment is tg-dominated with all experts on CPU — precisely the phase where WSL2 pays its hypervisor tax — so the plan is unchanged. Caveats: arms compare the stacks as shipped (MSVC CI binary vs gcc source build — compiler not isolated from OS); native (24,24) tg this session (22.96) ran ~9% above the grid-era 21.00 ± 1.09 — pairing within one session, not cross-session comparison, is what makes the deltas readable at all.
 
-## 3 — ik_llama.cpp engine A/B (QUEUED, secondary setup)
+## 3 — ik_llama.cpp engine A/B (DONE 2026-08-14: decisive negative on the MXFP4 regime)
 
-**Question.** Does the performance-focused fork beat mainline b10355 on this CPU-heavy MoE regime? Its CPU/quant paths are frequently reported faster, and its per-tensor quant control is what experiment 4 needs.
+**Question.** Does the performance-focused fork beat mainline b10355 on this CPU-heavy MoE regime? Its CPU/quant paths are frequently reported faster.
 
-**Protocol.** Build ik_llama.cpp under `tools/` (the pinned b10355 tree stays untouched), same model and placements, llama-bench protocol identical to the native grid. A/B only; no migration of the reference setup.
+**Setup.** Clone at HEAD 981e5ea (2026-08-13), gitignored `tools/ik_llama.cpp/`; MSVC + CUDA 13.3 sm_86 build via `tools/build-scripts/configure-ik.bat` / `build-ik.bat`. Support verified in source before building: gpt-oss architecture, MXFP4 CUDA kernels, `--n-cpu-moe`. Harness `experiments/gpt_oss/ik_ab.py`: placements (0,0)/(24,24)/(24,10), 2 rounds, engine order alternating per round, model page cache re-warmed per arm, identical llama-bench protocol (`-p 128 -n 32 -r 3`).
 
-**Decision rule.** A sustained ≥10% generation advantage at equal placement earns a follow-up full grid; otherwise recorded as parity/negative and closed.
+**Measurement (`results/gpt-oss/ik-ab-*.json` + manifest).** Generation: ik loses at every placement, in every round — (0,0) 8.76 vs 14.32 (−39%), (24,24) 10.02 vs 21.75 (−54%), (24,10) 20.69 vs 40.68 (−49%). pp: ik 72–73 at (0,0)/(24,24) vs mainline 148–156; (24,10) overlaps only because mainline pp went bimodal again (135.61 vs 207.83) against ik's stable 158.
+
+**Verdict: closed, negative — and not close; no follow-up grid.** The fork's reported CPU advantages do not materialize for MXFP4 MoE experts on this box. Scope boundary, recorded honestly: this tests the MXFP4 regime only; ik's reputation rests on its IQ-quant CPU kernels, untested here. If experiment 4 lands an IQ2-class cold tail, a mainline-vs-ik runtime A/B on the hybrid GGUF belongs to that experiment's speed gate. Both engines ran as-shipped defaults.
 
 ## 4 — Trace-guided mixed-precision experts (QUEUED)
 
@@ -59,4 +61,4 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Verdict: real but narrow — a per-workload flag, not a roofline mover.** +9.9% at 60% acceptance is genuine free speed, but only on highly repetitive/structured output (code, tables, templates); verification is exact so it is lossless, and a non-firing mode costs ~0.4%. The mechanism (literal n-gram lookup) implies the gain shrinks on open-ended prose — not separately measured, and it does not touch the bandwidth wall (accepted tokens still re-read the same experts in the verify pass). Recorded as a usable per-workload option (`--spec-type ngram-simple`), carried into the 120b protocol as the code-workload variant; no further bench rounds on the 20b.
 
-Experiments 2 and 3 are independent secondary setups. Experiment 4 depends on 3 only if stock `llama-quantize` cannot express the per-expert split (ik's per-tensor control is the fallback).
+Experiments 2 and 3 are independent secondary setups. Experiment 4 no longer depends on 3: stock b10355 `llama-quantize` already has per-tensor control (`--tensor-type name=ggml_type`, repeatable; `--tensor-type-file` for long lists), verified 2026-08-14. One hard constraint discovered: GGUF stores experts packed per layer (`blk.N.ffn_*_exps.weight`, one type per tensor), so per-expert-within-layer precision is inexpressible in any ggml engine without a fork; experiment 4 operates at per-layer granularity (trace-driven hot/cold layer split, or GGUF-level transplant of whole packed tensors between two official quants — which also avoids the `--allow-requantize` quality warning, since no high-precision source exists locally).

@@ -1,0 +1,2 @@
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 3070 Ti, compute capability 8.6, VMM: yes, VRAM: 8191 MiB

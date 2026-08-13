@@ -1,0 +1,17 @@
+{
+ "experiment": "next-experiments.md #3: ik_llama.cpp vs mainline b10355",
+ "model": "gpt-oss-20b-MXFP4.gguf",
+ "protocol": "-p 128 -n 32 -r 3, arms alternating per round, cache re-warmed per arm",
+ "engines": {
+  "mainline": "C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\llama.cpp-b10355\\llama-bench.exe",
+  "ik": "C:\\Users\\yassi\\Documents\\code\\BeyondVram\\tools\\ik_llama.cpp\\build\\bin\\llama-bench.exe"
+ },
+ "ik_commit": "981e5ea0d7579b4803c86afbb09a7cd7d7bf3bb8",
+ "rounds": 2,
+ "placements": [
+  "cpu00",
+  "moe24",
+  "moe10"
+ ],
+ "written": "2026-08-14 01:36 +0200"
+}
