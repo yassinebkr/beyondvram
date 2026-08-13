@@ -5,6 +5,9 @@ models/*
 tools/llama.cpp-b10355/
 tools/llama.cpp-source/
 tools/llama-moe-cache/
+tools/wsl2-ab/vhdx/
+tools/wsl2-ab/*.tar.gz
+tools/wsl2-ab/*.zip
 results/real_layer/
 results/*.zip
 

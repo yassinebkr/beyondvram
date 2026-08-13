@@ -78,6 +78,9 @@ tools/llama.cpp-b10355/ Unmodified b10355 release binaries (baseline + parity re
 tools/llama-moe-cache/  Gitignored FATE-fork clone (commit 77c8767, AGPL-3.0) for the claim
                         check; local patches at results/moe-locality/fate-repro/fork-patches.patch;
                         rebuild with MSYS2_ARG_CONV_EXCL="*" cmd /c "tools\build-scripts\build-fate.bat"
+tools/wsl2-ab/          WSL2 secondary-testbench A/B scripts (ab_paired.sh, ab_hybrid.sh);
+                        vhdx/ and tarballs are gitignored; the WSL2 distro is a test bench
+                        only, never a replacement for the native Windows b10355 reference
 tests/                 Pytest suite: fixture, rows, timeline, checksums, Windows I/O adapter
 src/                   Empty placeholder for future work
 ```

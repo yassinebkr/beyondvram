@@ -1,0 +1,10 @@
+== uname ==
+Linux Anwender 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+== free ==
+               total        used        free      shared  buff/cache   available
+Mem:           24033         534       23542           2         203       23498
+Swap:           6144           0        6144
+== cpuinfo model ==
+model name	: AMD Ryzen 5 5600X 6-Core Processor
+== date ==
+2026-08-13T22:24:01Z

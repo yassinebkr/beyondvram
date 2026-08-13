@@ -1,0 +1,12 @@
+6bc2cde3930ad088b3bb46fa45279e96d25bc3810f209850ecbe4722711874f9 *ubuntu-base-24.04.3-base-amd64.tar.gz
+7b2dced6dd56ad5e4a813fa25c8de307b655fdabc6ea9213175a92c48dabb048 *ubuntu-base-24.04.3-base-arm64.tar.gz
+747909a2f81d816fc6252f076757fcf6bd75a55f848a1c049ee79c0e88c0b9a0 *ubuntu-base-24.04.3-base-armhf.tar.gz
+9e0820411207fbc014c656f3dc6d13bc565a792fb10e394d06f1c1671f982d8d *ubuntu-base-24.04.3-base-ppc64el.tar.gz
+ba3f7d2a887d303454559b08103b2e96a09b037dabc0e339884bb6d9e8b95d00 *ubuntu-base-24.04.3-base-riscv64.tar.gz
+00abc81458f9740126cdf98ba9d04cae55ffa60a18dc2a54b88365d617e0ae9b *ubuntu-base-24.04.3-base-s390x.tar.gz
+c1e67ef7b17a6300e136118bd1dc04725009cb376c1aad10abcf8cd453628d58 *ubuntu-base-24.04.4-base-amd64.tar.gz
+04207713ece899c3740823d33690441ad3a7f0ded1101aca744e2b0f37ac7ff2 *ubuntu-base-24.04.4-base-arm64.tar.gz
+991520b47f6586f38a78505cf016e300b6191bb8ff86a0723481ec23a37ab7f4 *ubuntu-base-24.04.4-base-armhf.tar.gz
+707f06abf5ccd204ae899dc93b2f256f4bac957a6eaa81a1403cfdd0be6acded *ubuntu-base-24.04.4-base-ppc64el.tar.gz
+1b3cdb6a9c2370491584313b79e35838eaec0ec6a8d6b67f3ffff578c34cce2d *ubuntu-base-24.04.4-base-riscv64.tar.gz
+5f7923c9176ba8c0103267081b7f0efd5ab4db3b3e7d9dbe6e01e9edabfce6f6 *ubuntu-base-24.04.4-base-s390x.tar.gz

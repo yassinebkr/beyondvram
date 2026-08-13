@@ -95,35 +95,66 @@ def main() -> None:
         tag = sys.argv[sys.argv.index("--tag") + 1]
         out = OUT_DIR / f"speculative-bench-{tag}.json"
     records = []
-    for name, extra in configs:
-        print(f"[server] {name}", flush=True)
-        log_path = OUT_DIR / f"spec-server-{name}.log"
-        proc = start_server(extra, log_path)
-        if proc is None:
-            records.append({"config": name, "status": "server_died",
-                            "log": log_path.name})
-            print(f"  server died at startup; see {log_path.name}", flush=True)
-            continue
-        try:
-            for rep in range(reps):
-                result = completion()
-                timings = result.get("timings", {})
-                record = {"config": name, "rep": rep, "status": "ok",
-                          "predicted_per_second": timings.get("predicted_per_second"),
-                          "prompt_per_second": timings.get("prompt_per_second"),
-                          "timings": timings}
-                records.append(record)
-                print(f"  rep{rep}: gen={timings.get('predicted_per_second')} tok/s", flush=True)
-        finally:
-            proc.terminate()
-            proc.wait(timeout=30)
+    if "--interleave" in sys.argv:
+        # Rep-outer / config-inner with alternating order, one server lifetime
+        # per arm: pure-CPU llama-bench showed ~15% session-level drift on this
+        # machine (docs/next-experiments.md), so config-outer batching aliases
+        # drift into the config effect. Interleaving cancels it.
+        for rep in range(reps):
+            order = configs if rep % 2 == 0 else list(reversed(configs))
+            for name, extra in order:
+                print(f"[server] {name} rep{rep}", flush=True)
+                log_path = OUT_DIR / f"spec-server-{name}-rep{rep}.log"
+                proc = start_server(extra, log_path)
+                if proc is None:
+                    records.append({"config": name, "rep": rep, "status": "server_died",
+                                    "log": log_path.name})
+                    print(f"  server died at startup; see {log_path.name}", flush=True)
+                    continue
+                try:
+                    result = completion()
+                    timings = result.get("timings", {})
+                    records.append({"config": name, "rep": rep, "status": "ok",
+                                    "predicted_per_second": timings.get("predicted_per_second"),
+                                    "prompt_per_second": timings.get("prompt_per_second"),
+                                    "timings": timings})
+                    print(f"  rep{rep}: gen={timings.get('predicted_per_second')} tok/s", flush=True)
+                finally:
+                    proc.terminate()
+                    proc.wait(timeout=30)
+    else:
+        for name, extra in configs:
+            print(f"[server] {name}", flush=True)
+            log_path = OUT_DIR / f"spec-server-{name}.log"
+            proc = start_server(extra, log_path)
+            if proc is None:
+                records.append({"config": name, "status": "server_died",
+                                "log": log_path.name})
+                print(f"  server died at startup; see {log_path.name}", flush=True)
+                continue
+            try:
+                for rep in range(reps):
+                    result = completion()
+                    timings = result.get("timings", {})
+                    record = {"config": name, "rep": rep, "status": "ok",
+                              "predicted_per_second": timings.get("predicted_per_second"),
+                              "prompt_per_second": timings.get("prompt_per_second"),
+                              "timings": timings}
+                    records.append(record)
+                    print(f"  rep{rep}: gen={timings.get('predicted_per_second')} tok/s", flush=True)
+            finally:
+                proc.terminate()
+                proc.wait(timeout=30)
 
     payload = {
         "server": "llama-server b10355 (unmodified)",
         "model": MODEL.name, "draft": DRAFT.name,
         "placement": "-ngl 24 --n-cpu-moe 10 (measured optimum)",
         "prompt": PROMPT, "n_predict": N_PREDICT, "reps": reps,
-        "protocol": "rep 0 is warmup (kept, excluded from summary); greedy, seed 42",
+        "protocol": ("rep 0 is warmup (kept, excluded from summary); greedy, seed 42"
+                     + ("; arms interleaved rep-outer, alternating order (drift-canceling)"
+                        if "--interleave" in sys.argv else
+                        "; config-outer batching (pre-drift-discovery protocol)")),
         "expectation": "weak-to-negative per Track-1 (29.0 vs 29.5) and the survey (-19% to +2% on CPU-expert rigs)",
         "records": records,
     }

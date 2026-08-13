@@ -1,6 +1,6 @@
 # Next experiments: the post-Track-4 program
 
-Status: **active** (opened 2026-08-13). Experiment 1 done (no bandwidth headroom); 2–5 queued.
+Status: **active** (opened 2026-08-13). Experiments 1 (no bandwidth headroom) and 2 (WSL2: no advantage — native stays host) done; 3–5 queued.
 Owner directive: every alternative environment below is a **secondary/testing setup** — nothing replaces the native Windows 11 + b10355 reference environment, and every comparison is measured against the same-configuration native baseline.
 
 ## Why these five
@@ -15,13 +15,23 @@ Tracks 1–4 measured their way to the walls: dense streaming is storage-bound, 
 
 **Verdict: no headroom; ~26.6 GB/s stands as the machine constant.** (24,24) is flat at 19.3–19.7 tok/s for `-t 4/6/8` and degrades to 17.7–17.9 at `-t 10/12`; (24,10) peaks at `-t 6` (41.78) — the llama.cpp default thread count — and degrades beyond (32.2–35.2 at `-t 8–12`). No configuration beats the defaults: the CPU expert path is saturated at the practical read ceiling, and SMT contention only subtracts. "Optimize the CPU read path" ideas are dead on this box; the roofline constant needs no revision. Practical note: never run llama.cpp with `-t 12` here — it costs 15–25%.
 
-## 2 — WSL2 OS-tax A/B (QUEUED, secondary setup)
+## Cross-cutting: session drift (found 2026-08-13)
+
+Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/s in the placement-grid session and 13.15 ± 0.56 in a later same-day recheck — a ~15% swing with no config change (a resident WSL VM holding 24 GB may have contributed to the recheck value). Consequence: any claimed effect smaller than ~15% is invisible to cross-session comparisons. All A/B designs in this program interleave arms within one session (alternating order), warm the page cache before each arm, and stop the WSL VM before native arms. The Track-4 EAGLE-3 +5.7% verdict was measured config-outer (not interleaved) and is provisional until the interleaved re-run. The experiment-1 thread sweep ran sequentially within one session; its non-monotone shape (`-t 6` > `-t 4` at (24,10)) argues against drift aliasing, and its conclusions stand.
+
+## 2 — WSL2 OS-tax A/B (DONE 2026-08-14: no WSL2 advantage — native stays host)
 
 **Question.** The survey cites a 15–25% same-hardware llama.cpp advantage for Linux over Windows. Is it real on this machine, for this workload?
 
-**Protocol.** Identical model (gpt-oss-20b MXFP4), identical placements (24,24) and (24,10), identical llama-bench protocol, 3+ repetitions, native Windows vs WSL2 CUDA (same llama.cpp revision built inside WSL). Record vmmem dynamics and clock state alongside; WSL2 memory management can distort RAM-bound workloads, which is itself a finding.
+**Setup (done).** Dedicated secondary distro `BeyondVRAM-Test` (ubuntu-base 24.04.4 rootfs, `wsl --import`, root-only) — the pre-existing docker-desktop distro untouched. `C:\Users\yassi\.wslconfig` created (none existed before): `memory=24GB` so the 12.1 GB GGUF stays page-cache-resident, `processors=12` — global WSL2 settings, delete the file to restore defaults. (Note: a unitless `memory=24576` value broke VM creation — units are mandatory.) Model copied into the ext4 vhdx (9P-mounted model reads would poison the benchmark); scripts in `tools/wsl2-ab/`.
 
-**Decision rule.** A sustained ≥10% advantage makes WSL2 the benchmarking host for the 120b base experiment; parity or worse closes it. The native Windows setup remains the reference either way.
+**First signal (2026-08-13), superseded the same day by the drift discovery.** Official b10355 ubuntu-x64 CPU-only release inside WSL2 vs the grid-era native baseline measured tg 13.63 ± 0.35 vs 15.57 ± 0.13 (−12.5%) and pp 41.94 vs 157.96 (−73%). A fresh native recheck then landed at tg 13.15 ± 0.56 — the native baseline itself had drifted ~15% between sessions (see "Cross-cutting: session drift"), invalidating that comparison. The paired interleaved A/Bs below replace it.
+
+**Paired pure-CPU A/B** (`tools/wsl2-ab/ab_paired.sh` → `results/gpt-oss/ab2-cpu00-*.json`; native official CI binary vs official ubuntu-x64 CPU release, `-t 6` both, arms alternating in one session, VM stopped before native arms, page cache warmed). tg: native 13.95/15.09/15.42 vs WSL 13.35/14.94 (plus a 14.07 repeat) — per-round deltas −1.0 to −8.8%, near parity with a slight WSL deficit, both arms drifting up together within the session (pairing was necessary). pp: WSL 34.91–43.47 vs native 147.25–157.69 — a stable 3.5–4.3× WSL deficit, thread-count-independent (`-t 12` inside WSL: pp 47.70, tg 10.67 — the native `-t 12` penalty reproduces in the VM). A forced-zen4 backend load test ruled out a CPU-variant dispatch artifact: the zen4 build refuses to load on this Zen 3 (sse42 fallback), so haswell was the correct dispatch on both OSes. The pp pathology survives pairing — real, unexplained (suspected vCPU scheduling/spin-wait interaction), not pursued further: WSL is a test bench, not a target.
+
+**Paired hybrid CUDA A/B** (`tools/wsl2-ab/ab_hybrid.sh` → `results/gpt-oss/ab3-*.json`; native official CUDA CI binary vs in-VM gcc build of the same pinned commit dd1ea52, `-DGGML_CUDA=ON` sm_86; rounds a/b at placements (24,24) and (24,10), VM stop + cache warm between arms). In-VM CUDA verified live: `ggml_cuda_init` finds the 3070 Ti, and hybrid tg lands ~2.5× above pure-CPU. Generation: **WSL slower in all four round pairs** — (24,24) 21.21 vs 22.96 (−7.6%), (24,10) 37.94 vs 41.72 (−9.1%). Prompt processing inverts the sign: WSL +35% at (24,24) (196.7 vs 145.7) and a stable 310–347 at (24,10) where native went bimodal across rounds (149.66 vs 293.72) — consistent with lower Linux driver overhead vs WDDM launch/sync on the GPU-fed path.
+
+**Verdict: closed — native Windows stays the benchmarking and reference host.** The cited 15–25% Linux advantage does not reproduce on this box for this workload; the sign flips per phase (Linux wins GPU-fed pp, loses memory-bound tg by 7.6–9.1%, loses CPU-only pp 3.5–4.3×). The 120b base experiment is tg-dominated with all experts on CPU — precisely the phase where WSL2 pays its hypervisor tax — so the plan is unchanged. Caveats: arms compare the stacks as shipped (MSVC CI binary vs gcc source build — compiler not isolated from OS); native (24,24) tg this session (22.96) ran ~9% above the grid-era 21.00 ± 1.09 — pairing within one session, not cross-session comparison, is what makes the deltas readable at all.
 
 ## 3 — ik_llama.cpp engine A/B (QUEUED, secondary setup)
 
@@ -49,6 +59,4 @@ Tracks 1–4 measured their way to the walls: dense streaming is storage-bound, 
 
 **Decision rule.** <EAGLE-3's +5.7% closes it; >10% on realistic workloads earns a variant bench at the (24,10) optimum.
 
-## Sequencing
-
-1 runs now (pure measurement). 2 and 3 are independent secondary setups; 4 depends on 3 only if stock `llama-quantize` proves unable to express the split (ik's per-tensor control is the fallback); 5 folds into whichever bench runs next. Each lands with raw results, a doc verdict, and a commit — negative results are recorded, not dropped.
+Experiments 2 and 3 are independent secondary setups. Experiment 4 depends on 3 only if stock `llama-quantize` cannot express the per-expert split (ik's per-tensor control is the fallback).
