@@ -4,7 +4,7 @@
 
 BeyondVRAM is a measurement-first consumer-hardware LLM research workspace. Its first dense `NVMe -> RAM -> pinned staging -> VRAM` streaming track is archived: it established correctness but was storage-bound and not competitive with a practical llama.cpp Q4 baseline on this hardware. See `docs/archive-dense-streaming.md` before proposing work in that archived direction.
 
-Track 1 (MoE expert locality) is **closed**: expert-routing locality measured (strong), and all four beyond-stock speedups measured **negative** — sync expert cache (19.67 baseline vs 18.73/15.04 tok/s), async predictive prefetch (predictor structurally vacuous), frequency-static residency (VRAM-capped), and speculative decoding (29.0 vs 29.5 tok/s). Practical optimum: `-ngl 48 --n-cpu-moe 33` at ~33–35 tok/s. See `docs/moe-track-plan.md` before proposing MoE work.
+Track 1 (MoE expert locality) is **closed**: expert-routing locality measured (strong), and all four beyond-stock speedups measured **negative** — sync expert cache (19.67 baseline vs 18.73/15.04 tok/s), async predictive prefetch (predictor structurally vacuous), frequency-static residency (VRAM-capped), and speculative decoding (29.0 vs 29.5 tok/s). Practical optimum: `-ngl 48 --n-cpu-moe 33` at ~33–35 tok/s. A post-closure external-claim check (ongunm/llama-moe-cache FATE fork, claiming 33.74→64.45 tok/s) was measured **non-reproducible**: corrupt output as shipped (staging race), and 4.05 vs 27.08 tok/s at 54% pool-size-invariant hit once corrected — the same reactive-routing wall on an independent implementation. See `docs/moe-track-plan.md` before proposing MoE work.
 
 Track 2 (dense RAM-resident partial offload) has its **baseline**: dense Qwen3-32B Q4_K_M peaks at ~2.7 generation tok/s (ngl 22) — ~12× slower than the Track-1 MoE at similar total size, confirming sparse activation beats dense weights by an order of magnitude on this RAM-bound machine. See `docs/track2-dense-offload.md`.
 
@@ -16,7 +16,7 @@ The project remains **measurement-first**. No custom inference engine is selecte
 - `docs/system-characterization.md` — what the B01–B06 system benchmarks measure, results so far, and interpretation rules.
 - `docs/model-selection.md` — the Qwen3-8B baseline decision (Q09), candidates considered, and derived layer byte sizes for the overlap experiment.
 - `docs/archive-dense-streaming.md` — closure rationale and preserved evidence for the archived first track.
-- `docs/moe-track-plan.md` — Track 1 closure: expert-locality measurements, negative cache PoC, best MoE placement.
+- `docs/moe-track-plan.md` — Track 1 closure: expert-locality measurements, negative cache PoC, best MoE placement, FATE-fork claim non-reproduction.
 - `docs/track2-dense-offload.md` — Track 2 baseline: dense Qwen3-32B sweep and the dense-vs-MoE comparison.
 - `docs/track3-low-bit.md` — Track 3 baseline: low-bit quants, BitNet compatibility boundary, quality/speed frontier.
 - `benchmarks/system/README.md` — how to run the characterization suite.
@@ -47,20 +47,25 @@ experiments/moe_trace/  MoE expert-locality track: run_traces.py (10-prompt capt
                         measure_cache_poc.py (cache on/off perf comparison),
                         placement_grid.py (decoupled -ngl x --n-cpu-moe sweep),
                         prefetch_simulation.py (predictor hit-rate sim),
-                        speculative_bench.py (llama-server draft vs no-draft)
+                        speculative_bench.py (llama-server draft vs no-draft),
+                        fate_repro.py (FATE-fork claim check; --reparse rebuilds JSON from raw logs)
 experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl sweep)
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
 results/track2-dense/   Dense 32B placement sweep results
 results/track3-low-bit/ Low-bit bench + perplexity results and the fixed corpus
-models/                 Local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, BitNet)
+models/                 Local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, BitNet, gpt-oss-20b)
 results/moe-locality/   Raw expert traces (trace-*.jsonl), generated text, parity outputs,
                         locality-analysis.json, cache-cost-model.json, moe-cache-poc.json,
-                        cache-stats-*.json, moe-cache-poc.patch + moe-cache-new-files/
+                        cache-stats-*.json, moe-cache-poc.patch + moe-cache-new-files/,
+                        fate-repro/ (FATE-fork matrix, per-rep logs, fork-patches.patch)
 tools/build-scripts/    Native build helpers (configure-trace-build.bat, build-trace.bat,
-                        kill-stale-llama.ps1)
+                        build-fate.bat, kill-stale-llama.ps1)
 tools/llama.cpp-source/ llama.cpp pinned at dd1ea52 (b10355) + additive moe-trace example,
                         moe-cache PoC (env-gated, LLAMA_MOE_CACHE unset = stock behavior)
 tools/llama.cpp-b10355/ Unmodified b10355 release binaries (baseline + parity reference)
+tools/llama-moe-cache/  Gitignored FATE-fork clone (commit 77c8767, AGPL-3.0) for the claim
+                        check; local patches at results/moe-locality/fate-repro/fork-patches.patch;
+                        rebuild with MSYS2_ARG_CONV_EXCL="*" cmd /c "tools\build-scripts\build-fate.bat"
 tests/                 Pytest suite: fixture, rows, timeline, checksums, Windows I/O adapter
 src/                   Empty placeholder for future work
 ```

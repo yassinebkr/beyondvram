@@ -1,0 +1,1348 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 8191 MiB):
+  Device 0: NVIDIA GeForce RTX 3070 Ti, compute capability 8.6, VMM: yes, VRAM: 8191 MiB
+main: llama backend init
+main: load the model and apply lora adapter, if any
+common_init_result: fitting params to device memory, for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on
+llama_params_fit_impl: projected to use 4925 MiB of device memory vs. 7109 MiB of free device memory
+llama_params_fit_impl: will leave 2183 >= 1024 MiB of free device memory, no changes needed
+llama_params_fit: successfully fit params to free device memory
+llama_params_fit: fitting params to free memory took 0.34 seconds
+llama_model_load_from_file_impl: using device CUDA0 (NVIDIA GeForce RTX 3070 Ti) (0000:2b:00.0) - 7109 MiB free
+llama_model_loader: loaded meta data with 31 key-value pairs and 579 tensors from models/Qwen3-30B-A3B-GGUF/Qwen3-30B-A3B-Q4_K_M.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = qwen3moe
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Qwen3 30B Gptq Fp16
+llama_model_loader: - kv   3:                           general.finetune str              = gptq
+llama_model_loader: - kv   4:                           general.basename str              = Qwen3
+llama_model_loader: - kv   5:                         general.size_label str              = 30B
+llama_model_loader: - kv   6:                       qwen3moe.block_count u32              = 48
+llama_model_loader: - kv   7:                    qwen3moe.context_length u32              = 40960
+llama_model_loader: - kv   8:                  qwen3moe.embedding_length u32              = 2048
+llama_model_loader: - kv   9:               qwen3moe.feed_forward_length u32              = 6144
+llama_model_loader: - kv  10:              qwen3moe.attention.head_count u32              = 32
+llama_model_loader: - kv  11:           qwen3moe.attention.head_count_kv u32              = 4
+llama_model_loader: - kv  12:                    qwen3moe.rope.freq_base f32              = 1000000.000000
+llama_model_loader: - kv  13:  qwen3moe.attention.layer_norm_rms_epsilon f32              = 0.000001
+llama_model_loader: - kv  14:                 qwen3moe.expert_used_count u32              = 8
+llama_model_loader: - kv  15:              qwen3moe.attention.key_length u32              = 128
+llama_model_loader: - kv  16:            qwen3moe.attention.value_length u32              = 128
+llama_model_loader: - kv  17:                      qwen3moe.expert_count u32              = 128
+llama_model_loader: - kv  18:        qwen3moe.expert_feed_forward_length u32              = 768
+llama_model_loader: - kv  19:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  20:                         tokenizer.ggml.pre str              = qwen2
+llama_model_loader: - kv  21:                      tokenizer.ggml.tokens arr[str,151936]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  22:                  tokenizer.ggml.token_type arr[i32,151936]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  23:                      tokenizer.ggml.merges arr[str,151387]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+llama_model_loader: - kv  24:                tokenizer.ggml.eos_token_id u32              = 151645
+llama_model_loader: - kv  25:            tokenizer.ggml.padding_token_id u32              = 151643
+llama_model_loader: - kv  26:                tokenizer.ggml.bos_token_id u32              = 151643
+llama_model_loader: - kv  27:               tokenizer.ggml.add_bos_token bool             = false
+llama_model_loader: - kv  28:                    tokenizer.chat_template str              = {%- if tools %}\n    {{- '<|im_start|>...
+llama_model_loader: - kv  29:               general.quantization_version u32              = 2
+llama_model_loader: - kv  30:                          general.file_type u32              = 15
+llama_model_loader: - type  f32:  241 tensors
+llama_model_loader: - type q4_K:  289 tensors
+llama_model_loader: - type q6_K:   49 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = Q4_K - Medium
+print_info: file size   = 17.28 GiB (4.86 BPW) 
+load: 0 unused tokens
+load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+load: printing all EOG tokens:
+load:   - 128247 ('</s>')
+load:   - 151643 ('<|endoftext|>')
+load:   - 151645 ('<|im_end|>')
+load:   - 151662 ('<|fim_pad|>')
+load:   - 151663 ('<|repo_name|>')
+load:   - 151664 ('<|file_sep|>')
+load: special tokens cache size = 27
+load: token to piece cache size = 0.9311 MB
+print_info: arch                  = qwen3moe
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 40960
+print_info: n_embd                = 2048
+print_info: n_embd_inp            = 2048
+print_info: n_layer               = 48
+print_info: n_head                = 32
+print_info: n_head_kv             = 4
+print_info: n_rot                 = 128
+print_info: n_swa                 = 0
+print_info: is_swa_any            = 0
+print_info: n_embd_head_k         = 128
+print_info: n_embd_head_v         = 128
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-06
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 6144
+print_info: n_expert              = 128
+print_info: n_expert_used         = 8
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = -1
+print_info: rope type             = 2
+print_info: rope scaling          = linear
+print_info: freq_base_train       = 1000000.0
+print_info: freq_scale_train      = 1
+print_info: n_ctx_orig_yarn       = 40960
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 30B.A3B
+print_info: model params          = 30.53 B
+print_info: general.name          = Qwen3 30B Gptq Fp16
+print_info: n_ff_exp              = 768
+print_info: vocab type            = BPE
+print_info: n_vocab               = 151936
+print_info: n_merges              = 151387
+print_info: BOS token             = 151643 '<|endoftext|>'
+print_info: EOS token             = 151645 '<|im_end|>'
+print_info: EOT token             = 151645 '<|im_end|>'
+print_info: PAD token             = 151643 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: FIM PRE token         = 151659 '<|fim_prefix|>'
+print_info: FIM SUF token         = 151661 '<|fim_suffix|>'
+print_info: FIM MID token         = 151660 '<|fim_middle|>'
+print_info: FIM PAD token         = 151662 '<|fim_pad|>'
+print_info: FIM REP token         = 151663 '<|repo_name|>'
+print_info: FIM SEP token         = 151664 '<|file_sep|>'
+print_info: EOG token             = 128247 '</s>'
+print_info: EOG token             = 151643 '<|endoftext|>'
+print_info: EOG token             = 151645 '<|im_end|>'
+print_info: EOG token             = 151662 '<|fim_pad|>'
+print_info: EOG token             = 151663 '<|repo_name|>'
+print_info: EOG token             = 151664 '<|file_sep|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = false, direct_io = false)
+load_tensors: offloading output layer to GPU
+load_tensors: offloading 47 repeating layers to GPU
+load_tensors: offloaded 49/49 layers to GPU
+load_tensors:          CPU model buffer size =   166.92 MiB
+load_tensors:        CUDA0 model buffer size =   784.42 MiB
+load_tensors:          CPU model buffer size = 16740.00 MiB
+SETDBG #1 output_norm.weight dst=0000000B08800000 off=0 src=0000000204C00000 n=8192
+SETDBG #2 output.weight dst=0000000B08802000 off=0 src=0000000204D00000 n=1048576
+SETDBG #3 output.weight dst=0000000B08802000 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #4 output.weight dst=0000000B08802000 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #5 output.weight dst=0000000B08802000 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #6 output.weight dst=0000000B08802000 off=4194304 src=0000000204D00000 n=1048576
+SETDBG #7 output.weight dst=0000000B08802000 off=5242880 src=0000000204E00000 n=1048576
+SETDBG #8 output.weight dst=0000000B08802000 off=6291456 src=0000000204F00000 n=1048576
+SETDBG #9 output.weight dst=0000000B08802000 off=7340032 src=0000000204C00000 n=1048576
+SETDBG #10 output.weight dst=0000000B08802000 off=8388608 src=0000000204D00000 n=1048576
+SETDBG #11 output.weight dst=0000000B08802000 off=9437184 src=0000000204E00000 n=1048576
+SETDBG #12 output.weight dst=0000000B08802000 off=10485760 src=0000000204F00000 n=1048576
+SETDBG #13 output.weight dst=0000000B08802000 off=11534336 src=0000000204C00000 n=1048576
+SETDBG #14 output.weight dst=0000000B08802000 off=12582912 src=0000000204D00000 n=1048576
+SETDBG #15 output.weight dst=0000000B08802000 off=13631488 src=0000000204E00000 n=1048576
+SETDBG #16 output.weight dst=0000000B08802000 off=14680064 src=0000000204F00000 n=1048576
+SETDBG #17 output.weight dst=0000000B08802000 off=15728640 src=0000000204C00000 n=1048576
+SETDBG #18 output.weight dst=0000000B08802000 off=16777216 src=0000000204D00000 n=1048576
+SETDBG #19 output.weight dst=0000000B08802000 off=17825792 src=0000000204E00000 n=1048576
+SETDBG #20 output.weight dst=0000000B08802000 off=18874368 src=0000000204F00000 n=1048576
+SETDBG #21 output.weight dst=0000000B08802000 off=19922944 src=0000000204C00000 n=1048576
+SETDBG #22 output.weight dst=0000000B08802000 off=20971520 src=0000000204D00000 n=1048576
+SETDBG #23 output.weight dst=0000000B08802000 off=22020096 src=0000000204E00000 n=1048576
+SETDBG #24 output.weight dst=0000000B08802000 off=23068672 src=0000000204F00000 n=1048576
+SETDBG #25 output.weight dst=0000000B08802000 off=24117248 src=0000000204C00000 n=1048576
+SETDBG #26 output.weight dst=0000000B08802000 off=25165824 src=0000000204D00000 n=1048576
+SETDBG #27 output.weight dst=0000000B08802000 off=26214400 src=0000000204E00000 n=1048576
+SETDBG #28 output.weight dst=0000000B08802000 off=27262976 src=0000000204F00000 n=1048576
+SETDBG #29 output.weight dst=0000000B08802000 off=28311552 src=0000000204C00000 n=1048576
+SETDBG #30 output.weight dst=0000000B08802000 off=29360128 src=0000000204D00000 n=1048576
+SETDBG #31 output.weight dst=0000000B08802000 off=30408704 src=0000000204E00000 n=1048576
+SETDBG #32 output.weight dst=0000000B08802000 off=31457280 src=0000000204F00000 n=1048576
+SETDBG #33 output.weight dst=0000000B08802000 off=32505856 src=0000000204C00000 n=1048576
+SETDBG #34 output.weight dst=0000000B08802000 off=33554432 src=0000000204D00000 n=1048576
+SETDBG #35 output.weight dst=0000000B08802000 off=34603008 src=0000000204E00000 n=1048576
+SETDBG #36 output.weight dst=0000000B08802000 off=35651584 src=0000000204F00000 n=1048576
+SETDBG #37 output.weight dst=0000000B08802000 off=36700160 src=0000000204C00000 n=1048576
+SETDBG #38 output.weight dst=0000000B08802000 off=37748736 src=0000000204D00000 n=1048576
+SETDBG #39 output.weight dst=0000000B08802000 off=38797312 src=0000000204E00000 n=1048576
+SETDBG #40 output.weight dst=0000000B08802000 off=39845888 src=0000000204F00000 n=1048576
+SETDBG #41 output.weight dst=0000000B08802000 off=40894464 src=0000000204C00000 n=1048576
+SETDBG #42 output.weight dst=0000000B08802000 off=41943040 src=0000000204D00000 n=1048576
+SETDBG #43 output.weight dst=0000000B08802000 off=42991616 src=0000000204E00000 n=1048576
+SETDBG #44 output.weight dst=0000000B08802000 off=44040192 src=0000000204F00000 n=1048576
+SETDBG #45 output.weight dst=0000000B08802000 off=45088768 src=0000000204C00000 n=1048576
+SETDBG #46 output.weight dst=0000000B08802000 off=46137344 src=0000000204D00000 n=1048576
+SETDBG #47 output.weight dst=0000000B08802000 off=47185920 src=0000000204E00000 n=1048576
+SETDBG #48 output.weight dst=0000000B08802000 off=48234496 src=0000000204F00000 n=1048576
+SETDBG #49 output.weight dst=0000000B08802000 off=49283072 src=0000000204C00000 n=1048576
+SETDBG #50 output.weight dst=0000000B08802000 off=50331648 src=0000000204D00000 n=1048576
+SETDBG #51 output.weight dst=0000000B08802000 off=51380224 src=0000000204E00000 n=1048576
+SETDBG #52 output.weight dst=0000000B08802000 off=52428800 src=0000000204F00000 n=1048576
+SETDBG #53 output.weight dst=0000000B08802000 off=53477376 src=0000000204C00000 n=1048576
+SETDBG #54 output.weight dst=0000000B08802000 off=54525952 src=0000000204D00000 n=1048576
+SETDBG #55 output.weight dst=0000000B08802000 off=55574528 src=0000000204E00000 n=1048576
+SETDBG #56 output.weight dst=0000000B08802000 off=56623104 src=0000000204F00000 n=1048576
+SETDBG #57 output.weight dst=0000000B08802000 off=57671680 src=0000000204C00000 n=1048576
+SETDBG #58 output.weight dst=0000000B08802000 off=58720256 src=0000000204D00000 n=1048576
+SETDBG #59 output.weight dst=0000000B08802000 off=59768832 src=0000000204E00000 n=1048576
+SETDBG #60 output.weight dst=0000000B08802000 off=60817408 src=0000000204F00000 n=1048576
+SETDBG #61 output.weight dst=0000000B08802000 off=61865984 src=0000000204C00000 n=1048576
+SETDBG #62 output.weight dst=0000000B08802000 off=62914560 src=0000000204D00000 n=1048576
+SETDBG #63 output.weight dst=0000000B08802000 off=63963136 src=0000000204E00000 n=1048576
+SETDBG #64 output.weight dst=0000000B08802000 off=65011712 src=0000000204F00000 n=1048576
+SETDBG #65 output.weight dst=0000000B08802000 off=66060288 src=0000000204C00000 n=1048576
+SETDBG #66 output.weight dst=0000000B08802000 off=67108864 src=0000000204D00000 n=1048576
+SETDBG #67 output.weight dst=0000000B08802000 off=68157440 src=0000000204E00000 n=1048576
+SETDBG #68 output.weight dst=0000000B08802000 off=69206016 src=0000000204F00000 n=1048576
+SETDBG #69 output.weight dst=0000000B08802000 off=70254592 src=0000000204C00000 n=1048576
+SETDBG #70 output.weight dst=0000000B08802000 off=71303168 src=0000000204D00000 n=1048576
+SETDBG #71 output.weight dst=0000000B08802000 off=72351744 src=0000000204E00000 n=1048576
+SETDBG #72 output.weight dst=0000000B08802000 off=73400320 src=0000000204F00000 n=1048576
+SETDBG #73 output.weight dst=0000000B08802000 off=74448896 src=0000000204C00000 n=1048576
+SETDBG #74 output.weight dst=0000000B08802000 off=75497472 src=0000000204D00000 n=1048576
+SETDBG #75 output.weight dst=0000000B08802000 off=76546048 src=0000000204E00000 n=1048576
+SETDBG #76 output.weight dst=0000000B08802000 off=77594624 src=0000000204F00000 n=1048576
+SETDBG #77 output.weight dst=0000000B08802000 off=78643200 src=0000000204C00000 n=1048576
+SETDBG #78 output.weight dst=0000000B08802000 off=79691776 src=0000000204D00000 n=1048576
+SETDBG #79 output.weight dst=0000000B08802000 off=80740352 src=0000000204E00000 n=1048576
+SETDBG #80 output.weight dst=0000000B08802000 off=81788928 src=0000000204F00000 n=1048576
+SETDBG #81 output.weight dst=0000000B08802000 off=82837504 src=0000000204C00000 n=1048576
+SETDBG #82 output.weight dst=0000000B08802000 off=83886080 src=0000000204D00000 n=1048576
+SETDBG #83 output.weight dst=0000000B08802000 off=84934656 src=0000000204E00000 n=1048576
+SETDBG #84 output.weight dst=0000000B08802000 off=85983232 src=0000000204F00000 n=1048576
+SETDBG #85 output.weight dst=0000000B08802000 off=87031808 src=0000000204C00000 n=1048576
+SETDBG #86 output.weight dst=0000000B08802000 off=88080384 src=0000000204D00000 n=1048576
+SETDBG #87 output.weight dst=0000000B08802000 off=89128960 src=0000000204E00000 n=1048576
+SETDBG #88 output.weight dst=0000000B08802000 off=90177536 src=0000000204F00000 n=1048576
+SETDBG #89 output.weight dst=0000000B08802000 off=91226112 src=0000000204C00000 n=1048576
+SETDBG #90 output.weight dst=0000000B08802000 off=92274688 src=0000000204D00000 n=1048576
+SETDBG #91 output.weight dst=0000000B08802000 off=93323264 src=0000000204E00000 n=1048576
+SETDBG #92 output.weight dst=0000000B08802000 off=94371840 src=0000000204F00000 n=1048576
+SETDBG #93 output.weight dst=0000000B08802000 off=95420416 src=0000000204C00000 n=1048576
+SETDBG #94 output.weight dst=0000000B08802000 off=96468992 src=0000000204D00000 n=1048576
+SETDBG #95 output.weight dst=0000000B08802000 off=97517568 src=0000000204E00000 n=1048576
+SETDBG #96 output.weight dst=0000000B08802000 off=98566144 src=0000000204F00000 n=1048576
+SETDBG #97 output.weight dst=0000000B08802000 off=99614720 src=0000000204C00000 n=1048576
+SETDBG #98 output.weight dst=0000000B08802000 off=100663296 src=0000000204D00000 n=1048576
+SETDBG #99 output.weight dst=0000000B08802000 off=101711872 src=0000000204E00000 n=1048576
+SETDBG #100 output.weight dst=0000000B08802000 off=102760448 src=0000000204F00000 n=1048576
+SETDBG #101 output.weight dst=0000000B08802000 off=103809024 src=0000000204C00000 n=1048576
+SETDBG #102 output.weight dst=0000000B08802000 off=104857600 src=0000000204D00000 n=1048576
+SETDBG #103 output.weight dst=0000000B08802000 off=105906176 src=0000000204E00000 n=1048576
+SETDBG #104 output.weight dst=0000000B08802000 off=106954752 src=0000000204F00000 n=1048576
+SETDBG #105 output.weight dst=0000000B08802000 off=108003328 src=0000000204C00000 n=1048576
+SETDBG #106 output.weight dst=0000000B08802000 off=109051904 src=0000000204D00000 n=1048576
+SETDBG #107 output.weight dst=0000000B08802000 off=110100480 src=0000000204E00000 n=1048576
+SETDBG #108 output.weight dst=0000000B08802000 off=111149056 src=0000000204F00000 n=1048576
+SETDBG #109 output.weight dst=0000000B08802000 off=112197632 src=0000000204C00000 n=1048576
+SETDBG #110 output.weight dst=0000000B08802000 off=113246208 src=0000000204D00000 n=1048576
+SETDBG #111 output.weight dst=0000000B08802000 off=114294784 src=0000000204E00000 n=1048576
+SETDBG #112 output.weight dst=0000000B08802000 off=115343360 src=0000000204F00000 n=1048576
+SETDBG #113 output.weight dst=0000000B08802000 off=116391936 src=0000000204C00000 n=1048576
+SETDBG #114 output.weight dst=0000000B08802000 off=117440512 src=0000000204D00000 n=1048576
+SETDBG #115 output.weight dst=0000000B08802000 off=118489088 src=0000000204E00000 n=1048576
+SETDBG #116 output.weight dst=0000000B08802000 off=119537664 src=0000000204F00000 n=1048576
+SETDBG #117 output.weight dst=0000000B08802000 off=120586240 src=0000000204C00000 n=1048576
+SETDBG #118 output.weight dst=0000000B08802000 off=121634816 src=0000000204D00000 n=1048576
+SETDBG #119 output.weight dst=0000000B08802000 off=122683392 src=0000000204E00000 n=1048576
+SETDBG #120 output.weight dst=0000000B08802000 off=123731968 src=0000000204F00000 n=1048576
+SETDBG #121 output.weight dst=0000000B08802000 off=124780544 src=0000000204C00000 n=1048576
+SETDBG #122 output.weight dst=0000000B08802000 off=125829120 src=0000000204D00000 n=1048576
+SETDBG #123 output.weight dst=0000000B08802000 off=126877696 src=0000000204E00000 n=1048576
+SETDBG #124 output.weight dst=0000000B08802000 off=127926272 src=0000000204F00000 n=1048576
+SETDBG #125 output.weight dst=0000000B08802000 off=128974848 src=0000000204C00000 n=1048576
+SETDBG #126 output.weight dst=0000000B08802000 off=130023424 src=0000000204D00000 n=1048576
+SETDBG #127 output.weight dst=0000000B08802000 off=131072000 src=0000000204E00000 n=1048576
+SETDBG #128 output.weight dst=0000000B08802000 off=132120576 src=0000000204F00000 n=1048576
+SETDBG #129 output.weight dst=0000000B08802000 off=133169152 src=0000000204C00000 n=1048576
+SETDBG #130 output.weight dst=0000000B08802000 off=134217728 src=0000000204D00000 n=1048576
+SETDBG #131 output.weight dst=0000000B08802000 off=135266304 src=0000000204E00000 n=1048576
+SETDBG #132 output.weight dst=0000000B08802000 off=136314880 src=0000000204F00000 n=1048576
+SETDBG #133 output.weight dst=0000000B08802000 off=137363456 src=0000000204C00000 n=1048576
+SETDBG #134 output.weight dst=0000000B08802000 off=138412032 src=0000000204D00000 n=1048576
+SETDBG #135 output.weight dst=0000000B08802000 off=139460608 src=0000000204E00000 n=1048576
+SETDBG #136 output.weight dst=0000000B08802000 off=140509184 src=0000000204F00000 n=1048576
+SETDBG #137 output.weight dst=0000000B08802000 off=141557760 src=0000000204C00000 n=1048576
+SETDBG #138 output.weight dst=0000000B08802000 off=142606336 src=0000000204D00000 n=1048576
+SETDBG #139 output.weight dst=0000000B08802000 off=143654912 src=0000000204E00000 n=1048576
+SETDBG #140 output.weight dst=0000000B08802000 off=144703488 src=0000000204F00000 n=1048576
+SETDBG #141 output.weight dst=0000000B08802000 off=145752064 src=0000000204C00000 n=1048576
+SETDBG #142 output.weight dst=0000000B08802000 off=146800640 src=0000000204D00000 n=1048576
+SETDBG #143 output.weight dst=0000000B08802000 off=147849216 src=0000000204E00000 n=1048576
+SETDBG #144 output.weight dst=0000000B08802000 off=148897792 src=0000000204F00000 n=1048576
+SETDBG #145 output.weight dst=0000000B08802000 off=149946368 src=0000000204C00000 n=1048576
+SETDBG #146 output.weight dst=0000000B08802000 off=150994944 src=0000000204D00000 n=1048576
+SETDBG #147 output.weight dst=0000000B08802000 off=152043520 src=0000000204E00000 n=1048576
+SETDBG #148 output.weight dst=0000000B08802000 off=153092096 src=0000000204F00000 n=1048576
+SETDBG #149 output.weight dst=0000000B08802000 off=154140672 src=0000000204C00000 n=1048576
+SETDBG #150 output.weight dst=0000000B08802000 off=155189248 src=0000000204D00000 n=1048576
+SETDBG #151 output.weight dst=0000000B08802000 off=156237824 src=0000000204E00000 n=1048576
+SETDBG #152 output.weight dst=0000000B08802000 off=157286400 src=0000000204F00000 n=1048576
+SETDBG #153 output.weight dst=0000000B08802000 off=158334976 src=0000000204C00000 n=1048576
+SETDBG #154 output.weight dst=0000000B08802000 off=159383552 src=0000000204D00000 n=1048576
+SETDBG #155 output.weight dst=0000000B08802000 off=160432128 src=0000000204E00000 n=1048576
+SETDBG #156 output.weight dst=0000000B08802000 off=161480704 src=0000000204F00000 n=1048576
+SETDBG #157 output.weight dst=0000000B08802000 off=162529280 src=0000000204C00000 n=1048576
+SETDBG #158 output.weight dst=0000000B08802000 off=163577856 src=0000000204D00000 n=1048576
+SETDBG #159 output.weight dst=0000000B08802000 off=164626432 src=0000000204E00000 n=1048576
+SETDBG #160 output.weight dst=0000000B08802000 off=165675008 src=0000000204F00000 n=1048576
+SETDBG #161 output.weight dst=0000000B08802000 off=166723584 src=0000000204C00000 n=1048576
+SETDBG #162 output.weight dst=0000000B08802000 off=167772160 src=0000000204D00000 n=1048576
+SETDBG #163 output.weight dst=0000000B08802000 off=168820736 src=0000000204E00000 n=1048576
+SETDBG #164 output.weight dst=0000000B08802000 off=169869312 src=0000000204F00000 n=1048576
+SETDBG #165 output.weight dst=0000000B08802000 off=170917888 src=0000000204C00000 n=1048576
+SETDBG #166 output.weight dst=0000000B08802000 off=171966464 src=0000000204D00000 n=1048576
+SETDBG #167 output.weight dst=0000000B08802000 off=173015040 src=0000000204E00000 n=1048576
+SETDBG #168 output.weight dst=0000000B08802000 off=174063616 src=0000000204F00000 n=1048576
+SETDBG #169 output.weight dst=0000000B08802000 off=175112192 src=0000000204C00000 n=1048576
+SETDBG #170 output.weight dst=0000000B08802000 off=176160768 src=0000000204D00000 n=1048576
+SETDBG #171 output.weight dst=0000000B08802000 off=177209344 src=0000000204E00000 n=1048576
+SETDBG #172 output.weight dst=0000000B08802000 off=178257920 src=0000000204F00000 n=1048576
+SETDBG #173 output.weight dst=0000000B08802000 off=179306496 src=0000000204C00000 n=1048576
+SETDBG #174 output.weight dst=0000000B08802000 off=180355072 src=0000000204D00000 n=1048576
+SETDBG #175 output.weight dst=0000000B08802000 off=181403648 src=0000000204E00000 n=1048576
+SETDBG #176 output.weight dst=0000000B08802000 off=182452224 src=0000000204F00000 n=1048576
+SETDBG #177 output.weight dst=0000000B08802000 off=183500800 src=0000000204C00000 n=1048576
+SETDBG #178 output.weight dst=0000000B08802000 off=184549376 src=0000000204D00000 n=1048576
+SETDBG #179 output.weight dst=0000000B08802000 off=185597952 src=0000000204E00000 n=1048576
+SETDBG #180 output.weight dst=0000000B08802000 off=186646528 src=0000000204F00000 n=1048576
+SETDBG #181 output.weight dst=0000000B08802000 off=187695104 src=0000000204C00000 n=1048576
+SETDBG #182 output.weight dst=0000000B08802000 off=188743680 src=0000000204D00000 n=1048576
+SETDBG #183 output.weight dst=0000000B08802000 off=189792256 src=0000000204E00000 n=1048576
+SETDBG #184 output.weight dst=0000000B08802000 off=190840832 src=0000000204F00000 n=1048576
+SETDBG #185 output.weight dst=0000000B08802000 off=191889408 src=0000000204C00000 n=1048576
+SETDBG #186 output.weight dst=0000000B08802000 off=192937984 src=0000000204D00000 n=1048576
+SETDBG #187 output.weight dst=0000000B08802000 off=193986560 src=0000000204E00000 n=1048576
+SETDBG #188 output.weight dst=0000000B08802000 off=195035136 src=0000000204F00000 n=1048576
+SETDBG #189 output.weight dst=0000000B08802000 off=196083712 src=0000000204C00000 n=1048576
+SETDBG #190 output.weight dst=0000000B08802000 off=197132288 src=0000000204D00000 n=1048576
+SETDBG #191 output.weight dst=0000000B08802000 off=198180864 src=0000000204E00000 n=1048576
+SETDBG #192 output.weight dst=0000000B08802000 off=199229440 src=0000000204F00000 n=1048576
+SETDBG #193 output.weight dst=0000000B08802000 off=200278016 src=0000000204C00000 n=1048576
+SETDBG #194 output.weight dst=0000000B08802000 off=201326592 src=0000000204D00000 n=1048576
+SETDBG #195 output.weight dst=0000000B08802000 off=202375168 src=0000000204E00000 n=1048576
+SETDBG #196 output.weight dst=0000000B08802000 off=203423744 src=0000000204F00000 n=1048576
+SETDBG #197 output.weight dst=0000000B08802000 off=204472320 src=0000000204C00000 n=1048576
+SETDBG #198 output.weight dst=0000000B08802000 off=205520896 src=0000000204D00000 n=1048576
+SETDBG #199 output.weight dst=0000000B08802000 off=206569472 src=0000000204E00000 n=1048576
+SETDBG #200 output.weight dst=0000000B08802000 off=207618048 src=0000000204F00000 n=1048576
+SETDBG #201 output.weight dst=0000000B08802000 off=208666624 src=0000000204C00000 n=1048576
+SETDBG #202 output.weight dst=0000000B08802000 off=209715200 src=0000000204D00000 n=1048576
+SETDBG #203 output.weight dst=0000000B08802000 off=210763776 src=0000000204E00000 n=1048576
+SETDBG #204 output.weight dst=0000000B08802000 off=211812352 src=0000000204F00000 n=1048576
+SETDBG #205 output.weight dst=0000000B08802000 off=212860928 src=0000000204C00000 n=1048576
+SETDBG #206 output.weight dst=0000000B08802000 off=213909504 src=0000000204D00000 n=1048576
+SETDBG #207 output.weight dst=0000000B08802000 off=214958080 src=0000000204E00000 n=1048576
+SETDBG #208 output.weight dst=0000000B08802000 off=216006656 src=0000000204F00000 n=1048576
+SETDBG #209 output.weight dst=0000000B08802000 off=217055232 src=0000000204C00000 n=1048576
+SETDBG #210 output.weight dst=0000000B08802000 off=218103808 src=0000000204D00000 n=1048576
+SETDBG #211 output.weight dst=0000000B08802000 off=219152384 src=0000000204E00000 n=1048576
+SETDBG #212 output.weight dst=0000000B08802000 off=220200960 src=0000000204F00000 n=1048576
+SETDBG #213 output.weight dst=0000000B08802000 off=221249536 src=0000000204C00000 n=1048576
+SETDBG #214 output.weight dst=0000000B08802000 off=222298112 src=0000000204D00000 n=1048576
+SETDBG #215 output.weight dst=0000000B08802000 off=223346688 src=0000000204E00000 n=1048576
+SETDBG #216 output.weight dst=0000000B08802000 off=224395264 src=0000000204F00000 n=1048576
+SETDBG #217 output.weight dst=0000000B08802000 off=225443840 src=0000000204C00000 n=1048576
+SETDBG #218 output.weight dst=0000000B08802000 off=226492416 src=0000000204D00000 n=1048576
+SETDBG #219 output.weight dst=0000000B08802000 off=227540992 src=0000000204E00000 n=1048576
+SETDBG #220 output.weight dst=0000000B08802000 off=228589568 src=0000000204F00000 n=1048576
+SETDBG #221 output.weight dst=0000000B08802000 off=229638144 src=0000000204C00000 n=1048576
+SETDBG #222 output.weight dst=0000000B08802000 off=230686720 src=0000000204D00000 n=1048576
+SETDBG #223 output.weight dst=0000000B08802000 off=231735296 src=0000000204E00000 n=1048576
+SETDBG #224 output.weight dst=0000000B08802000 off=232783872 src=0000000204F00000 n=1048576
+SETDBG #225 output.weight dst=0000000B08802000 off=233832448 src=0000000204C00000 n=1048576
+SETDBG #226 output.weight dst=0000000B08802000 off=234881024 src=0000000204D00000 n=1048576
+SETDBG #227 output.weight dst=0000000B08802000 off=235929600 src=0000000204E00000 n=1048576
+SETDBG #228 output.weight dst=0000000B08802000 off=236978176 src=0000000204F00000 n=1048576
+SETDBG #229 output.weight dst=0000000B08802000 off=238026752 src=0000000204C00000 n=1048576
+SETDBG #230 output.weight dst=0000000B08802000 off=239075328 src=0000000204D00000 n=1048576
+SETDBG #231 output.weight dst=0000000B08802000 off=240123904 src=0000000204E00000 n=1048576
+SETDBG #232 output.weight dst=0000000B08802000 off=241172480 src=0000000204F00000 n=1048576
+SETDBG #233 output.weight dst=0000000B08802000 off=242221056 src=0000000204C00000 n=1048576
+SETDBG #234 output.weight dst=0000000B08802000 off=243269632 src=0000000204D00000 n=1048576
+SETDBG #235 output.weight dst=0000000B08802000 off=244318208 src=0000000204E00000 n=1048576
+SETDBG #236 output.weight dst=0000000B08802000 off=245366784 src=0000000204F00000 n=1048576
+SETDBG #237 output.weight dst=0000000B08802000 off=246415360 src=0000000204C00000 n=1048576
+SETDBG #238 output.weight dst=0000000B08802000 off=247463936 src=0000000204D00000 n=1048576
+SETDBG #239 output.weight dst=0000000B08802000 off=248512512 src=0000000204E00000 n=1048576
+SETDBG #240 output.weight dst=0000000B08802000 off=249561088 src=0000000204F00000 n=1048576
+SETDBG #241 output.weight dst=0000000B08802000 off=250609664 src=0000000204C00000 n=1048576
+SETDBG #242 output.weight dst=0000000B08802000 off=251658240 src=0000000204D00000 n=1048576
+SETDBG #243 output.weight dst=0000000B08802000 off=252706816 src=0000000204E00000 n=1048576
+SETDBG #244 output.weight dst=0000000B08802000 off=253755392 src=0000000204F00000 n=1048576
+SETDBG #245 output.weight dst=0000000B08802000 off=254803968 src=0000000204C00000 n=448512
+.SETDBG #246 blk.0.attn_norm.weight dst=0000000B17B6F800 off=0 src=0000000204D00000 n=8192
+SETDBG #247 blk.0.attn_q.weight dst=0000000B17B71800 off=0 src=0000000204E00000 n=1048576
+SETDBG #248 blk.0.attn_q.weight dst=0000000B17B71800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #249 blk.0.attn_q.weight dst=0000000B17B71800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #250 blk.0.attn_q.weight dst=0000000B17B71800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #251 blk.0.attn_q.weight dst=0000000B17B71800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #252 blk.0.attn_k.weight dst=0000000B17FF1800 off=0 src=0000000204F00000 n=589824
+SETDBG #253 blk.0.attn_v.weight dst=0000000B18081800 off=0 src=0000000204C00000 n=860160
+SETDBG #254 blk.0.attn_output.weight dst=0000000B18153800 off=0 src=0000000204D00000 n=1048576
+SETDBG #255 blk.0.attn_output.weight dst=0000000B18153800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #256 blk.0.attn_output.weight dst=0000000B18153800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #257 blk.0.attn_output.weight dst=0000000B18153800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #258 blk.0.attn_output.weight dst=0000000B18153800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #259 blk.0.attn_k_norm.weight dst=0000000B185D3800 off=0 src=0000000204E00000 n=512
+SETDBG #260 blk.0.attn_q_norm.weight dst=0000000B185D3A00 off=0 src=0000000204F00000 n=512
+SETDBG #261 blk.0.ffn_norm.weight dst=0000000B185D3C00 off=0 src=0000000204C00000 n=8192
+SETDBG #262 blk.0.ffn_gate_inp.weight dst=0000000B185D5C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #263 blk.1.attn_norm.weight dst=0000000B186D5C00 off=0 src=0000000204E00000 n=8192
+SETDBG #264 blk.1.attn_q.weight dst=0000000B186D7C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #265 blk.1.attn_q.weight dst=0000000B186D7C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #266 blk.1.attn_q.weight dst=0000000B186D7C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #267 blk.1.attn_q.weight dst=0000000B186D7C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #268 blk.1.attn_q.weight dst=0000000B186D7C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #269 blk.1.attn_k.weight dst=0000000B18B57C00 off=0 src=0000000204C00000 n=589824
+SETDBG #270 blk.1.attn_v.weight dst=0000000B18BE7C00 off=0 src=0000000204D00000 n=860160
+SETDBG #271 blk.1.attn_output.weight dst=0000000B18CB9C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #272 blk.1.attn_output.weight dst=0000000B18CB9C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #273 blk.1.attn_output.weight dst=0000000B18CB9C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #274 blk.1.attn_output.weight dst=0000000B18CB9C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #275 blk.1.attn_output.weight dst=0000000B18CB9C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #276 blk.1.attn_k_norm.weight dst=0000000B19139C00 off=0 src=0000000204F00000 n=512
+SETDBG #277 blk.1.attn_q_norm.weight dst=0000000B19139E00 off=0 src=0000000204C00000 n=512
+SETDBG #278 blk.1.ffn_norm.weight dst=0000000B1913A000 off=0 src=0000000204D00000 n=8192
+SETDBG #279 blk.1.ffn_gate_inp.weight dst=0000000B1913C000 off=0 src=0000000204E00000 n=1048576
+SETDBG #280 blk.2.attn_norm.weight dst=0000000B1923C000 off=0 src=0000000204F00000 n=8192
+SETDBG #281 blk.2.attn_q.weight dst=0000000B1923E000 off=0 src=0000000204C00000 n=1048576
+SETDBG #282 blk.2.attn_q.weight dst=0000000B1923E000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #283 blk.2.attn_q.weight dst=0000000B1923E000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #284 blk.2.attn_q.weight dst=0000000B1923E000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #285 blk.2.attn_q.weight dst=0000000B1923E000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #286 blk.2.attn_k.weight dst=0000000B196BE000 off=0 src=0000000204D00000 n=589824
+SETDBG #287 blk.2.attn_v.weight dst=0000000B1974E000 off=0 src=0000000204E00000 n=860160
+SETDBG #288 blk.2.attn_output.weight dst=0000000B19820000 off=0 src=0000000204F00000 n=1048576
+SETDBG #289 blk.2.attn_output.weight dst=0000000B19820000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #290 blk.2.attn_output.weight dst=0000000B19820000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #291 blk.2.attn_output.weight dst=0000000B19820000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #292 blk.2.attn_output.weight dst=0000000B19820000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #293 blk.2.attn_k_norm.weight dst=0000000B19CA0000 off=0 src=0000000204C00000 n=512
+SETDBG #294 blk.2.attn_q_norm.weight dst=0000000B19CA0200 off=0 src=0000000204D00000 n=512
+SETDBG #295 blk.2.ffn_norm.weight dst=0000000B19CA0400 off=0 src=0000000204E00000 n=8192
+SETDBG #296 blk.2.ffn_gate_inp.weight dst=0000000B19CA2400 off=0 src=0000000204F00000 n=1048576
+SETDBG #297 blk.3.attn_norm.weight dst=0000000B19DA2400 off=0 src=0000000204C00000 n=8192
+SETDBG #298 blk.3.attn_q.weight dst=0000000B19DA4400 off=0 src=0000000204D00000 n=1048576
+SETDBG #299 blk.3.attn_q.weight dst=0000000B19DA4400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #300 blk.3.attn_q.weight dst=0000000B19DA4400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #301 blk.3.attn_q.weight dst=0000000B19DA4400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #302 blk.3.attn_q.weight dst=0000000B19DA4400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #303 blk.3.attn_k.weight dst=0000000B1A224400 off=0 src=0000000204E00000 n=589824
+SETDBG #304 blk.3.attn_v.weight dst=0000000B1A2B4400 off=0 src=0000000204F00000 n=860160
+SETDBG #305 blk.3.attn_output.weight dst=0000000B1A386400 off=0 src=0000000204C00000 n=1048576
+SETDBG #306 blk.3.attn_output.weight dst=0000000B1A386400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #307 blk.3.attn_output.weight dst=0000000B1A386400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #308 blk.3.attn_output.weight dst=0000000B1A386400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #309 blk.3.attn_output.weight dst=0000000B1A386400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #310 blk.3.attn_k_norm.weight dst=0000000B1A806400 off=0 src=0000000204D00000 n=512
+SETDBG #311 blk.3.attn_q_norm.weight dst=0000000B1A806600 off=0 src=0000000204E00000 n=512
+SETDBG #312 blk.3.ffn_norm.weight dst=0000000B1A806800 off=0 src=0000000204F00000 n=8192
+SETDBG #313 blk.3.ffn_gate_inp.weight dst=0000000B1A808800 off=0 src=0000000204C00000 n=1048576
+SETDBG #314 blk.4.attn_norm.weight dst=0000000B1A908800 off=0 src=0000000204D00000 n=8192
+SETDBG #315 blk.4.attn_q.weight dst=0000000B1A90A800 off=0 src=0000000204E00000 n=1048576
+SETDBG #316 blk.4.attn_q.weight dst=0000000B1A90A800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #317 blk.4.attn_q.weight dst=0000000B1A90A800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #318 blk.4.attn_q.weight dst=0000000B1A90A800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #319 blk.4.attn_q.weight dst=0000000B1A90A800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #320 blk.4.attn_k.weight dst=0000000B1AD8A800 off=0 src=0000000204F00000 n=589824
+SETDBG #321 blk.4.attn_v.weight dst=0000000B1AE1A800 off=0 src=0000000204C00000 n=860160
+SETDBG #322 blk.4.attn_output.weight dst=0000000B1AEEC800 off=0 src=0000000204D00000 n=1048576
+SETDBG #323 blk.4.attn_output.weight dst=0000000B1AEEC800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #324 blk.4.attn_output.weight dst=0000000B1AEEC800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #325 blk.4.attn_output.weight dst=0000000B1AEEC800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #326 blk.4.attn_output.weight dst=0000000B1AEEC800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #327 blk.4.attn_k_norm.weight dst=0000000B1B36C800 off=0 src=0000000204E00000 n=512
+SETDBG #328 blk.4.attn_q_norm.weight dst=0000000B1B36CA00 off=0 src=0000000204F00000 n=512
+SETDBG #329 blk.4.ffn_norm.weight dst=0000000B1B36CC00 off=0 src=0000000204C00000 n=8192
+SETDBG #330 blk.4.ffn_gate_inp.weight dst=0000000B1B36EC00 off=0 src=0000000204D00000 n=1048576
+SETDBG #331 blk.5.attn_norm.weight dst=0000000B1B46EC00 off=0 src=0000000204E00000 n=8192
+SETDBG #332 blk.5.attn_q.weight dst=0000000B1B470C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #333 blk.5.attn_q.weight dst=0000000B1B470C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #334 blk.5.attn_q.weight dst=0000000B1B470C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #335 blk.5.attn_q.weight dst=0000000B1B470C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #336 blk.5.attn_q.weight dst=0000000B1B470C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #337 blk.5.attn_k.weight dst=0000000B1B8F0C00 off=0 src=0000000204C00000 n=589824
+SETDBG #338 blk.5.attn_v.weight dst=0000000B1B980C00 off=0 src=0000000204D00000 n=860160
+SETDBG #339 blk.5.attn_output.weight dst=0000000B1BA52C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #340 blk.5.attn_output.weight dst=0000000B1BA52C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #341 blk.5.attn_output.weight dst=0000000B1BA52C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #342 blk.5.attn_output.weight dst=0000000B1BA52C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #343 blk.5.attn_output.weight dst=0000000B1BA52C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #344 blk.5.attn_k_norm.weight dst=0000000B1BED2C00 off=0 src=0000000204F00000 n=512
+SETDBG #345 blk.5.attn_q_norm.weight dst=0000000B1BED2E00 off=0 src=0000000204C00000 n=512
+SETDBG #346 blk.5.ffn_norm.weight dst=0000000B1BED3000 off=0 src=0000000204D00000 n=8192
+SETDBG #347 blk.5.ffn_gate_inp.weight dst=0000000B1BED5000 off=0 src=0000000204E00000 n=1048576
+SETDBG #348 blk.6.attn_norm.weight dst=0000000B1BFD5000 off=0 src=0000000204F00000 n=8192
+SETDBG #349 blk.6.attn_q.weight dst=0000000B1BFD7000 off=0 src=0000000204C00000 n=1048576
+SETDBG #350 blk.6.attn_q.weight dst=0000000B1BFD7000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #351 blk.6.attn_q.weight dst=0000000B1BFD7000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #352 blk.6.attn_q.weight dst=0000000B1BFD7000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #353 blk.6.attn_q.weight dst=0000000B1BFD7000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #354 blk.6.attn_k.weight dst=0000000B1C457000 off=0 src=0000000204D00000 n=589824
+SETDBG #355 blk.6.attn_v.weight dst=0000000B1C4E7000 off=0 src=0000000204E00000 n=589824
+SETDBG #356 blk.6.attn_output.weight dst=0000000B1C577000 off=0 src=0000000204F00000 n=1048576
+SETDBG #357 blk.6.attn_output.weight dst=0000000B1C577000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #358 blk.6.attn_output.weight dst=0000000B1C577000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #359 blk.6.attn_output.weight dst=0000000B1C577000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #360 blk.6.attn_output.weight dst=0000000B1C577000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #361 blk.6.attn_k_norm.weight dst=0000000B1C9F7000 off=0 src=0000000204C00000 n=512
+SETDBG #362 blk.6.attn_q_norm.weight dst=0000000B1C9F7200 off=0 src=0000000204D00000 n=512
+SETDBG #363 blk.6.ffn_norm.weight dst=0000000B1C9F7400 off=0 src=0000000204E00000 n=8192
+SETDBG #364 blk.6.ffn_gate_inp.weight dst=0000000B1C9F9400 off=0 src=0000000204F00000 n=1048576
+SETDBG #365 blk.7.attn_norm.weight dst=0000000B1CAF9400 off=0 src=0000000204C00000 n=8192
+SETDBG #366 blk.7.attn_q.weight dst=0000000B1CAFB400 off=0 src=0000000204D00000 n=1048576
+SETDBG #367 blk.7.attn_q.weight dst=0000000B1CAFB400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #368 blk.7.attn_q.weight dst=0000000B1CAFB400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #369 blk.7.attn_q.weight dst=0000000B1CAFB400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #370 blk.7.attn_q.weight dst=0000000B1CAFB400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #371 blk.7.attn_k.weight dst=0000000B1CF7B400 off=0 src=0000000204E00000 n=589824
+SETDBG #372 blk.7.attn_v.weight dst=0000000B1D00B400 off=0 src=0000000204F00000 n=589824
+SETDBG #373 blk.7.attn_output.weight dst=0000000B1D09B400 off=0 src=0000000204C00000 n=1048576
+SETDBG #374 blk.7.attn_output.weight dst=0000000B1D09B400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #375 blk.7.attn_output.weight dst=0000000B1D09B400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #376 blk.7.attn_output.weight dst=0000000B1D09B400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #377 blk.7.attn_output.weight dst=0000000B1D09B400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #378 blk.7.attn_k_norm.weight dst=0000000B1D51B400 off=0 src=0000000204D00000 n=512
+SETDBG #379 blk.7.attn_q_norm.weight dst=0000000B1D51B600 off=0 src=0000000204E00000 n=512
+SETDBG #380 blk.7.ffn_norm.weight dst=0000000B1D51B800 off=0 src=0000000204F00000 n=8192
+SETDBG #381 blk.7.ffn_gate_inp.weight dst=0000000B1D51D800 off=0 src=0000000204C00000 n=1048576
+SETDBG #382 blk.8.attn_norm.weight dst=0000000B1D61D800 off=0 src=0000000204D00000 n=8192
+SETDBG #383 blk.8.attn_q.weight dst=0000000B1D61F800 off=0 src=0000000204E00000 n=1048576
+SETDBG #384 blk.8.attn_q.weight dst=0000000B1D61F800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #385 blk.8.attn_q.weight dst=0000000B1D61F800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #386 blk.8.attn_q.weight dst=0000000B1D61F800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #387 blk.8.attn_q.weight dst=0000000B1D61F800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #388 blk.8.attn_k.weight dst=0000000B1DA9F800 off=0 src=0000000204F00000 n=589824
+SETDBG #389 blk.8.attn_v.weight dst=0000000B1DB2F800 off=0 src=0000000204C00000 n=860160
+SETDBG #390 blk.8.attn_output.weight dst=0000000B1DC01800 off=0 src=0000000204D00000 n=1048576
+SETDBG #391 blk.8.attn_output.weight dst=0000000B1DC01800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #392 blk.8.attn_output.weight dst=0000000B1DC01800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #393 blk.8.attn_output.weight dst=0000000B1DC01800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #394 blk.8.attn_output.weight dst=0000000B1DC01800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #395 blk.8.attn_k_norm.weight dst=0000000B1E081800 off=0 src=0000000204E00000 n=512
+SETDBG #396 blk.8.attn_q_norm.weight dst=0000000B1E081A00 off=0 src=0000000204F00000 n=512
+SETDBG #397 blk.8.ffn_norm.weight dst=0000000B1E081C00 off=0 src=0000000204C00000 n=8192
+SETDBG #398 blk.8.ffn_gate_inp.weight dst=0000000B1E083C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #399 blk.9.attn_norm.weight dst=0000000B1E183C00 off=0 src=0000000204E00000 n=8192
+SETDBG #400 blk.9.attn_q.weight dst=0000000B1E185C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #401 blk.9.attn_q.weight dst=0000000B1E185C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #402 blk.9.attn_q.weight dst=0000000B1E185C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #403 blk.9.attn_q.weight dst=0000000B1E185C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #404 blk.9.attn_q.weight dst=0000000B1E185C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #405 blk.9.attn_k.weight dst=0000000B1E605C00 off=0 src=0000000204C00000 n=589824
+SETDBG #406 blk.9.attn_v.weight dst=0000000B1E695C00 off=0 src=0000000204D00000 n=589824
+SETDBG #407 blk.9.attn_output.weight dst=0000000B1E725C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #408 blk.9.attn_output.weight dst=0000000B1E725C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #409 blk.9.attn_output.weight dst=0000000B1E725C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #410 blk.9.attn_output.weight dst=0000000B1E725C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #411 blk.9.attn_output.weight dst=0000000B1E725C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #412 blk.9.attn_k_norm.weight dst=0000000B1EBA5C00 off=0 src=0000000204F00000 n=512
+SETDBG #413 blk.9.attn_q_norm.weight dst=0000000B1EBA5E00 off=0 src=0000000204C00000 n=512
+SETDBG #414 blk.9.ffn_norm.weight dst=0000000B1EBA6000 off=0 src=0000000204D00000 n=8192
+SETDBG #415 blk.9.ffn_gate_inp.weight dst=0000000B1EBA8000 off=0 src=0000000204E00000 n=1048576
+SETDBG #416 blk.10.attn_norm.weight dst=0000000B1ECA8000 off=0 src=0000000204F00000 n=8192
+SETDBG #417 blk.10.attn_q.weight dst=0000000B1ECAA000 off=0 src=0000000204C00000 n=1048576
+SETDBG #418 blk.10.attn_q.weight dst=0000000B1ECAA000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #419 blk.10.attn_q.weight dst=0000000B1ECAA000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #420 blk.10.attn_q.weight dst=0000000B1ECAA000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #421 blk.10.attn_q.weight dst=0000000B1ECAA000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #422 blk.10.attn_k.weight dst=0000000B1F12A000 off=0 src=0000000204D00000 n=589824
+SETDBG #423 blk.10.attn_v.weight dst=0000000B1F1BA000 off=0 src=0000000204E00000 n=589824
+SETDBG #424 blk.10.attn_output.weight dst=0000000B1F24A000 off=0 src=0000000204F00000 n=1048576
+SETDBG #425 blk.10.attn_output.weight dst=0000000B1F24A000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #426 blk.10.attn_output.weight dst=0000000B1F24A000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #427 blk.10.attn_output.weight dst=0000000B1F24A000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #428 blk.10.attn_output.weight dst=0000000B1F24A000 off=4194304 src=0000000204F00000 n=524288
+.SETDBG #429 blk.10.attn_k_norm.weight dst=0000000B1F6CA000 off=0 src=0000000204C00000 n=512
+SETDBG #430 blk.10.attn_q_norm.weight dst=0000000B1F6CA200 off=0 src=0000000204D00000 n=512
+SETDBG #431 blk.10.ffn_norm.weight dst=0000000B1F6CA400 off=0 src=0000000204E00000 n=8192
+SETDBG #432 blk.10.ffn_gate_inp.weight dst=0000000B1F6CC400 off=0 src=0000000204F00000 n=1048576
+SETDBG #433 blk.11.attn_norm.weight dst=0000000B1F7CC400 off=0 src=0000000204C00000 n=8192
+SETDBG #434 blk.11.attn_q.weight dst=0000000B1F7CE400 off=0 src=0000000204D00000 n=1048576
+SETDBG #435 blk.11.attn_q.weight dst=0000000B1F7CE400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #436 blk.11.attn_q.weight dst=0000000B1F7CE400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #437 blk.11.attn_q.weight dst=0000000B1F7CE400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #438 blk.11.attn_q.weight dst=0000000B1F7CE400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #439 blk.11.attn_k.weight dst=0000000B1FC4E400 off=0 src=0000000204E00000 n=589824
+SETDBG #440 blk.11.attn_v.weight dst=0000000B1FCDE400 off=0 src=0000000204F00000 n=860160
+SETDBG #441 blk.11.attn_output.weight dst=0000000B1FDB0400 off=0 src=0000000204C00000 n=1048576
+SETDBG #442 blk.11.attn_output.weight dst=0000000B1FDB0400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #443 blk.11.attn_output.weight dst=0000000B1FDB0400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #444 blk.11.attn_output.weight dst=0000000B1FDB0400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #445 blk.11.attn_output.weight dst=0000000B1FDB0400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #446 blk.11.attn_k_norm.weight dst=0000000B20230400 off=0 src=0000000204D00000 n=512
+SETDBG #447 blk.11.attn_q_norm.weight dst=0000000B20230600 off=0 src=0000000204E00000 n=512
+SETDBG #448 blk.11.ffn_norm.weight dst=0000000B20230800 off=0 src=0000000204F00000 n=8192
+SETDBG #449 blk.11.ffn_gate_inp.weight dst=0000000B20232800 off=0 src=0000000204C00000 n=1048576
+SETDBG #450 blk.12.attn_norm.weight dst=0000000B20332800 off=0 src=0000000204D00000 n=8192
+SETDBG #451 blk.12.attn_q.weight dst=0000000B20334800 off=0 src=0000000204E00000 n=1048576
+SETDBG #452 blk.12.attn_q.weight dst=0000000B20334800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #453 blk.12.attn_q.weight dst=0000000B20334800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #454 blk.12.attn_q.weight dst=0000000B20334800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #455 blk.12.attn_q.weight dst=0000000B20334800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #456 blk.12.attn_k.weight dst=0000000B207B4800 off=0 src=0000000204F00000 n=589824
+SETDBG #457 blk.12.attn_v.weight dst=0000000B20844800 off=0 src=0000000204C00000 n=589824
+SETDBG #458 blk.12.attn_output.weight dst=0000000B208D4800 off=0 src=0000000204D00000 n=1048576
+SETDBG #459 blk.12.attn_output.weight dst=0000000B208D4800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #460 blk.12.attn_output.weight dst=0000000B208D4800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #461 blk.12.attn_output.weight dst=0000000B208D4800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #462 blk.12.attn_output.weight dst=0000000B208D4800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #463 blk.12.attn_k_norm.weight dst=0000000B20D54800 off=0 src=0000000204E00000 n=512
+SETDBG #464 blk.12.attn_q_norm.weight dst=0000000B20D54A00 off=0 src=0000000204F00000 n=512
+SETDBG #465 blk.12.ffn_norm.weight dst=0000000B20D54C00 off=0 src=0000000204C00000 n=8192
+SETDBG #466 blk.12.ffn_gate_inp.weight dst=0000000B20D56C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #467 blk.13.attn_norm.weight dst=0000000B20E56C00 off=0 src=0000000204E00000 n=8192
+SETDBG #468 blk.13.attn_q.weight dst=0000000B20E58C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #469 blk.13.attn_q.weight dst=0000000B20E58C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #470 blk.13.attn_q.weight dst=0000000B20E58C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #471 blk.13.attn_q.weight dst=0000000B20E58C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #472 blk.13.attn_q.weight dst=0000000B20E58C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #473 blk.13.attn_k.weight dst=0000000B212D8C00 off=0 src=0000000204C00000 n=589824
+SETDBG #474 blk.13.attn_v.weight dst=0000000B21368C00 off=0 src=0000000204D00000 n=589824
+SETDBG #475 blk.13.attn_output.weight dst=0000000B213F8C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #476 blk.13.attn_output.weight dst=0000000B213F8C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #477 blk.13.attn_output.weight dst=0000000B213F8C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #478 blk.13.attn_output.weight dst=0000000B213F8C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #479 blk.13.attn_output.weight dst=0000000B213F8C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #480 blk.13.attn_k_norm.weight dst=0000000B21878C00 off=0 src=0000000204F00000 n=512
+SETDBG #481 blk.13.attn_q_norm.weight dst=0000000B21878E00 off=0 src=0000000204C00000 n=512
+SETDBG #482 blk.13.ffn_norm.weight dst=0000000B21879000 off=0 src=0000000204D00000 n=8192
+SETDBG #483 blk.13.ffn_gate_inp.weight dst=0000000B2187B000 off=0 src=0000000204E00000 n=1048576
+SETDBG #484 blk.14.attn_norm.weight dst=0000000B2197B000 off=0 src=0000000204F00000 n=8192
+SETDBG #485 blk.14.attn_q.weight dst=0000000B2197D000 off=0 src=0000000204C00000 n=1048576
+SETDBG #486 blk.14.attn_q.weight dst=0000000B2197D000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #487 blk.14.attn_q.weight dst=0000000B2197D000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #488 blk.14.attn_q.weight dst=0000000B2197D000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #489 blk.14.attn_q.weight dst=0000000B2197D000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #490 blk.14.attn_k.weight dst=0000000B21DFD000 off=0 src=0000000204D00000 n=589824
+SETDBG #491 blk.14.attn_v.weight dst=0000000B21E8D000 off=0 src=0000000204E00000 n=860160
+SETDBG #492 blk.14.attn_output.weight dst=0000000B21F5F000 off=0 src=0000000204F00000 n=1048576
+SETDBG #493 blk.14.attn_output.weight dst=0000000B21F5F000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #494 blk.14.attn_output.weight dst=0000000B21F5F000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #495 blk.14.attn_output.weight dst=0000000B21F5F000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #496 blk.14.attn_output.weight dst=0000000B21F5F000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #497 blk.14.attn_k_norm.weight dst=0000000B223DF000 off=0 src=0000000204C00000 n=512
+SETDBG #498 blk.14.attn_q_norm.weight dst=0000000B223DF200 off=0 src=0000000204D00000 n=512
+SETDBG #499 blk.14.ffn_norm.weight dst=0000000B223DF400 off=0 src=0000000204E00000 n=8192
+SETDBG #500 blk.14.ffn_gate_inp.weight dst=0000000B223E1400 off=0 src=0000000204F00000 n=1048576
+SETDBG #501 blk.15.attn_norm.weight dst=0000000B224E1400 off=0 src=0000000204C00000 n=8192
+SETDBG #502 blk.15.attn_q.weight dst=0000000B224E3400 off=0 src=0000000204D00000 n=1048576
+SETDBG #503 blk.15.attn_q.weight dst=0000000B224E3400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #504 blk.15.attn_q.weight dst=0000000B224E3400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #505 blk.15.attn_q.weight dst=0000000B224E3400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #506 blk.15.attn_q.weight dst=0000000B224E3400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #507 blk.15.attn_k.weight dst=0000000B22963400 off=0 src=0000000204E00000 n=589824
+SETDBG #508 blk.15.attn_v.weight dst=0000000B229F3400 off=0 src=0000000204F00000 n=589824
+SETDBG #509 blk.15.attn_output.weight dst=0000000B22A83400 off=0 src=0000000204C00000 n=1048576
+SETDBG #510 blk.15.attn_output.weight dst=0000000B22A83400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #511 blk.15.attn_output.weight dst=0000000B22A83400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #512 blk.15.attn_output.weight dst=0000000B22A83400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #513 blk.15.attn_output.weight dst=0000000B22A83400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #514 blk.15.attn_k_norm.weight dst=0000000B22F03400 off=0 src=0000000204D00000 n=512
+SETDBG #515 blk.15.attn_q_norm.weight dst=0000000B22F03600 off=0 src=0000000204E00000 n=512
+SETDBG #516 blk.15.ffn_norm.weight dst=0000000B22F03800 off=0 src=0000000204F00000 n=8192
+SETDBG #517 blk.15.ffn_gate_inp.weight dst=0000000B22F05800 off=0 src=0000000204C00000 n=1048576
+SETDBG #518 blk.16.attn_norm.weight dst=0000000B23005800 off=0 src=0000000204D00000 n=8192
+SETDBG #519 blk.16.attn_q.weight dst=0000000B23007800 off=0 src=0000000204E00000 n=1048576
+SETDBG #520 blk.16.attn_q.weight dst=0000000B23007800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #521 blk.16.attn_q.weight dst=0000000B23007800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #522 blk.16.attn_q.weight dst=0000000B23007800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #523 blk.16.attn_q.weight dst=0000000B23007800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #524 blk.16.attn_k.weight dst=0000000B23487800 off=0 src=0000000204F00000 n=589824
+SETDBG #525 blk.16.attn_v.weight dst=0000000B23517800 off=0 src=0000000204C00000 n=589824
+SETDBG #526 blk.16.attn_output.weight dst=0000000B235A7800 off=0 src=0000000204D00000 n=1048576
+SETDBG #527 blk.16.attn_output.weight dst=0000000B235A7800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #528 blk.16.attn_output.weight dst=0000000B235A7800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #529 blk.16.attn_output.weight dst=0000000B235A7800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #530 blk.16.attn_output.weight dst=0000000B235A7800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #531 blk.16.attn_k_norm.weight dst=0000000B23A27800 off=0 src=0000000204E00000 n=512
+SETDBG #532 blk.16.attn_q_norm.weight dst=0000000B23A27A00 off=0 src=0000000204F00000 n=512
+SETDBG #533 blk.16.ffn_norm.weight dst=0000000B23A27C00 off=0 src=0000000204C00000 n=8192
+SETDBG #534 blk.16.ffn_gate_inp.weight dst=0000000B23A29C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #535 blk.17.attn_norm.weight dst=0000000B23B29C00 off=0 src=0000000204E00000 n=8192
+SETDBG #536 blk.17.attn_q.weight dst=0000000B23B2BC00 off=0 src=0000000204F00000 n=1048576
+SETDBG #537 blk.17.attn_q.weight dst=0000000B23B2BC00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #538 blk.17.attn_q.weight dst=0000000B23B2BC00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #539 blk.17.attn_q.weight dst=0000000B23B2BC00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #540 blk.17.attn_q.weight dst=0000000B23B2BC00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #541 blk.17.attn_k.weight dst=0000000B23FABC00 off=0 src=0000000204C00000 n=589824
+SETDBG #542 blk.17.attn_v.weight dst=0000000B2403BC00 off=0 src=0000000204D00000 n=860160
+SETDBG #543 blk.17.attn_output.weight dst=0000000B2410DC00 off=0 src=0000000204E00000 n=1048576
+SETDBG #544 blk.17.attn_output.weight dst=0000000B2410DC00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #545 blk.17.attn_output.weight dst=0000000B2410DC00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #546 blk.17.attn_output.weight dst=0000000B2410DC00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #547 blk.17.attn_output.weight dst=0000000B2410DC00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #548 blk.17.attn_k_norm.weight dst=0000000B2458DC00 off=0 src=0000000204F00000 n=512
+SETDBG #549 blk.17.attn_q_norm.weight dst=0000000B2458DE00 off=0 src=0000000204C00000 n=512
+SETDBG #550 blk.17.ffn_norm.weight dst=0000000B2458E000 off=0 src=0000000204D00000 n=8192
+SETDBG #551 blk.17.ffn_gate_inp.weight dst=0000000B24590000 off=0 src=0000000204E00000 n=1048576
+SETDBG #552 blk.18.attn_norm.weight dst=0000000B24690000 off=0 src=0000000204F00000 n=8192
+SETDBG #553 blk.18.attn_q.weight dst=0000000B24692000 off=0 src=0000000204C00000 n=1048576
+SETDBG #554 blk.18.attn_q.weight dst=0000000B24692000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #555 blk.18.attn_q.weight dst=0000000B24692000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #556 blk.18.attn_q.weight dst=0000000B24692000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #557 blk.18.attn_q.weight dst=0000000B24692000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #558 blk.18.attn_k.weight dst=0000000B24B12000 off=0 src=0000000204D00000 n=589824
+SETDBG #559 blk.18.attn_v.weight dst=0000000B24BA2000 off=0 src=0000000204E00000 n=589824
+SETDBG #560 blk.18.attn_output.weight dst=0000000B24C32000 off=0 src=0000000204F00000 n=1048576
+SETDBG #561 blk.18.attn_output.weight dst=0000000B24C32000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #562 blk.18.attn_output.weight dst=0000000B24C32000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #563 blk.18.attn_output.weight dst=0000000B24C32000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #564 blk.18.attn_output.weight dst=0000000B24C32000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #565 blk.18.attn_k_norm.weight dst=0000000B250B2000 off=0 src=0000000204C00000 n=512
+SETDBG #566 blk.18.attn_q_norm.weight dst=0000000B250B2200 off=0 src=0000000204D00000 n=512
+SETDBG #567 blk.18.ffn_norm.weight dst=0000000B250B2400 off=0 src=0000000204E00000 n=8192
+SETDBG #568 blk.18.ffn_gate_inp.weight dst=0000000B250B4400 off=0 src=0000000204F00000 n=1048576
+SETDBG #569 blk.19.attn_norm.weight dst=0000000B251B4400 off=0 src=0000000204C00000 n=8192
+SETDBG #570 blk.19.attn_q.weight dst=0000000B251B6400 off=0 src=0000000204D00000 n=1048576
+SETDBG #571 blk.19.attn_q.weight dst=0000000B251B6400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #572 blk.19.attn_q.weight dst=0000000B251B6400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #573 blk.19.attn_q.weight dst=0000000B251B6400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #574 blk.19.attn_q.weight dst=0000000B251B6400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #575 blk.19.attn_k.weight dst=0000000B25636400 off=0 src=0000000204E00000 n=589824
+SETDBG #576 blk.19.attn_v.weight dst=0000000B256C6400 off=0 src=0000000204F00000 n=589824
+SETDBG #577 blk.19.attn_output.weight dst=0000000B25756400 off=0 src=0000000204C00000 n=1048576
+SETDBG #578 blk.19.attn_output.weight dst=0000000B25756400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #579 blk.19.attn_output.weight dst=0000000B25756400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #580 blk.19.attn_output.weight dst=0000000B25756400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #581 blk.19.attn_output.weight dst=0000000B25756400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #582 blk.19.attn_k_norm.weight dst=0000000B25BD6400 off=0 src=0000000204D00000 n=512
+SETDBG #583 blk.19.attn_q_norm.weight dst=0000000B25BD6600 off=0 src=0000000204E00000 n=512
+SETDBG #584 blk.19.ffn_norm.weight dst=0000000B25BD6800 off=0 src=0000000204F00000 n=8192
+SETDBG #585 blk.19.ffn_gate_inp.weight dst=0000000B25BD8800 off=0 src=0000000204C00000 n=1048576
+SETDBG #586 blk.20.attn_norm.weight dst=0000000B25CD8800 off=0 src=0000000204D00000 n=8192
+SETDBG #587 blk.20.attn_q.weight dst=0000000B25CDA800 off=0 src=0000000204E00000 n=1048576
+SETDBG #588 blk.20.attn_q.weight dst=0000000B25CDA800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #589 blk.20.attn_q.weight dst=0000000B25CDA800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #590 blk.20.attn_q.weight dst=0000000B25CDA800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #591 blk.20.attn_q.weight dst=0000000B25CDA800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #592 blk.20.attn_k.weight dst=0000000B2615A800 off=0 src=0000000204F00000 n=589824
+SETDBG #593 blk.20.attn_v.weight dst=0000000B261EA800 off=0 src=0000000204C00000 n=860160
+SETDBG #594 blk.20.attn_output.weight dst=0000000B262BC800 off=0 src=0000000204D00000 n=1048576
+SETDBG #595 blk.20.attn_output.weight dst=0000000B262BC800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #596 blk.20.attn_output.weight dst=0000000B262BC800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #597 blk.20.attn_output.weight dst=0000000B262BC800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #598 blk.20.attn_output.weight dst=0000000B262BC800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #599 blk.20.attn_k_norm.weight dst=0000000B2673C800 off=0 src=0000000204E00000 n=512
+SETDBG #600 blk.20.attn_q_norm.weight dst=0000000B2673CA00 off=0 src=0000000204F00000 n=512
+SETDBG #601 blk.20.ffn_norm.weight dst=0000000B2673CC00 off=0 src=0000000204C00000 n=8192
+SETDBG #602 blk.20.ffn_gate_inp.weight dst=0000000B2673EC00 off=0 src=0000000204D00000 n=1048576
+SETDBG #603 blk.21.attn_norm.weight dst=0000000B2683EC00 off=0 src=0000000204E00000 n=8192
+SETDBG #604 blk.21.attn_q.weight dst=0000000B26840C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #605 blk.21.attn_q.weight dst=0000000B26840C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #606 blk.21.attn_q.weight dst=0000000B26840C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #607 blk.21.attn_q.weight dst=0000000B26840C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #608 blk.21.attn_q.weight dst=0000000B26840C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #609 blk.21.attn_k.weight dst=0000000B26CC0C00 off=0 src=0000000204C00000 n=589824
+SETDBG #610 blk.21.attn_v.weight dst=0000000B26D50C00 off=0 src=0000000204D00000 n=589824
+SETDBG #611 blk.21.attn_output.weight dst=0000000B26DE0C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #612 blk.21.attn_output.weight dst=0000000B26DE0C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #613 blk.21.attn_output.weight dst=0000000B26DE0C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #614 blk.21.attn_output.weight dst=0000000B26DE0C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #615 blk.21.attn_output.weight dst=0000000B26DE0C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #616 blk.21.attn_k_norm.weight dst=0000000B27260C00 off=0 src=0000000204F00000 n=512
+SETDBG #617 blk.21.attn_q_norm.weight dst=0000000B27260E00 off=0 src=0000000204C00000 n=512
+SETDBG #618 blk.21.ffn_norm.weight dst=0000000B27261000 off=0 src=0000000204D00000 n=8192
+SETDBG #619 blk.21.ffn_gate_inp.weight dst=0000000B27263000 off=0 src=0000000204E00000 n=1048576
+SETDBG #620 blk.22.attn_norm.weight dst=0000000B27363000 off=0 src=0000000204F00000 n=8192
+SETDBG #621 blk.22.attn_q.weight dst=0000000B27365000 off=0 src=0000000204C00000 n=1048576
+SETDBG #622 blk.22.attn_q.weight dst=0000000B27365000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #623 blk.22.attn_q.weight dst=0000000B27365000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #624 blk.22.attn_q.weight dst=0000000B27365000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #625 blk.22.attn_q.weight dst=0000000B27365000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #626 blk.22.attn_k.weight dst=0000000B277E5000 off=0 src=0000000204D00000 n=589824
+SETDBG #627 blk.22.attn_v.weight dst=0000000B27875000 off=0 src=0000000204E00000 n=589824
+SETDBG #628 blk.22.attn_output.weight dst=0000000B27905000 off=0 src=0000000204F00000 n=1048576
+SETDBG #629 blk.22.attn_output.weight dst=0000000B27905000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #630 blk.22.attn_output.weight dst=0000000B27905000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #631 blk.22.attn_output.weight dst=0000000B27905000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #632 blk.22.attn_output.weight dst=0000000B27905000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #633 blk.22.attn_k_norm.weight dst=0000000B27D85000 off=0 src=0000000204C00000 n=512
+SETDBG #634 blk.22.attn_q_norm.weight dst=0000000B27D85200 off=0 src=0000000204D00000 n=512
+SETDBG #635 blk.22.ffn_norm.weight dst=0000000B27D85400 off=0 src=0000000204E00000 n=8192
+SETDBG #636 blk.22.ffn_gate_inp.weight dst=0000000B27D87400 off=0 src=0000000204F00000 n=1048576
+SETDBG #637 blk.23.attn_norm.weight dst=0000000B27E87400 off=0 src=0000000204C00000 n=8192
+SETDBG #638 blk.23.attn_q.weight dst=0000000B27E89400 off=0 src=0000000204D00000 n=1048576
+SETDBG #639 blk.23.attn_q.weight dst=0000000B27E89400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #640 blk.23.attn_q.weight dst=0000000B27E89400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #641 blk.23.attn_q.weight dst=0000000B27E89400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #642 blk.23.attn_q.weight dst=0000000B27E89400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #643 blk.23.attn_k.weight dst=0000000B28309400 off=0 src=0000000204E00000 n=589824
+SETDBG #644 blk.23.attn_v.weight dst=0000000B28399400 off=0 src=0000000204F00000 n=860160
+SETDBG #645 blk.23.attn_output.weight dst=0000000B2846B400 off=0 src=0000000204C00000 n=1048576
+SETDBG #646 blk.23.attn_output.weight dst=0000000B2846B400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #647 blk.23.attn_output.weight dst=0000000B2846B400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #648 blk.23.attn_output.weight dst=0000000B2846B400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #649 blk.23.attn_output.weight dst=0000000B2846B400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #650 blk.23.attn_k_norm.weight dst=0000000B288EB400 off=0 src=0000000204D00000 n=512
+SETDBG #651 blk.23.attn_q_norm.weight dst=0000000B288EB600 off=0 src=0000000204E00000 n=512
+SETDBG #652 blk.23.ffn_norm.weight dst=0000000B288EB800 off=0 src=0000000204F00000 n=8192
+SETDBG #653 blk.23.ffn_gate_inp.weight dst=0000000B288ED800 off=0 src=0000000204C00000 n=1048576
+SETDBG #654 blk.24.attn_norm.weight dst=0000000B289ED800 off=0 src=0000000204D00000 n=8192
+SETDBG #655 blk.24.attn_q.weight dst=0000000B289EF800 off=0 src=0000000204E00000 n=1048576
+SETDBG #656 blk.24.attn_q.weight dst=0000000B289EF800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #657 blk.24.attn_q.weight dst=0000000B289EF800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #658 blk.24.attn_q.weight dst=0000000B289EF800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #659 blk.24.attn_q.weight dst=0000000B289EF800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #660 blk.24.attn_k.weight dst=0000000B28E6F800 off=0 src=0000000204F00000 n=589824
+SETDBG #661 blk.24.attn_v.weight dst=0000000B28EFF800 off=0 src=0000000204C00000 n=589824
+SETDBG #662 blk.24.attn_output.weight dst=0000000B28F8F800 off=0 src=0000000204D00000 n=1048576
+SETDBG #663 blk.24.attn_output.weight dst=0000000B28F8F800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #664 blk.24.attn_output.weight dst=0000000B28F8F800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #665 blk.24.attn_output.weight dst=0000000B28F8F800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #666 blk.24.attn_output.weight dst=0000000B28F8F800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #667 blk.24.attn_k_norm.weight dst=0000000B2940F800 off=0 src=0000000204E00000 n=512
+SETDBG #668 blk.24.attn_q_norm.weight dst=0000000B2940FA00 off=0 src=0000000204F00000 n=512
+SETDBG #669 blk.24.ffn_norm.weight dst=0000000B2940FC00 off=0 src=0000000204C00000 n=8192
+SETDBG #670 blk.24.ffn_gate_inp.weight dst=0000000B29411C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #671 blk.25.attn_norm.weight dst=0000000B29511C00 off=0 src=0000000204E00000 n=8192
+SETDBG #672 blk.25.attn_q.weight dst=0000000B29513C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #673 blk.25.attn_q.weight dst=0000000B29513C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #674 blk.25.attn_q.weight dst=0000000B29513C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #675 blk.25.attn_q.weight dst=0000000B29513C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #676 blk.25.attn_q.weight dst=0000000B29513C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #677 blk.25.attn_k.weight dst=0000000B29993C00 off=0 src=0000000204C00000 n=589824
+SETDBG #678 blk.25.attn_v.weight dst=0000000B29A23C00 off=0 src=0000000204D00000 n=589824
+SETDBG #679 blk.25.attn_output.weight dst=0000000B29AB3C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #680 blk.25.attn_output.weight dst=0000000B29AB3C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #681 blk.25.attn_output.weight dst=0000000B29AB3C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #682 blk.25.attn_output.weight dst=0000000B29AB3C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #683 blk.25.attn_output.weight dst=0000000B29AB3C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #684 blk.25.attn_k_norm.weight dst=0000000B29F33C00 off=0 src=0000000204F00000 n=512
+SETDBG #685 blk.25.attn_q_norm.weight dst=0000000B29F33E00 off=0 src=0000000204C00000 n=512
+SETDBG #686 blk.25.ffn_norm.weight dst=0000000B29F34000 off=0 src=0000000204D00000 n=8192
+SETDBG #687 blk.25.ffn_gate_inp.weight dst=0000000B29F36000 off=0 src=0000000204E00000 n=1048576
+SETDBG #688 blk.26.attn_norm.weight dst=0000000B2A036000 off=0 src=0000000204F00000 n=8192
+SETDBG #689 blk.26.attn_q.weight dst=0000000B2A038000 off=0 src=0000000204C00000 n=1048576
+SETDBG #690 blk.26.attn_q.weight dst=0000000B2A038000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #691 blk.26.attn_q.weight dst=0000000B2A038000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #692 blk.26.attn_q.weight dst=0000000B2A038000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #693 blk.26.attn_q.weight dst=0000000B2A038000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #694 blk.26.attn_k.weight dst=0000000B2A4B8000 off=0 src=0000000204D00000 n=589824
+.SETDBG #695 blk.26.attn_v.weight dst=0000000B2A548000 off=0 src=0000000204E00000 n=860160
+SETDBG #696 blk.26.attn_output.weight dst=0000000B2A61A000 off=0 src=0000000204F00000 n=1048576
+SETDBG #697 blk.26.attn_output.weight dst=0000000B2A61A000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #698 blk.26.attn_output.weight dst=0000000B2A61A000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #699 blk.26.attn_output.weight dst=0000000B2A61A000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #700 blk.26.attn_output.weight dst=0000000B2A61A000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #701 blk.26.attn_k_norm.weight dst=0000000B2AA9A000 off=0 src=0000000204C00000 n=512
+SETDBG #702 blk.26.attn_q_norm.weight dst=0000000B2AA9A200 off=0 src=0000000204D00000 n=512
+SETDBG #703 blk.26.ffn_norm.weight dst=0000000B2AA9A400 off=0 src=0000000204E00000 n=8192
+SETDBG #704 blk.26.ffn_gate_inp.weight dst=0000000B2AA9C400 off=0 src=0000000204F00000 n=1048576
+SETDBG #705 blk.27.attn_norm.weight dst=0000000B2AB9C400 off=0 src=0000000204C00000 n=8192
+SETDBG #706 blk.27.attn_q.weight dst=0000000B2AB9E400 off=0 src=0000000204D00000 n=1048576
+SETDBG #707 blk.27.attn_q.weight dst=0000000B2AB9E400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #708 blk.27.attn_q.weight dst=0000000B2AB9E400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #709 blk.27.attn_q.weight dst=0000000B2AB9E400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #710 blk.27.attn_q.weight dst=0000000B2AB9E400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #711 blk.27.attn_k.weight dst=0000000B2B01E400 off=0 src=0000000204E00000 n=589824
+SETDBG #712 blk.27.attn_v.weight dst=0000000B2B0AE400 off=0 src=0000000204F00000 n=589824
+SETDBG #713 blk.27.attn_output.weight dst=0000000B2B13E400 off=0 src=0000000204C00000 n=1048576
+SETDBG #714 blk.27.attn_output.weight dst=0000000B2B13E400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #715 blk.27.attn_output.weight dst=0000000B2B13E400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #716 blk.27.attn_output.weight dst=0000000B2B13E400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #717 blk.27.attn_output.weight dst=0000000B2B13E400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #718 blk.27.attn_k_norm.weight dst=0000000B2B5BE400 off=0 src=0000000204D00000 n=512
+SETDBG #719 blk.27.attn_q_norm.weight dst=0000000B2B5BE600 off=0 src=0000000204E00000 n=512
+SETDBG #720 blk.27.ffn_norm.weight dst=0000000B2B5BE800 off=0 src=0000000204F00000 n=8192
+SETDBG #721 blk.27.ffn_gate_inp.weight dst=0000000B2B5C0800 off=0 src=0000000204C00000 n=1048576
+SETDBG #722 blk.28.attn_norm.weight dst=0000000B2B6C0800 off=0 src=0000000204D00000 n=8192
+SETDBG #723 blk.28.attn_q.weight dst=0000000B2B6C2800 off=0 src=0000000204E00000 n=1048576
+SETDBG #724 blk.28.attn_q.weight dst=0000000B2B6C2800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #725 blk.28.attn_q.weight dst=0000000B2B6C2800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #726 blk.28.attn_q.weight dst=0000000B2B6C2800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #727 blk.28.attn_q.weight dst=0000000B2B6C2800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #728 blk.28.attn_k.weight dst=0000000B2BB42800 off=0 src=0000000204F00000 n=589824
+SETDBG #729 blk.28.attn_v.weight dst=0000000B2BBD2800 off=0 src=0000000204C00000 n=589824
+SETDBG #730 blk.28.attn_output.weight dst=0000000B2BC62800 off=0 src=0000000204D00000 n=1048576
+SETDBG #731 blk.28.attn_output.weight dst=0000000B2BC62800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #732 blk.28.attn_output.weight dst=0000000B2BC62800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #733 blk.28.attn_output.weight dst=0000000B2BC62800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #734 blk.28.attn_output.weight dst=0000000B2BC62800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #735 blk.28.attn_k_norm.weight dst=0000000B2C0E2800 off=0 src=0000000204E00000 n=512
+SETDBG #736 blk.28.attn_q_norm.weight dst=0000000B2C0E2A00 off=0 src=0000000204F00000 n=512
+SETDBG #737 blk.28.ffn_norm.weight dst=0000000B2C0E2C00 off=0 src=0000000204C00000 n=8192
+SETDBG #738 blk.28.ffn_gate_inp.weight dst=0000000B2C0E4C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #739 blk.29.attn_norm.weight dst=0000000B2C1E4C00 off=0 src=0000000204E00000 n=8192
+SETDBG #740 blk.29.attn_q.weight dst=0000000B2C1E6C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #741 blk.29.attn_q.weight dst=0000000B2C1E6C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #742 blk.29.attn_q.weight dst=0000000B2C1E6C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #743 blk.29.attn_q.weight dst=0000000B2C1E6C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #744 blk.29.attn_q.weight dst=0000000B2C1E6C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #745 blk.29.attn_k.weight dst=0000000B2C666C00 off=0 src=0000000204C00000 n=589824
+SETDBG #746 blk.29.attn_v.weight dst=0000000B2C6F6C00 off=0 src=0000000204D00000 n=860160
+SETDBG #747 blk.29.attn_output.weight dst=0000000B2C7C8C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #748 blk.29.attn_output.weight dst=0000000B2C7C8C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #749 blk.29.attn_output.weight dst=0000000B2C7C8C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #750 blk.29.attn_output.weight dst=0000000B2C7C8C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #751 blk.29.attn_output.weight dst=0000000B2C7C8C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #752 blk.29.attn_k_norm.weight dst=0000000B2CC48C00 off=0 src=0000000204F00000 n=512
+SETDBG #753 blk.29.attn_q_norm.weight dst=0000000B2CC48E00 off=0 src=0000000204C00000 n=512
+SETDBG #754 blk.29.ffn_norm.weight dst=0000000B2CC49000 off=0 src=0000000204D00000 n=8192
+SETDBG #755 blk.29.ffn_gate_inp.weight dst=0000000B2CC4B000 off=0 src=0000000204E00000 n=1048576
+SETDBG #756 blk.30.attn_norm.weight dst=0000000B2CD4B000 off=0 src=0000000204F00000 n=8192
+SETDBG #757 blk.30.attn_q.weight dst=0000000B2CD4D000 off=0 src=0000000204C00000 n=1048576
+SETDBG #758 blk.30.attn_q.weight dst=0000000B2CD4D000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #759 blk.30.attn_q.weight dst=0000000B2CD4D000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #760 blk.30.attn_q.weight dst=0000000B2CD4D000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #761 blk.30.attn_q.weight dst=0000000B2CD4D000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #762 blk.30.attn_k.weight dst=0000000B2D1CD000 off=0 src=0000000204D00000 n=589824
+SETDBG #763 blk.30.attn_v.weight dst=0000000B2D25D000 off=0 src=0000000204E00000 n=589824
+SETDBG #764 blk.30.attn_output.weight dst=0000000B2D2ED000 off=0 src=0000000204F00000 n=1048576
+SETDBG #765 blk.30.attn_output.weight dst=0000000B2D2ED000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #766 blk.30.attn_output.weight dst=0000000B2D2ED000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #767 blk.30.attn_output.weight dst=0000000B2D2ED000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #768 blk.30.attn_output.weight dst=0000000B2D2ED000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #769 blk.30.attn_k_norm.weight dst=0000000B2D76D000 off=0 src=0000000204C00000 n=512
+SETDBG #770 blk.30.attn_q_norm.weight dst=0000000B2D76D200 off=0 src=0000000204D00000 n=512
+SETDBG #771 blk.30.ffn_norm.weight dst=0000000B2D76D400 off=0 src=0000000204E00000 n=8192
+SETDBG #772 blk.30.ffn_gate_inp.weight dst=0000000B2D76F400 off=0 src=0000000204F00000 n=1048576
+SETDBG #773 blk.31.attn_norm.weight dst=0000000B2D86F400 off=0 src=0000000204C00000 n=8192
+SETDBG #774 blk.31.attn_q.weight dst=0000000B2D871400 off=0 src=0000000204D00000 n=1048576
+SETDBG #775 blk.31.attn_q.weight dst=0000000B2D871400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #776 blk.31.attn_q.weight dst=0000000B2D871400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #777 blk.31.attn_q.weight dst=0000000B2D871400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #778 blk.31.attn_q.weight dst=0000000B2D871400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #779 blk.31.attn_k.weight dst=0000000B2DCF1400 off=0 src=0000000204E00000 n=589824
+SETDBG #780 blk.31.attn_v.weight dst=0000000B2DD81400 off=0 src=0000000204F00000 n=589824
+SETDBG #781 blk.31.attn_output.weight dst=0000000B2DE11400 off=0 src=0000000204C00000 n=1048576
+SETDBG #782 blk.31.attn_output.weight dst=0000000B2DE11400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #783 blk.31.attn_output.weight dst=0000000B2DE11400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #784 blk.31.attn_output.weight dst=0000000B2DE11400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #785 blk.31.attn_output.weight dst=0000000B2DE11400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #786 blk.31.attn_k_norm.weight dst=0000000B2E291400 off=0 src=0000000204D00000 n=512
+SETDBG #787 blk.31.attn_q_norm.weight dst=0000000B2E291600 off=0 src=0000000204E00000 n=512
+SETDBG #788 blk.31.ffn_norm.weight dst=0000000B2E291800 off=0 src=0000000204F00000 n=8192
+SETDBG #789 blk.31.ffn_gate_inp.weight dst=0000000B2E293800 off=0 src=0000000204C00000 n=1048576
+SETDBG #790 blk.32.attn_norm.weight dst=0000000B2E393800 off=0 src=0000000204D00000 n=8192
+SETDBG #791 blk.32.attn_q.weight dst=0000000B2E395800 off=0 src=0000000204E00000 n=1048576
+SETDBG #792 blk.32.attn_q.weight dst=0000000B2E395800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #793 blk.32.attn_q.weight dst=0000000B2E395800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #794 blk.32.attn_q.weight dst=0000000B2E395800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #795 blk.32.attn_q.weight dst=0000000B2E395800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #796 blk.32.attn_k.weight dst=0000000B2E815800 off=0 src=0000000204F00000 n=589824
+SETDBG #797 blk.32.attn_v.weight dst=0000000B2E8A5800 off=0 src=0000000204C00000 n=860160
+SETDBG #798 blk.32.attn_output.weight dst=0000000B2E977800 off=0 src=0000000204D00000 n=1048576
+SETDBG #799 blk.32.attn_output.weight dst=0000000B2E977800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #800 blk.32.attn_output.weight dst=0000000B2E977800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #801 blk.32.attn_output.weight dst=0000000B2E977800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #802 blk.32.attn_output.weight dst=0000000B2E977800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #803 blk.32.attn_k_norm.weight dst=0000000B2EDF7800 off=0 src=0000000204E00000 n=512
+SETDBG #804 blk.32.attn_q_norm.weight dst=0000000B2EDF7A00 off=0 src=0000000204F00000 n=512
+SETDBG #805 blk.32.ffn_norm.weight dst=0000000B2EDF7C00 off=0 src=0000000204C00000 n=8192
+SETDBG #806 blk.32.ffn_gate_inp.weight dst=0000000B2EDF9C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #807 blk.33.attn_norm.weight dst=0000000B2EEF9C00 off=0 src=0000000204E00000 n=8192
+SETDBG #808 blk.33.attn_q.weight dst=0000000B2EEFBC00 off=0 src=0000000204F00000 n=1048576
+SETDBG #809 blk.33.attn_q.weight dst=0000000B2EEFBC00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #810 blk.33.attn_q.weight dst=0000000B2EEFBC00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #811 blk.33.attn_q.weight dst=0000000B2EEFBC00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #812 blk.33.attn_q.weight dst=0000000B2EEFBC00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #813 blk.33.attn_k.weight dst=0000000B2F37BC00 off=0 src=0000000204C00000 n=589824
+SETDBG #814 blk.33.attn_v.weight dst=0000000B2F40BC00 off=0 src=0000000204D00000 n=589824
+SETDBG #815 blk.33.attn_output.weight dst=0000000B2F49BC00 off=0 src=0000000204E00000 n=1048576
+SETDBG #816 blk.33.attn_output.weight dst=0000000B2F49BC00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #817 blk.33.attn_output.weight dst=0000000B2F49BC00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #818 blk.33.attn_output.weight dst=0000000B2F49BC00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #819 blk.33.attn_output.weight dst=0000000B2F49BC00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #820 blk.33.attn_k_norm.weight dst=0000000B2F91BC00 off=0 src=0000000204F00000 n=512
+SETDBG #821 blk.33.attn_q_norm.weight dst=0000000B2F91BE00 off=0 src=0000000204C00000 n=512
+SETDBG #822 blk.33.ffn_norm.weight dst=0000000B2F91C000 off=0 src=0000000204D00000 n=8192
+SETDBG #823 blk.33.ffn_gate_inp.weight dst=0000000B2F91E000 off=0 src=0000000204E00000 n=1048576
+SETDBG #824 blk.34.attn_norm.weight dst=0000000B2FA1E000 off=0 src=0000000204F00000 n=8192
+SETDBG #825 blk.34.attn_q.weight dst=0000000B2FA20000 off=0 src=0000000204C00000 n=1048576
+SETDBG #826 blk.34.attn_q.weight dst=0000000B2FA20000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #827 blk.34.attn_q.weight dst=0000000B2FA20000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #828 blk.34.attn_q.weight dst=0000000B2FA20000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #829 blk.34.attn_q.weight dst=0000000B2FA20000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #830 blk.34.attn_k.weight dst=0000000B2FEA0000 off=0 src=0000000204D00000 n=589824
+SETDBG #831 blk.34.attn_v.weight dst=0000000B2FF30000 off=0 src=0000000204E00000 n=589824
+SETDBG #832 blk.34.attn_output.weight dst=0000000B2FFC0000 off=0 src=0000000204F00000 n=1048576
+SETDBG #833 blk.34.attn_output.weight dst=0000000B2FFC0000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #834 blk.34.attn_output.weight dst=0000000B2FFC0000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #835 blk.34.attn_output.weight dst=0000000B2FFC0000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #836 blk.34.attn_output.weight dst=0000000B2FFC0000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #837 blk.34.attn_k_norm.weight dst=0000000B30440000 off=0 src=0000000204C00000 n=512
+SETDBG #838 blk.34.attn_q_norm.weight dst=0000000B30440200 off=0 src=0000000204D00000 n=512
+SETDBG #839 blk.34.ffn_norm.weight dst=0000000B30440400 off=0 src=0000000204E00000 n=8192
+SETDBG #840 blk.34.ffn_gate_inp.weight dst=0000000B30442400 off=0 src=0000000204F00000 n=1048576
+SETDBG #841 blk.35.attn_norm.weight dst=0000000B30542400 off=0 src=0000000204C00000 n=8192
+SETDBG #842 blk.35.attn_q.weight dst=0000000B30544400 off=0 src=0000000204D00000 n=1048576
+SETDBG #843 blk.35.attn_q.weight dst=0000000B30544400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #844 blk.35.attn_q.weight dst=0000000B30544400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #845 blk.35.attn_q.weight dst=0000000B30544400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #846 blk.35.attn_q.weight dst=0000000B30544400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #847 blk.35.attn_k.weight dst=0000000B309C4400 off=0 src=0000000204E00000 n=589824
+SETDBG #848 blk.35.attn_v.weight dst=0000000B30A54400 off=0 src=0000000204F00000 n=860160
+SETDBG #849 blk.35.attn_output.weight dst=0000000B30B26400 off=0 src=0000000204C00000 n=1048576
+SETDBG #850 blk.35.attn_output.weight dst=0000000B30B26400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #851 blk.35.attn_output.weight dst=0000000B30B26400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #852 blk.35.attn_output.weight dst=0000000B30B26400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #853 blk.35.attn_output.weight dst=0000000B30B26400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #854 blk.35.attn_k_norm.weight dst=0000000B30FA6400 off=0 src=0000000204D00000 n=512
+SETDBG #855 blk.35.attn_q_norm.weight dst=0000000B30FA6600 off=0 src=0000000204E00000 n=512
+SETDBG #856 blk.35.ffn_norm.weight dst=0000000B30FA6800 off=0 src=0000000204F00000 n=8192
+SETDBG #857 blk.35.ffn_gate_inp.weight dst=0000000B30FA8800 off=0 src=0000000204C00000 n=1048576
+SETDBG #858 blk.36.attn_norm.weight dst=0000000B310A8800 off=0 src=0000000204D00000 n=8192
+SETDBG #859 blk.36.attn_q.weight dst=0000000B310AA800 off=0 src=0000000204E00000 n=1048576
+SETDBG #860 blk.36.attn_q.weight dst=0000000B310AA800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #861 blk.36.attn_q.weight dst=0000000B310AA800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #862 blk.36.attn_q.weight dst=0000000B310AA800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #863 blk.36.attn_q.weight dst=0000000B310AA800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #864 blk.36.attn_k.weight dst=0000000B3152A800 off=0 src=0000000204F00000 n=589824
+SETDBG #865 blk.36.attn_v.weight dst=0000000B315BA800 off=0 src=0000000204C00000 n=589824
+SETDBG #866 blk.36.attn_output.weight dst=0000000B3164A800 off=0 src=0000000204D00000 n=1048576
+SETDBG #867 blk.36.attn_output.weight dst=0000000B3164A800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #868 blk.36.attn_output.weight dst=0000000B3164A800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #869 blk.36.attn_output.weight dst=0000000B3164A800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #870 blk.36.attn_output.weight dst=0000000B3164A800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #871 blk.36.attn_k_norm.weight dst=0000000B31ACA800 off=0 src=0000000204E00000 n=512
+SETDBG #872 blk.36.attn_q_norm.weight dst=0000000B31ACAA00 off=0 src=0000000204F00000 n=512
+SETDBG #873 blk.36.ffn_norm.weight dst=0000000B31ACAC00 off=0 src=0000000204C00000 n=8192
+SETDBG #874 blk.36.ffn_gate_inp.weight dst=0000000B31ACCC00 off=0 src=0000000204D00000 n=1048576
+SETDBG #875 blk.37.attn_norm.weight dst=0000000B31BCCC00 off=0 src=0000000204E00000 n=8192
+SETDBG #876 blk.37.attn_q.weight dst=0000000B31BCEC00 off=0 src=0000000204F00000 n=1048576
+SETDBG #877 blk.37.attn_q.weight dst=0000000B31BCEC00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #878 blk.37.attn_q.weight dst=0000000B31BCEC00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #879 blk.37.attn_q.weight dst=0000000B31BCEC00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #880 blk.37.attn_q.weight dst=0000000B31BCEC00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #881 blk.37.attn_k.weight dst=0000000B3204EC00 off=0 src=0000000204C00000 n=589824
+SETDBG #882 blk.37.attn_v.weight dst=0000000B320DEC00 off=0 src=0000000204D00000 n=589824
+SETDBG #883 blk.37.attn_output.weight dst=0000000B3216EC00 off=0 src=0000000204E00000 n=1048576
+SETDBG #884 blk.37.attn_output.weight dst=0000000B3216EC00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #885 blk.37.attn_output.weight dst=0000000B3216EC00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #886 blk.37.attn_output.weight dst=0000000B3216EC00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #887 blk.37.attn_output.weight dst=0000000B3216EC00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #888 blk.37.attn_k_norm.weight dst=0000000B325EEC00 off=0 src=0000000204F00000 n=512
+SETDBG #889 blk.37.attn_q_norm.weight dst=0000000B325EEE00 off=0 src=0000000204C00000 n=512
+SETDBG #890 blk.37.ffn_norm.weight dst=0000000B325EF000 off=0 src=0000000204D00000 n=8192
+SETDBG #891 blk.37.ffn_gate_inp.weight dst=0000000B325F1000 off=0 src=0000000204E00000 n=1048576
+SETDBG #892 blk.38.attn_norm.weight dst=0000000B326F1000 off=0 src=0000000204F00000 n=8192
+SETDBG #893 blk.38.attn_q.weight dst=0000000B326F3000 off=0 src=0000000204C00000 n=1048576
+SETDBG #894 blk.38.attn_q.weight dst=0000000B326F3000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #895 blk.38.attn_q.weight dst=0000000B326F3000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #896 blk.38.attn_q.weight dst=0000000B326F3000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #897 blk.38.attn_q.weight dst=0000000B326F3000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #898 blk.38.attn_k.weight dst=0000000B32B73000 off=0 src=0000000204D00000 n=589824
+SETDBG #899 blk.38.attn_v.weight dst=0000000B32C03000 off=0 src=0000000204E00000 n=860160
+SETDBG #900 blk.38.attn_output.weight dst=0000000B32CD5000 off=0 src=0000000204F00000 n=1048576
+SETDBG #901 blk.38.attn_output.weight dst=0000000B32CD5000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #902 blk.38.attn_output.weight dst=0000000B32CD5000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #903 blk.38.attn_output.weight dst=0000000B32CD5000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #904 blk.38.attn_output.weight dst=0000000B32CD5000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #905 blk.38.attn_k_norm.weight dst=0000000B33155000 off=0 src=0000000204C00000 n=512
+SETDBG #906 blk.38.attn_q_norm.weight dst=0000000B33155200 off=0 src=0000000204D00000 n=512
+SETDBG #907 blk.38.ffn_norm.weight dst=0000000B33155400 off=0 src=0000000204E00000 n=8192
+SETDBG #908 blk.38.ffn_gate_inp.weight dst=0000000B33157400 off=0 src=0000000204F00000 n=1048576
+SETDBG #909 blk.39.attn_norm.weight dst=0000000B33257400 off=0 src=0000000204C00000 n=8192
+SETDBG #910 blk.39.attn_q.weight dst=0000000B33259400 off=0 src=0000000204D00000 n=1048576
+SETDBG #911 blk.39.attn_q.weight dst=0000000B33259400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #912 blk.39.attn_q.weight dst=0000000B33259400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #913 blk.39.attn_q.weight dst=0000000B33259400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #914 blk.39.attn_q.weight dst=0000000B33259400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #915 blk.39.attn_k.weight dst=0000000B336D9400 off=0 src=0000000204E00000 n=589824
+SETDBG #916 blk.39.attn_v.weight dst=0000000B33769400 off=0 src=0000000204F00000 n=589824
+SETDBG #917 blk.39.attn_output.weight dst=0000000B337F9400 off=0 src=0000000204C00000 n=1048576
+SETDBG #918 blk.39.attn_output.weight dst=0000000B337F9400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #919 blk.39.attn_output.weight dst=0000000B337F9400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #920 blk.39.attn_output.weight dst=0000000B337F9400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #921 blk.39.attn_output.weight dst=0000000B337F9400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #922 blk.39.attn_k_norm.weight dst=0000000B33C79400 off=0 src=0000000204D00000 n=512
+SETDBG #923 blk.39.attn_q_norm.weight dst=0000000B33C79600 off=0 src=0000000204E00000 n=512
+SETDBG #924 blk.39.ffn_norm.weight dst=0000000B33C79800 off=0 src=0000000204F00000 n=8192
+SETDBG #925 blk.39.ffn_gate_inp.weight dst=0000000B33C7B800 off=0 src=0000000204C00000 n=1048576
+SETDBG #926 blk.40.attn_norm.weight dst=0000000B33D7B800 off=0 src=0000000204D00000 n=8192
+SETDBG #927 blk.40.attn_q.weight dst=0000000B33D7D800 off=0 src=0000000204E00000 n=1048576
+SETDBG #928 blk.40.attn_q.weight dst=0000000B33D7D800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #929 blk.40.attn_q.weight dst=0000000B33D7D800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #930 blk.40.attn_q.weight dst=0000000B33D7D800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #931 blk.40.attn_q.weight dst=0000000B33D7D800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #932 blk.40.attn_k.weight dst=0000000B341FD800 off=0 src=0000000204F00000 n=589824
+SETDBG #933 blk.40.attn_v.weight dst=0000000B3428D800 off=0 src=0000000204C00000 n=589824
+SETDBG #934 blk.40.attn_output.weight dst=0000000B3431D800 off=0 src=0000000204D00000 n=1048576
+SETDBG #935 blk.40.attn_output.weight dst=0000000B3431D800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #936 blk.40.attn_output.weight dst=0000000B3431D800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #937 blk.40.attn_output.weight dst=0000000B3431D800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #938 blk.40.attn_output.weight dst=0000000B3431D800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #939 blk.40.attn_k_norm.weight dst=0000000B3479D800 off=0 src=0000000204E00000 n=512
+SETDBG #940 blk.40.attn_q_norm.weight dst=0000000B3479DA00 off=0 src=0000000204F00000 n=512
+SETDBG #941 blk.40.ffn_norm.weight dst=0000000B3479DC00 off=0 src=0000000204C00000 n=8192
+SETDBG #942 blk.40.ffn_gate_inp.weight dst=0000000B3479FC00 off=0 src=0000000204D00000 n=1048576
+SETDBG #943 blk.41.attn_norm.weight dst=0000000B3489FC00 off=0 src=0000000204E00000 n=8192
+SETDBG #944 blk.41.attn_q.weight dst=0000000B348A1C00 off=0 src=0000000204F00000 n=1048576
+SETDBG #945 blk.41.attn_q.weight dst=0000000B348A1C00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #946 blk.41.attn_q.weight dst=0000000B348A1C00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #947 blk.41.attn_q.weight dst=0000000B348A1C00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #948 blk.41.attn_q.weight dst=0000000B348A1C00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #949 blk.41.attn_k.weight dst=0000000B34D21C00 off=0 src=0000000204C00000 n=589824
+SETDBG #950 blk.41.attn_v.weight dst=0000000B34DB1C00 off=0 src=0000000204D00000 n=860160
+SETDBG #951 blk.41.attn_output.weight dst=0000000B34E83C00 off=0 src=0000000204E00000 n=1048576
+SETDBG #952 blk.41.attn_output.weight dst=0000000B34E83C00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #953 blk.41.attn_output.weight dst=0000000B34E83C00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #954 blk.41.attn_output.weight dst=0000000B34E83C00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #955 blk.41.attn_output.weight dst=0000000B34E83C00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #956 blk.41.attn_k_norm.weight dst=0000000B35303C00 off=0 src=0000000204F00000 n=512
+SETDBG #957 blk.41.attn_q_norm.weight dst=0000000B35303E00 off=0 src=0000000204C00000 n=512
+SETDBG #958 blk.41.ffn_norm.weight dst=0000000B35304000 off=0 src=0000000204D00000 n=8192
+SETDBG #959 blk.41.ffn_gate_inp.weight dst=0000000B35306000 off=0 src=0000000204E00000 n=1048576
+SETDBG #960 blk.42.attn_norm.weight dst=0000000B35406000 off=0 src=0000000204F00000 n=8192
+SETDBG #961 blk.42.attn_q.weight dst=0000000B35408000 off=0 src=0000000204C00000 n=1048576
+SETDBG #962 blk.42.attn_q.weight dst=0000000B35408000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #963 blk.42.attn_q.weight dst=0000000B35408000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #964 blk.42.attn_q.weight dst=0000000B35408000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #965 blk.42.attn_q.weight dst=0000000B35408000 off=4194304 src=0000000204C00000 n=524288
+.SETDBG #966 blk.42.attn_k.weight dst=0000000B35888000 off=0 src=0000000204D00000 n=589824
+SETDBG #967 blk.42.attn_v.weight dst=0000000B35918000 off=0 src=0000000204E00000 n=860160
+SETDBG #968 blk.42.attn_output.weight dst=0000000B359EA000 off=0 src=0000000204F00000 n=1048576
+SETDBG #969 blk.42.attn_output.weight dst=0000000B359EA000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #970 blk.42.attn_output.weight dst=0000000B359EA000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #971 blk.42.attn_output.weight dst=0000000B359EA000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #972 blk.42.attn_output.weight dst=0000000B359EA000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #973 blk.42.attn_k_norm.weight dst=0000000B35E6A000 off=0 src=0000000204C00000 n=512
+SETDBG #974 blk.42.attn_q_norm.weight dst=0000000B35E6A200 off=0 src=0000000204D00000 n=512
+SETDBG #975 blk.42.ffn_norm.weight dst=0000000B35E6A400 off=0 src=0000000204E00000 n=8192
+SETDBG #976 blk.42.ffn_gate_inp.weight dst=0000000B35E6C400 off=0 src=0000000204F00000 n=1048576
+SETDBG #977 blk.43.attn_norm.weight dst=0000000B35F6C400 off=0 src=0000000204C00000 n=8192
+SETDBG #978 blk.43.attn_q.weight dst=0000000B35F6E400 off=0 src=0000000204D00000 n=1048576
+SETDBG #979 blk.43.attn_q.weight dst=0000000B35F6E400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #980 blk.43.attn_q.weight dst=0000000B35F6E400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #981 blk.43.attn_q.weight dst=0000000B35F6E400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #982 blk.43.attn_q.weight dst=0000000B35F6E400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #983 blk.43.attn_k.weight dst=0000000B363EE400 off=0 src=0000000204E00000 n=589824
+SETDBG #984 blk.43.attn_v.weight dst=0000000B3647E400 off=0 src=0000000204F00000 n=860160
+SETDBG #985 blk.43.attn_output.weight dst=0000000B36550400 off=0 src=0000000204C00000 n=1048576
+SETDBG #986 blk.43.attn_output.weight dst=0000000B36550400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #987 blk.43.attn_output.weight dst=0000000B36550400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #988 blk.43.attn_output.weight dst=0000000B36550400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #989 blk.43.attn_output.weight dst=0000000B36550400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #990 blk.43.attn_k_norm.weight dst=0000000B369D0400 off=0 src=0000000204D00000 n=512
+SETDBG #991 blk.43.attn_q_norm.weight dst=0000000B369D0600 off=0 src=0000000204E00000 n=512
+SETDBG #992 blk.43.ffn_norm.weight dst=0000000B369D0800 off=0 src=0000000204F00000 n=8192
+SETDBG #993 blk.43.ffn_gate_inp.weight dst=0000000B369D2800 off=0 src=0000000204C00000 n=1048576
+SETDBG #994 blk.44.attn_norm.weight dst=0000000B36AD2800 off=0 src=0000000204D00000 n=8192
+SETDBG #995 blk.44.attn_q.weight dst=0000000B36AD4800 off=0 src=0000000204E00000 n=1048576
+SETDBG #996 blk.44.attn_q.weight dst=0000000B36AD4800 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #997 blk.44.attn_q.weight dst=0000000B36AD4800 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #998 blk.44.attn_q.weight dst=0000000B36AD4800 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #999 blk.44.attn_q.weight dst=0000000B36AD4800 off=4194304 src=0000000204E00000 n=524288
+SETDBG #1000 blk.44.attn_k.weight dst=0000000B36F54800 off=0 src=0000000204F00000 n=589824
+SETDBG #1001 blk.44.attn_v.weight dst=0000000B36FE4800 off=0 src=0000000204C00000 n=860160
+SETDBG #1002 blk.44.attn_output.weight dst=0000000B370B6800 off=0 src=0000000204D00000 n=1048576
+SETDBG #1003 blk.44.attn_output.weight dst=0000000B370B6800 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #1004 blk.44.attn_output.weight dst=0000000B370B6800 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #1005 blk.44.attn_output.weight dst=0000000B370B6800 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #1006 blk.44.attn_output.weight dst=0000000B370B6800 off=4194304 src=0000000204D00000 n=524288
+SETDBG #1007 blk.44.attn_k_norm.weight dst=0000000B37536800 off=0 src=0000000204E00000 n=512
+SETDBG #1008 blk.44.attn_q_norm.weight dst=0000000B37536A00 off=0 src=0000000204F00000 n=512
+SETDBG #1009 blk.44.ffn_norm.weight dst=0000000B37536C00 off=0 src=0000000204C00000 n=8192
+SETDBG #1010 blk.44.ffn_gate_inp.weight dst=0000000B37538C00 off=0 src=0000000204D00000 n=1048576
+SETDBG #1011 blk.45.attn_norm.weight dst=0000000B37638C00 off=0 src=0000000204E00000 n=8192
+SETDBG #1012 blk.45.attn_q.weight dst=0000000B3763AC00 off=0 src=0000000204F00000 n=1048576
+SETDBG #1013 blk.45.attn_q.weight dst=0000000B3763AC00 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #1014 blk.45.attn_q.weight dst=0000000B3763AC00 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #1015 blk.45.attn_q.weight dst=0000000B3763AC00 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #1016 blk.45.attn_q.weight dst=0000000B3763AC00 off=4194304 src=0000000204F00000 n=524288
+SETDBG #1017 blk.45.attn_k.weight dst=0000000B37ABAC00 off=0 src=0000000204C00000 n=589824
+SETDBG #1018 blk.45.attn_v.weight dst=0000000B37B4AC00 off=0 src=0000000204D00000 n=860160
+SETDBG #1019 blk.45.attn_output.weight dst=0000000B37C1CC00 off=0 src=0000000204E00000 n=1048576
+SETDBG #1020 blk.45.attn_output.weight dst=0000000B37C1CC00 off=1048576 src=0000000204F00000 n=1048576
+SETDBG #1021 blk.45.attn_output.weight dst=0000000B37C1CC00 off=2097152 src=0000000204C00000 n=1048576
+SETDBG #1022 blk.45.attn_output.weight dst=0000000B37C1CC00 off=3145728 src=0000000204D00000 n=1048576
+SETDBG #1023 blk.45.attn_output.weight dst=0000000B37C1CC00 off=4194304 src=0000000204E00000 n=524288
+SETDBG #1024 blk.45.attn_k_norm.weight dst=0000000B3809CC00 off=0 src=0000000204F00000 n=512
+SETDBG #1025 blk.45.attn_q_norm.weight dst=0000000B3809CE00 off=0 src=0000000204C00000 n=512
+SETDBG #1026 blk.45.ffn_norm.weight dst=0000000B3809D000 off=0 src=0000000204D00000 n=8192
+SETDBG #1027 blk.45.ffn_gate_inp.weight dst=0000000B3809F000 off=0 src=0000000204E00000 n=1048576
+SETDBG #1028 blk.46.attn_norm.weight dst=0000000B3819F000 off=0 src=0000000204F00000 n=8192
+SETDBG #1029 blk.46.attn_q.weight dst=0000000B381A1000 off=0 src=0000000204C00000 n=1048576
+SETDBG #1030 blk.46.attn_q.weight dst=0000000B381A1000 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #1031 blk.46.attn_q.weight dst=0000000B381A1000 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #1032 blk.46.attn_q.weight dst=0000000B381A1000 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #1033 blk.46.attn_q.weight dst=0000000B381A1000 off=4194304 src=0000000204C00000 n=524288
+SETDBG #1034 blk.46.attn_k.weight dst=0000000B38621000 off=0 src=0000000204D00000 n=589824
+SETDBG #1035 blk.46.attn_v.weight dst=0000000B386B1000 off=0 src=0000000204E00000 n=860160
+SETDBG #1036 blk.46.attn_output.weight dst=0000000B38783000 off=0 src=0000000204F00000 n=1048576
+SETDBG #1037 blk.46.attn_output.weight dst=0000000B38783000 off=1048576 src=0000000204C00000 n=1048576
+SETDBG #1038 blk.46.attn_output.weight dst=0000000B38783000 off=2097152 src=0000000204D00000 n=1048576
+SETDBG #1039 blk.46.attn_output.weight dst=0000000B38783000 off=3145728 src=0000000204E00000 n=1048576
+SETDBG #1040 blk.46.attn_output.weight dst=0000000B38783000 off=4194304 src=0000000204F00000 n=524288
+SETDBG #1041 blk.46.attn_k_norm.weight dst=0000000B38C03000 off=0 src=0000000204C00000 n=512
+SETDBG #1042 blk.46.attn_q_norm.weight dst=0000000B38C03200 off=0 src=0000000204D00000 n=512
+SETDBG #1043 blk.46.ffn_norm.weight dst=0000000B38C03400 off=0 src=0000000204E00000 n=8192
+SETDBG #1044 blk.46.ffn_gate_inp.weight dst=0000000B38C05400 off=0 src=0000000204F00000 n=1048576
+SETDBG #1045 blk.47.attn_norm.weight dst=0000000B38D05400 off=0 src=0000000204C00000 n=8192
+SETDBG #1046 blk.47.attn_q.weight dst=0000000B38D07400 off=0 src=0000000204D00000 n=1048576
+SETDBG #1047 blk.47.attn_q.weight dst=0000000B38D07400 off=1048576 src=0000000204E00000 n=1048576
+SETDBG #1048 blk.47.attn_q.weight dst=0000000B38D07400 off=2097152 src=0000000204F00000 n=1048576
+SETDBG #1049 blk.47.attn_q.weight dst=0000000B38D07400 off=3145728 src=0000000204C00000 n=1048576
+SETDBG #1050 blk.47.attn_q.weight dst=0000000B38D07400 off=4194304 src=0000000204D00000 n=524288
+SETDBG #1051 blk.47.attn_k.weight dst=0000000B39187400 off=0 src=0000000204E00000 n=589824
+SETDBG #1052 blk.47.attn_v.weight dst=0000000B39217400 off=0 src=0000000204F00000 n=860160
+SETDBG #1053 blk.47.attn_output.weight dst=0000000B392E9400 off=0 src=0000000204C00000 n=1048576
+SETDBG #1054 blk.47.attn_output.weight dst=0000000B392E9400 off=1048576 src=0000000204D00000 n=1048576
+SETDBG #1055 blk.47.attn_output.weight dst=0000000B392E9400 off=2097152 src=0000000204E00000 n=1048576
+SETDBG #1056 blk.47.attn_output.weight dst=0000000B392E9400 off=3145728 src=0000000204F00000 n=1048576
+SETDBG #1057 blk.47.attn_output.weight dst=0000000B392E9400 off=4194304 src=0000000204C00000 n=524288
+SETDBG #1058 blk.47.attn_k_norm.weight dst=0000000B39769400 off=0 src=0000000204D00000 n=512
+SETDBG #1059 blk.47.attn_q_norm.weight dst=0000000B39769600 off=0 src=0000000204E00000 n=512
+SETDBG #1060 blk.47.ffn_norm.weight dst=0000000B39769800 off=0 src=0000000204F00000 n=8192
+SETDBG #1061 blk.47.ffn_gate_inp.weight dst=0000000B3976B800 off=0 src=0000000204C00000 n=1048576
+...............................................................................................
+common_init_result: added </s> logit bias = -inf
+common_init_result: added <|endoftext|> logit bias = -inf
+common_init_result: added <|im_end|> logit bias = -inf
+common_init_result: added <|fim_pad|> logit bias = -inf
+common_init_result: added <|repo_name|> logit bias = -inf
+common_init_result: added <|file_sep|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 40960
+llama_context: n_ctx_seq     = 40960
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 1000000.0
+llama_context: freq_scale    = 1
+llama_context:  CUDA_Host  output buffer size =     0.58 MiB
+llama_kv_cache:      CUDA0 KV buffer size =  3840.00 MiB
+llama_kv_cache: size = 3840.00 MiB ( 40960 cells,  48 layers,  1/1 seqs), K (f16): 1920.00 MiB, V (f16): 1920.00 MiB
+llama_kv_cache: attn_rot_k = 0
+llama_kv_cache: attn_rot_v = 0
+sched_reserve: reserving ...
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve: resolving fused Gated Delta Net support:
+sched_reserve: fused Gated Delta Net (autoregressive) enabled
+sched_reserve: fused Gated Delta Net (chunked) enabled
+sched_reserve:      CUDA0 compute buffer size =   301.51 MiB
+sched_reserve:  CUDA_Host compute buffer size =    88.01 MiB
+sched_reserve: graph nodes  = 3031
+sched_reserve: graph splits = 146 (with bs=512), 98 (with bs=1)
+sched_reserve: reserve took 21.61 ms, sched copies = 1
+FATE: n_layer=48 n_expert=128 n_expert_used=8
+FATE: max expert strides: gate=884736B up=884736B down=1290240B max=1.2MB
+FATE: working set = 1152 slots (1418MB), target = 2048MB
+FATE: GPU pool allocated: 1663 slots × 1.2MB = 2047MB
+FATE: cudaHostRegister failed for all flags (ptr=0000013BE48E8080 size=157MB)
+FATE: pinned 49/144 expert tensors for async prefetch
+FATE: pinned staging buffer: 1.2MB
+FATE: prefetch engine started (cross-layer + temporal prediction)
+FATE: system initialized (1663 cache slots + prefetch)
+common_init_from_params: FATE expert caching enabled
+main: llama threadpool init, n_threads = 6
+
+system_info: n_threads = 6 (n_threads_batch = 6) / 12 | CUDA : ARCHS = 860 | USE_GRAPHS = 1 | PEER_MAX_BATCH_SIZE = 128 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+sampler seed: 42
+sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = -1
+	top_k = 40, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+generate: n_ctx = 40960, n_batch = 2048, n_predict = 8, n_keep = 0
+
+FATE-DBG #1 miss1: dst=0000000C32A02800 off=1769472 src=0000013BDDE98080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1062 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=1769472 src=0000013BDDE98080 n=885248
+FATE-DBG #2 miss2: dst=0000000C3C800000 off=0 src=0000000C32BB2800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1063  dst=0000000C3C800000 off=0 src=0000000C32BB2800 n=885248
+FATE-DBG #3 miss1: dst=0000000C32A02800 off=5308416 src=0000013BDE1F8080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1064 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=5308416 src=0000013BDE1F8080 n=885248
+FATE-DBG #4 miss2: dst=0000000C3C800000 off=1290752 src=0000000C32F12800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1065  dst=0000000C3C800000 off=1290752 src=0000000C32F12800 n=885248
+FATE-DBG #5 miss1: dst=0000000C32A02800 off=18579456 src=0000013BDEEA0080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1066 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=18579456 src=0000013BDEEA0080 n=885248
+FATE-DBG #6 miss2: dst=0000000C3C800000 off=2581504 src=0000000C33BBA800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1067  dst=0000000C3C800000 off=2581504 src=0000000C33BBA800 n=885248
+FATE-DBG #7 miss1: dst=0000000C32A02800 off=32735232 src=0000013BDFC20080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1068 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=32735232 src=0000013BDFC20080 n=885248
+FATE-DBG #8 miss2: dst=0000000C3C800000 off=3872256 src=0000000C3493A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1069  dst=0000000C3C800000 off=3872256 src=0000000C3493A800 n=885248
+FATE-DBG #9 miss1: dst=0000000C32A02800 off=41582592 src=0000013BE0490080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1070 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=41582592 src=0000013BE0490080 n=885248
+FATE-DBG #10 miss2: dst=0000000C3C800000 off=5163008 src=0000000C351AA800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1071  dst=0000000C3C800000 off=5163008 src=0000000C351AA800 n=885248
+FATE-DBG #11 miss1: dst=0000000C32A02800 off=54853632 src=0000013BE1138080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1072 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=54853632 src=0000013BE1138080 n=885248
+FATE-DBG #12 miss2: dst=0000000C3C800000 off=6453760 src=0000000C35E52800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1073  dst=0000000C3C800000 off=6453760 src=0000000C35E52800 n=885248
+FATE-DBG #13 miss1: dst=0000000C32A02800 off=55738368 src=0000013BE1210080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1074 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=55738368 src=0000013BE1210080 n=885248
+FATE-DBG #14 miss2: dst=0000000C3C800000 off=7744512 src=0000000C35F2A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1075  dst=0000000C3C800000 off=7744512 src=0000000C35F2A800 n=885248
+FATE-DBG #15 miss1: dst=0000000C32A02800 off=66355200 src=0000013BE1C30080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1076 CUDA0#blk.0.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=66355200 src=0000013BE1C30080 n=885248
+FATE-DBG #16 miss2: dst=0000000C3C800000 off=9035264 src=0000000C3694A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_gate_exps.weight
+SETDBG #1077  dst=0000000C3C800000 off=9035264 src=0000000C3694A800 n=885248
+FATE-DBG #17 miss1: dst=0000000C32A02800 off=1769472 src=0000013BEE818080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1078 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=1769472 src=0000013BEE818080 n=885248
+FATE-DBG #18 miss2: dst=0000000C3C800000 off=10326016 src=0000000C32BB2800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1079  dst=0000000C3C800000 off=10326016 src=0000000C32BB2800 n=885248
+FATE-DBG #19 miss1: dst=0000000C32A02800 off=5308416 src=0000013BEEB78080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1080 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=5308416 src=0000013BEEB78080 n=885248
+FATE-DBG #20 miss2: dst=0000000C3C800000 off=11616768 src=0000000C32F12800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1081  dst=0000000C3C800000 off=11616768 src=0000000C32F12800 n=885248
+FATE-DBG #21 miss1: dst=0000000C32A02800 off=18579456 src=0000013BEF820080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1082 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=18579456 src=0000013BEF820080 n=885248
+FATE-DBG #22 miss2: dst=0000000C3C800000 off=12907520 src=0000000C33BBA800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1083  dst=0000000C3C800000 off=12907520 src=0000000C33BBA800 n=885248
+FATE-DBG #23 miss1: dst=0000000C32A02800 off=32735232 src=0000013BF05A0080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1084 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=32735232 src=0000013BF05A0080 n=885248
+FATE-DBG #24 miss2: dst=0000000C3C800000 off=14198272 src=0000000C3493A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1085  dst=0000000C3C800000 off=14198272 src=0000000C3493A800 n=885248
+FATE-DBG #25 miss1: dst=0000000C32A02800 off=41582592 src=0000013BF0E10080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1086 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=41582592 src=0000013BF0E10080 n=885248
+FATE-DBG #26 miss2: dst=0000000C3C800000 off=15489024 src=0000000C351AA800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1087  dst=0000000C3C800000 off=15489024 src=0000000C351AA800 n=885248
+FATE-DBG #27 miss1: dst=0000000C32A02800 off=54853632 src=0000013BF1AB8080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1088 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=54853632 src=0000013BF1AB8080 n=885248
+FATE-DBG #28 miss2: dst=0000000C3C800000 off=16779776 src=0000000C35E52800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1089  dst=0000000C3C800000 off=16779776 src=0000000C35E52800 n=885248
+FATE-DBG #29 miss1: dst=0000000C32A02800 off=55738368 src=0000013BF1B90080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1090 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=55738368 src=0000013BF1B90080 n=885248
+FATE-DBG #30 miss2: dst=0000000C3C800000 off=18070528 src=0000000C35F2A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1091  dst=0000000C3C800000 off=18070528 src=0000000C35F2A800 n=885248
+FATE-DBG #31 miss1: dst=0000000C32A02800 off=66355200 src=0000013BF25B0080 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1092 CUDA0#blk.0.ffn_up_exps.weight#0 dst=0000000C32A02800 off=66355200 src=0000013BF25B0080 n=885248
+FATE-DBG #32 miss2: dst=0000000C3C800000 off=19361280 src=0000000C3694A800 n=885248 nbytes(dst)=113246208 name=blk.0.ffn_up_exps.weight
+SETDBG #1093  dst=0000000C3C800000 off=19361280 src=0000000C3694A800 n=885248
+FATE-DBG #33 miss1: dst=0000000C32A02800 off=2580480 src=0000013BE4B5E080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1094 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=2580480 src=0000013BE4B5E080 n=1290752
+FATE-DBG #34 miss2: dst=0000000C3C800000 off=20652032 src=0000000C32C78800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1095  dst=0000000C3C800000 off=20652032 src=0000000C32C78800 n=1290752
+FATE-DBG #35 miss1: dst=0000000C32A02800 off=7741440 src=0000013BE504A080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1096 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=7741440 src=0000013BE504A080 n=1290752
+FATE-DBG #36 miss2: dst=0000000C3C800000 off=21942784 src=0000000C33164800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1097  dst=0000000C3C800000 off=21942784 src=0000000C33164800 n=1290752
+FATE-DBG #37 miss1: dst=0000000C32A02800 off=27095040 src=0000013BE62BF080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1098 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=27095040 src=0000013BE62BF080 n=1290752
+FATE-DBG #38 miss2: dst=0000000C3C800000 off=23233536 src=0000000C343D9800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1099  dst=0000000C3C800000 off=23233536 src=0000000C343D9800 n=1290752
+FATE-DBG #39 miss1: dst=0000000C32A02800 off=47738880 src=0000013BE766F080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1100 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=47738880 src=0000013BE766F080 n=1290752
+FATE-DBG #40 miss2: dst=0000000C3C800000 off=24524288 src=0000000C35789800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1101  dst=0000000C3C800000 off=24524288 src=0000000C35789800 n=1290752
+FATE-DBG #41 miss1: dst=0000000C32A02800 off=60641280 src=0000013BE82BD080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1102 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=60641280 src=0000013BE82BD080 n=1290752
+FATE-DBG #42 miss2: dst=0000000C3C800000 off=25815040 src=0000000C363D7800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1103  dst=0000000C3C800000 off=25815040 src=0000000C363D7800 n=1290752
+FATE-DBG #43 miss1: dst=0000000C32A02800 off=79994880 src=0000013BE9532080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1104 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=79994880 src=0000013BE9532080 n=1290752
+FATE-DBG #44 miss2: dst=0000000C3C800000 off=27105792 src=0000000C3764C800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1105  dst=0000000C3C800000 off=27105792 src=0000000C3764C800 n=1290752
+FATE-DBG #45 miss1: dst=0000000C32A02800 off=81285120 src=0000013BE966D080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1106 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=81285120 src=0000013BE966D080 n=1290752
+FATE-DBG #46 miss2: dst=0000000C3C800000 off=28396544 src=0000000C37787800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1107  dst=0000000C3C800000 off=28396544 src=0000000C37787800 n=1290752
+FATE-DBG #47 miss1: dst=0000000C32A02800 off=96768000 src=0000013BEA531080 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1108 CUDA0#blk.0.ffn_down_exps.weight#0 dst=0000000C32A02800 off=96768000 src=0000013BEA531080 n=1290752
+FATE-DBG #48 miss2: dst=0000000C3C800000 off=29687296 src=0000000C3864B800 n=1290752 nbytes(dst)=165150720 name=blk.0.ffn_down_exps.weight
+SETDBG #1109  dst=0000000C3C800000 off=29687296 src=0000000C3864B800 n=1290752
+FATE-DBG #49 miss1: dst=0000000C32A02800 off=0 src=0000013BF5268080 n=885248 nbytes(dst)=113246208 name=blk.1.ffn_gate_exps.weight
+SETDBG #1110 CUDA0#blk.1.ffn_gate_exps.weight#0 dst=0000000C32A02800 off=0 src=0000013BF5268080 n=885248
+C:\Users\yassi\Documents\code\BeyondVram\tools\llama-moe-cache\ggml\src\ggml-cuda\ggml-cuda.cu:98: CUDA error
+CUDA error: invalid argument
+  current device: 0, in function ggml_backend_cuda_set_tensor_async at C:\Users\yassi\Documents\code\BeyondVram\tools\llama-moe-cache\ggml\src\ggml-cuda\ggml-cuda.cu:2857
+  cudaMemcpyAsync((char *)tensor->data + offset, data, size, cudaMemcpyDefault, cuda_ctx->stream())

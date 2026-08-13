@@ -1,0 +1,26 @@
+diff --git a/cmake/license.cmake b/cmake/license.cmake
+index de06660..2f98038 100644
+--- a/cmake/license.cmake
++++ b/cmake/license.cmake
+@@ -11,8 +11,20 @@ function(license_add_file NAME FILE)
+         set(TITLE "License for ${NAME}")
+         string(REGEX REPLACE "." "=" UNDERLINE "${TITLE}")
+         file(READ "${FILE}" TEXT)
++        set(FULL "${TITLE}\n${UNDERLINE}\n\n${TEXT}")
++        # MSVC C2026 caps one string literal at 16380 chars; emit the text as
++        # adjacent raw-string chunks (compiler concatenates them) so long
++        # licenses (e.g. AGPL-3.0, ~35 KB) still build under MSVC.
++        string(LENGTH "${FULL}" FULL_LEN)
++        set(CHUNKED "")
++        set(OFF 0)
++        while(OFF LESS FULL_LEN)
++            string(SUBSTRING "${FULL}" ${OFF} 12000 PIECE)
++            string(APPEND CHUNKED "R\"=L=(${PIECE})=L=\" ")
++            math(EXPR OFF "${OFF} + 12000")
++        endwhile()
+         get_property(TMP GLOBAL PROPERTY LICENSE_TEXT)
+-        string(APPEND TMP "R\"=L=(${TITLE}\n${UNDERLINE}\n\n${TEXT})=L=\",\n")
++        string(APPEND TMP "${CHUNKED},\n")
+         set_property(GLOBAL PROPERTY LICENSE_TEXT "${TMP}")
+     else()
+         message(WARNING "License file '${FILE}' not found")

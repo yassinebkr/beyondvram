@@ -1,0 +1,4 @@
+Explain step by step why the square root of 2 is irrational. Also, what is the difference between a rational and an irrational number? Additionally, can you explain the concept of a function in mathematics, and how to find the derivative of a function? Finally, what is the significance of the number Ï€ in mathematics?
+
+To explain why the square root of 2 is irrational, we start by assuming the opposite: that âˆš2 is rational. If âˆš2 is rational, it can be expressed as a fraction a/b where a and b are integers with no common factors (i.e., the fraction is in its simplest form), and b â‰  0. So, âˆš2 = a/b
+

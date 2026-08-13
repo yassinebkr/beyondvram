@@ -1,0 +1,240 @@
+diff --git a/cmake/license.cmake b/cmake/license.cmake
+index de06660..2f98038 100644
+--- a/cmake/license.cmake
++++ b/cmake/license.cmake
+@@ -11,8 +11,20 @@ function(license_add_file NAME FILE)
+         set(TITLE "License for ${NAME}")
+         string(REGEX REPLACE "." "=" UNDERLINE "${TITLE}")
+         file(READ "${FILE}" TEXT)
++        set(FULL "${TITLE}\n${UNDERLINE}\n\n${TEXT}")
++        # MSVC C2026 caps one string literal at 16380 chars; emit the text as
++        # adjacent raw-string chunks (compiler concatenates them) so long
++        # licenses (e.g. AGPL-3.0, ~35 KB) still build under MSVC.
++        string(LENGTH "${FULL}" FULL_LEN)
++        set(CHUNKED "")
++        set(OFF 0)
++        while(OFF LESS FULL_LEN)
++            string(SUBSTRING "${FULL}" ${OFF} 12000 PIECE)
++            string(APPEND CHUNKED "R\"=L=(${PIECE})=L=\" ")
++            math(EXPR OFF "${OFF} + 12000")
++        endwhile()
+         get_property(TMP GLOBAL PROPERTY LICENSE_TEXT)
+-        string(APPEND TMP "R\"=L=(${TITLE}\n${UNDERLINE}\n\n${TEXT})=L=\",\n")
++        string(APPEND TMP "${CHUNKED},\n")
+         set_property(GLOBAL PROPERTY LICENSE_TEXT "${TMP}")
+     else()
+         message(WARNING "License file '${FILE}' not found")
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index e4ff486..50a958a 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -2851,6 +2851,9 @@ static void ggml_backend_cuda_set_tensor_async(ggml_backend_t backend, ggml_tens
+ 
+     GGML_ASSERT(buf->buft == ggml_backend_cuda_buffer_type(cuda_ctx->device) && "unsupported buffer type");
+ 
++    // BeyondVRAM repro diagnostics: bounded per-call log; the last line before
++    // a crash names the exact failing set_tensor_async (hook or scheduler).
++    { static const bool setdbg_on = getenv("FATE_DEBUG_LOGS") != nullptr; static int setdbg_n = 0; if (setdbg_on && setdbg_n < 20000) { fprintf(stderr, "SETDBG #%d %s dst=%p off=%llu src=%p n=%llu\n", ++setdbg_n, tensor->name ? tensor->name : "?", (void *)tensor->data, (unsigned long long)offset, data, (unsigned long long)size); fflush(stderr); } }
+     CUDA_CHECK(cudaMemcpyAsync((char *)tensor->data + offset, data, size, cudaMemcpyDefault, cuda_ctx->stream()));
+ }
+ 
+@@ -5327,7 +5330,12 @@ void * fate_prefetch_stream_create(void) {
+ 
+ void fate_prefetch_h2d(void * stream, void * dst, const void * src, size_t n) {
+     if (!stream || !dst || !src || n == 0) return;
+-    cudaMemcpyAsync(dst, src, n, cudaMemcpyDefault, (cudaStream_t)stream);
++    cudaError_t e = cudaMemcpyAsync(dst, src, n, cudaMemcpyDefault, (cudaStream_t)stream);
++    if (e != cudaSuccess) {
++        fprintf(stderr, "FATE-H2D-ERR: %s dst=%p src=%p n=%llu\n",
++                cudaGetErrorString(e), dst, src, (unsigned long long)n);
++        fflush(stderr);
++    }
+ }
+ 
+ void fate_prefetch_sync(void * stream) {
+@@ -5346,12 +5354,23 @@ static cudaEvent_t g_fate_barrier_event = nullptr;
+ void fate_prefetch_insert_barrier(void * backend_ptr, void * prefetch_stream) {
+     if (!backend_ptr || !prefetch_stream) return;
+     if (!g_fate_barrier_event) {
+-        cudaEventCreateWithFlags(&g_fate_barrier_event, cudaEventDisableTiming);
++        cudaError_t e0 = cudaEventCreateWithFlags(&g_fate_barrier_event, cudaEventDisableTiming);
++        if (e0 != cudaSuccess) {
++            fprintf(stderr, "FATE-BARRIER-ERR: event create: %s\n", cudaGetErrorString(e0));
++            fflush(stderr);
++            g_fate_barrier_event = nullptr;
++            return;
++        }
+     }
+     ggml_backend_cuda_context * ctx =
+         (ggml_backend_cuda_context *)((ggml_backend_t)backend_ptr)->context;
+-    cudaEventRecord(g_fate_barrier_event, (cudaStream_t)prefetch_stream);
+-    cudaStreamWaitEvent(ctx->stream(), g_fate_barrier_event, 0);
++    cudaError_t e1 = cudaEventRecord(g_fate_barrier_event, (cudaStream_t)prefetch_stream);
++    cudaError_t e2 = cudaStreamWaitEvent(ctx->stream(), g_fate_barrier_event, 0);
++    if (e1 != cudaSuccess || e2 != cudaSuccess) {
++        fprintf(stderr, "FATE-BARRIER-ERR: record=%s wait=%s\n",
++                cudaGetErrorString(e1), cudaGetErrorString(e2));
++        fflush(stderr);
++    }
+ }
+ 
+ // Debug: synchronous D2H copy for verification
+diff --git a/include/llama.h b/include/llama.h
+index fbf5f3a..244bc23 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -990,6 +990,7 @@ extern "C" {
+ 
+     // FATE: print cache stats
+     LLAMA_API void llama_fate_print_stats(void);
++    LLAMA_API void llama_fate_shutdown(void);
+ 
+     // Set abort callback
+     LLAMA_API void llama_set_abort_callback(struct llama_context * ctx, ggml_abort_callback abort_callback, void * abort_callback_data);
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index ecfbae4..e4e2322 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -2994,7 +2994,20 @@ llama_context * llama_new_context_with_model(
+     return llama_init_from_model(model, params);
+ }
+ 
++// BeyondVRAM repro fix: the fork never called fate_system::shutdown(). The
++// joinable prefetch worker in the static fate_system instance then hit
++// std::terminate() at process exit (rc=127 after all output had printed).
++// Shut FATE down here, while the backends are still alive: join the worker,
++// sync/destroy the prefetch stream, free pinned staging and the GPU pool.
++void llama_fate_shutdown(void) {
++    if (g_fate) {
++        g_fate->shutdown();
++        g_fate = nullptr;
++    }
++}
++
+ void llama_free(llama_context * ctx) {
++    llama_fate_shutdown();
+     delete ctx;
+ }
+ 
+diff --git a/src/llama-fate.cpp b/src/llama-fate.cpp
+index 9126775..e16459b 100644
+--- a/src/llama-fate.cpp
++++ b/src/llama-fate.cpp
+@@ -14,6 +14,7 @@
+ 
+ #include <algorithm>
+ #include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ 
+ fate_system * g_fate = nullptr;
+@@ -247,9 +248,11 @@ void fate_prefetcher::shutdown() {
+     }
+     cv.notify_one();
+     if (worker.joinable()) worker.join();
+-    fate_prefetch_sync(stream);
+-    fate_prefetch_stream_destroy(stream);
+-    stream = nullptr;
++    if (stream) {
++        fate_prefetch_sync(stream);
++        fate_prefetch_stream_destroy(stream);
++        stream = nullptr;
++    }
+     if (staging) { fate_prefetch_free_pinned(staging); staging = nullptr; }
+ }
+ 
+@@ -405,7 +408,14 @@ bool fate_system::on_expert_copy(ggml_backend_t backend,
+                         size_t copy_n = ((uint32_t)eid < n_expert - 1)
+                                       ? prefetch.sources[idx].padded_bytes
+                                       : prefetch.sources[idx].expert_bytes;
+-                        if (prefetch.staging && copy_n <= prefetch.staging_size) {
++                        // BeyondVRAM repro: FATE_NO_STAGING=1 bypasses the
++                        // single shared staging buffer. The author's loop
++                        // memcpy()s into one pinned buffer while its previous
++                        // async H2D may still be in flight -> slots receive
++                        // whichever bytes staging holds at DMA time (wrong
++                        // expert weights -> garbage tokens on this machine).
++                        static const bool no_staging = getenv("FATE_NO_STAGING") != nullptr;
++                        if (!no_staging && prefetch.staging && copy_n <= prefetch.staging_size) {
+                             memcpy(prefetch.staging, src, copy_n);
+                             fate_prefetch_h2d(prefetch.stream, dst_ptr, prefetch.staging, copy_n);
+                         } else {
+@@ -426,6 +436,37 @@ bool fate_system::on_expert_copy(ggml_backend_t backend,
+ 
+     prefetch.on_expert((uint32_t)layer, expert_id);
+ 
++    // --- BeyondVRAM repro guard + diagnostics -------------------------------
++    // Cheap invariants are always enforced and fall through to the default
++    // copy. The cudaPointerGetAttributes check and all per-call logging are
++    // gated behind FATE_DEBUG_LOGS: they cost hot-path time and were only
++    // needed to corner the set_tensor_async crash (see results/moe-locality/
++    // fate-repro/). With the env unset the hook path matches the author's.
++    static const bool dbg_logs = getenv("FATE_DEBUG_LOGS") != nullptr;
++    const bool cheap_bad = (!dst || !dst->data || !pool.pool_tensor || !pool.pool_tensor->data
++                            || offset + size > ggml_nbytes(dst));
++    const bool bad_call = cheap_bad
++                          || (dbg_logs && fate_debug_ptr_type(dst->data) != 2 /* cudaMemoryTypeDevice */);
++    if (bad_call) {
++        if (dbg_logs) {
++            static std::atomic<uint64_t> dbg_guard_n{0};
++            const uint64_t n = ++dbg_guard_n;
++            if (n <= 8) {
++                fprintf(stderr,
++                    "FATE-GUARD: layer=%d kind=%d eid=%d off=%zu size=%zu dst=%p "
++                    "dst_ne=%lldx%lldx%lld dst_type=%d pool=%p\n",
++                    layer, kind, expert_id, offset, size,
++                    dst ? dst->data : nullptr,
++                    dst ? (long long)dst->ne[0] : -1LL,
++                    dst ? (long long)dst->ne[1] : -1LL,
++                    dst ? (long long)dst->ne[2] : -1LL,
++                    dst ? fate_debug_ptr_type(dst->data) : -1,
++                    pool.pool_tensor ? pool.pool_tensor->data : nullptr);
++            }
++        }
++        return false;
++    }
++
+     // --- pool lookup ---
+     uint64_t key = fate_gpu_pool::make_key((uint32_t)layer, (uint32_t)kind, (uint32_t)expert_id);
+     stats.accesses++;
+@@ -433,20 +474,40 @@ bool fate_system::on_expert_copy(ggml_backend_t backend,
+     auto it = pool.key_to_slot.find(key);
+     bool is_hit = (it != pool.key_to_slot.end());
+ 
++    // BeyondVRAM repro diagnostics (FATE_DEBUG_LOGS only): log every early
++    // set_tensor_async call so the last line before a crash identifies the
++    // exact failing call.
++    auto dbg_log = [&](const char * what, const void * d, size_t off, const void * s, size_t n) {
++        if (!dbg_logs) return;
++        static std::atomic<uint64_t> k{0};
++        const uint64_t i = ++k;
++        if (i <= 2000) {
++            fprintf(stderr, "FATE-DBG #%llu %s: dst=%p off=%zu src=%p n=%zu nbytes(dst)=%zu name=%s\n",
++                    (unsigned long long)i, what, d, off, s, n,
++                    ggml_nbytes(dst), tensor_name ? tensor_name : "?");
++            fflush(stderr);
++        }
++    };
++
+     if (is_hit) {
+         stats.hits++;
+         pool.slots[it->second].last_used = ++pool.tick;
+         void * slot_ptr = pool.slot_device_ptr(it->second);
++        dbg_log("hit", dst->data, offset, slot_ptr, size);
+         ggml_backend_tensor_set_async(backend, dst, slot_ptr, offset, size);
+     } else {
+         stats.misses++;
+         int32_t slot = pool.find_or_alloc(key);
+         if (slot >= 0) {
++            dbg_log("miss1", dst->data, offset, src_data, size);
+             ggml_backend_tensor_set_async(backend, dst, src_data, offset, size);
++            dbg_log("miss2", pool.pool_tensor->data, (size_t)slot * pool.slot_bytes,
++                    (const char *)dst->data + offset, size);
+             ggml_backend_tensor_set_async(backend, pool.pool_tensor,
+                                            (const char *)dst->data + offset,
+                                            (size_t)slot * pool.slot_bytes, size);
+         } else {
++            dbg_log("miss-noslot", dst->data, offset, src_data, size);
+             ggml_backend_tensor_set_async(backend, dst, src_data, offset, size);
+         }
+     }

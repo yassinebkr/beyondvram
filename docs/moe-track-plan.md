@@ -127,6 +127,31 @@ First pass (3 reps): all-attention-GPU configs dominate; best `-ngl 48 --n-cpu-m
 
 With this, Track 1 (MoE expert locality + llama.cpp placement for Qwen3-30B-A3B on this machine) is closed: locality measured, sync expert cache PoC measured negative, and the practical placement optimum recorded. The expert-cache machinery stays in the pinned build, env-gated, as preserved evidence for a possible later async-prefetch iteration.
 
+## External-claim check: FATE fork reproduction (2026-08-13): NON-REPRODUCIBLE
+
+The deep-research survey (docs/research-report-deep-research.md) flagged one unreplicated llama.cpp fork claiming predictive expert caching beats the Track-1 ceiling: ongunm/llama-moe-cache (AGPL-3.0), claiming Qwen3-30B-A3B Q4_K_M 33.74 → 64.45 tok/s at 99.50% hit on an RTX 4070 Ti 12 GB via a GPU expert pool + cross-layer/temporal prefetch. The fork was cloned (commit 77c8767, gitignored `tools/llama-moe-cache/`), built with CUDA/MSVC, and measured here (RTX 3070 Ti 8 GiB; the author's regime — default `--fit` placement, mmap, GPU computes all experts, per-use H2D). Local patches required to build and to obtain correct output are preserved at `results/moe-locality/fate-repro/fork-patches.patch`; the measurement script is `experiments/moe_trace/fate_repro.py`; raw per-rep logs and `fate-repro.json` sit alongside.
+
+Three fork defects were root-caused during bring-up (all fixed locally, recorded in the patch):
+
+1. **Teardown crash**: the fork never calls `fate_system::shutdown()`; the joinable prefetch worker `std::thread` inside the function-static `fate_system` hits `std::terminate()` at process exit (rc=127 after all output has printed). Fixed by a `llama_fate_shutdown()` called from `llama_free`.
+2. **`--no-mmap` crash**: partial `cudaHostRegister` on malloc'd weights (49/144 pinned) enables true-async H2D into reused ggml input_cpy buffers → CUDA invalid argument at layer transitions on this 8 GB placement. The author's mmap config avoids it (0/144 pinned; pageable copies self-serialize). All runs below use mmap.
+3. **Output corruption (disqualifier as shipped)**: prefetch loop `memcpy`s every expert into **one shared pinned staging buffer** while its previous async H2D may still be in flight → pool slots receive whatever staging holds at DMA time → FATE-on emits `????…` garbage from token 1. A `FATE_NO_STAGING=1` toggle (direct pageable H2D, synchronizing but correct) makes on-vs-off **token-exact** over 96 greedy tokens. The 98.96% hit rate briefly observed under the race was an artifact: corrupted runs repeat a single token, making temporal prediction trivially perfect.
+
+Measured matrix (fork llama-completion, 3 prompts × 3 reps × 128 tokens, greedy, seed 42, mmap, graphs on, `FATE_NO_STAGING=1` for the on rows; raw: `results/moe-locality/fate-repro/fate-repro.json` + per-rep logs):
+
+| config | generation tok/s | prompt tok/s | hit rate | pool |
+|---|---:|---:|---:|---:|
+| `--fate` off (fork baseline) | 27.08 ± 0.78 | 41.26 | — | — |
+| on, 2048 MB | 4.05 ± 0.02 | 9.05 | 54.00% | 1663 slots |
+| on, 1536 MB | 4.05 ± 0.02 | 9.05 | 54.00% | 1247 slots |
+| on, 1024 MB | 4.05 ± 0.03 | 9.07 | 54.00% | 831 slots |
+
+(stock b10355 same prompt/seed: 26.46 tok/s; output coherent with fork-off up to a mid-stream token flip from version-drift numerics.)
+
+**Verdict: the claim is non-reproducible in every dimension** — correctness fails as shipped; hit rate is 54%, not 99.5%; generation is 6.7× *slower* than the fork's own off switch, not 1.9× faster. The failure is structural, not tuning: the predictor prefetches the union `cur[layer-1] ∪ prev[layer]` (~2.3× over-fetch, ≈2555 copies/token), which rewrites any 8-GB-fittable pool several times per token, so hit rate and speed are **identical across 831–1663 slots** (counts equal to the unit). The surviving hits are within-transition prefetch→use — a staging delay line, not cross-token caching. Total H2D rises to ~3175 copies/token vs ~1342 for stock (misses + prefetches, 2048 MB row), mostly as synchronous pageable copies on the hook thread; prefill regresses 4.6× (author-reported 4 t/s matches).
+
+This is the Track-1 reactive-routing wall confirmed on an independent implementation: with routing known only at layer time, a heuristic predictor's over-fetch destroys the reuse it tries to monetize. No further iteration on this fork; the earlier verdict (33–35 tok/s placement ceiling; levers are physical or research-grade-predictor) stands reinforced.
+
 ## Locality experiment, only after a baseline
 
 The first locality experiment is observational. Capture expert IDs selected per token/layer from an instrumented runtime or an independently validated reference path, then report reuse-distance and hit-rate curves for hypothetical GPU expert-cache capacities. Do not implement an eviction policy until traces show measurable temporal locality.
