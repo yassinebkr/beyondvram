@@ -4,6 +4,7 @@ models/*
 .venv/
 tools/llama.cpp-b10355/
 tools/llama.cpp-source/
+tools/llama-moe-cache/
 results/real_layer/
 results/*.zip
 

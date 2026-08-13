@@ -20,4 +20,7 @@ hf download microsoft/bitnet-b1.58-2B-4T-gguf ggml-model-i2_s.gguf --local-dir m
 
 # Speculative-decoding draft
 hf download Qwen/Qwen3-0.6B-GGUF Qwen3-0.6B-Q8_0.gguf --local-dir models/Qwen3-0.6B-GGUF
+
+# Track 4 validation: MXFP4 on sm_86 + second-architecture roofline check
+hf download ggml-org/gpt-oss-20b-GGUF --local-dir models/gpt-oss-20b-GGUF
 ```
