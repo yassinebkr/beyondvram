@@ -1,5 +1,6 @@
 // bench-tui unit tests. Single-file CHECK runner; TEST blocks self-register.
 // Exit code is 0 when nothing failed, 1 otherwise.
+#include "config.h"
 #include "fsutil.h"
 #include "json.h"
 #include <cstdio>
@@ -169,4 +170,39 @@ TEST(fsutil_ensure_dir_rejects_file) {
   write_file(base + "/f", "x");
   CHECK(!ensure_dir(base + "/f"));
   CHECK(ensure_dir(base + "/subdir"));
+}
+
+TEST(config_presets_roundtrip) {
+  std::string base = make_tmp_dir();
+  std::string path = base + "/presets.json";
+  std::vector<Preset> in = {{"a", "/m/a.gguf", "llama-bench", "-ngl 0 -o json", 3},
+                            {"b", "/m/b.gguf", "llama-server", "--port 8080", 1}};
+  CHECK(save_presets(path, in));
+  std::vector<Preset> out;
+  CHECK(load_presets(path, out));
+  CHECK(out.size() == 2);
+  CHECK(out[0].name == "a" && out[0].repeats == 3 && out[0].args == "-ngl 0 -o json");
+  CHECK(out[1].binary == "llama-server");
+}
+
+TEST(config_missing_and_malformed) {
+  std::string base = make_tmp_dir();
+  std::vector<Preset> out;
+  CHECK(load_presets(base + "/nope.json", out) && out.empty());  // missing -> empty defaults
+  std::string path = base + "/bad.json";
+  write_file(path, "{not json");
+  CHECK(!load_presets(path, out) && out.empty());  // malformed -> false
+  bool ok = false;
+  CHECK(slurp(path, ok) == "{not json");           // file preserved
+}
+
+TEST(config_agents) {
+  auto d = default_agents("/repo");
+  CHECK(d.size() == 3 && d[0].name == "kimi" && d[1].name == "codex");
+  std::string base = make_tmp_dir();
+  std::string path = base + "/agents.json";
+  CHECK(save_agents(path, d));
+  std::vector<AgentSpec> out;
+  CHECK(load_agents(path, out));
+  CHECK(out.size() == 3 && out[2].workdir == "/repo");
 }
