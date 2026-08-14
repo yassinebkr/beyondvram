@@ -15,11 +15,20 @@ A testbench, not an OS fork: stock netinst, no desktop environment.
 
 Route taken on this machine (2026-08-14): the NVMe system partition would not
 shrink at all — the shrink engine reported zero shrinkable space
-(`Get-PartitionSupportedSize`: SizeMax equal to the current partition size),
-capped by immovable pagefile/hibernate data at the partition tail — so a
-~150 GB partition was carved from the data HDD instead. Cold model loads from
-the HDD cost ~95–113 s per bench arm; steady-state tok/s is unaffected
-(weights are RAM-resident by the time measurement starts).
+(`Get-PartitionSupportedSize`: SizeMax equal to the current partition size).
+The pagefile was relocated to the data HDD and hibernation disabled, but the
+Application-log defrag events (source Microsoft-Windows-Defrag, ID 259) then
+named the real blocker: `$Mft::$BITMAP` — NTFS metadata the online shrink
+engine can never relocate — parked ~52 MiB from the physical end of the
+partition (cluster 0xee41033). No Windows-side setting changes this; the only
+NVMe route left is an offline resize (GParted Live, or the Debian installer's
+own NTFS resize in manual partitioning) after a clean `chkdsk /scan`, with the
+usual backup-first caveat. Alternative: install onto a partition carved from
+the data HDD instead — cold model loads from the HDD cost ~95–113 s per bench
+arm; steady-state tok/s is unaffected (weights are RAM-resident by the time
+measurement starts). **Decision (2026-08-14): the HDD route** — the Linux
+partition is carved from the data HDD manually; the offline NTFS resize was
+judged not worth the filesystem risk for a testbench.
 
 The Debian installer needs unallocated space: delete the freshly created NTFS
 volume in diskmgmt.msc (right-click → Delete Volume) before booting the
