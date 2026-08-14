@@ -18,6 +18,11 @@ The system partition on the NVMe is shrunk by ~60 GB (admin PowerShell):
 Resize-Partition -DriveLetter <system-drive> -Size <target>
 ```
 
+Measured on this machine (2026-08-14): the initial shrink cap was **zero** —
+`Get-PartitionSupportedSize -DriveLetter <system-drive>` reported SizeMax equal to the
+current partition size (zero shrinkable space) — so the
+pagefile/hibernate removal below is mandatory on this box, not optional.
+
 If the resize fails with `StorageWMI 4097` ("shrink size is too big"), immovable
 files near the partition end cap the shrink below 60 GB. Query the real ceiling
 with `Get-PartitionSupportedSize -DriveLetter <system-drive>` and shrink to that SizeMax, or
