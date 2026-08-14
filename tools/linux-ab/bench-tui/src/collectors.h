@@ -54,6 +54,8 @@ class GpuSampler {
 public:
   GpuSampler();
   ~GpuSampler();
+  GpuSampler(const GpuSampler&) = delete;
+  GpuSampler &operator=(const GpuSampler&) = delete;
   GpuSample sample();
 private:
   void *lib_ = nullptr;

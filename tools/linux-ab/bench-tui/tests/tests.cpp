@@ -274,3 +274,15 @@ TEST(push_hist_caps) {
   for (int i = 0; i < 130; ++i) push_hist(h, (float)i);
   CHECK(h.size() == 120 && h.front() == 10.0f);
 }
+
+TEST(collector_runner_double_start) {
+  CollectorState st;
+  CollectorRunner r(st);
+  r.set_interval_ms(50);
+  r.start();
+  r.start();  // second call while joinable must not crash
+  usleep(150000);
+  r.stop();
+  CollectorSnapshot s = snapshot_from(st);
+  CHECK(s.mem.total_mb > 0);
+}

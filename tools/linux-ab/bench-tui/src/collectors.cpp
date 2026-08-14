@@ -2,6 +2,7 @@
 #include "fsutil.h"
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <dlfcn.h>
@@ -200,6 +201,9 @@ GpuSample GpuSampler::sample() {
     return s;
   }
   if (smi_available_) {
+    // popen fallback costs tens to hundreds of ms per sample; it only triggers
+    // when libnvidia-ml.so.1 cannot be dlopen'd but nvidia-smi exists. If that
+    // ever becomes the common path, sample the GPU at a reduced rate.
     FILE *f = popen(
         "nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw "
         "--format=csv,noheader,nounits 2>/dev/null",
@@ -231,6 +235,7 @@ CollectorRunner::CollectorRunner(CollectorState &st) : st_(st) {}
 CollectorRunner::~CollectorRunner() { stop(); }
 
 void CollectorRunner::start() {
+  if (th_.joinable()) return;
   stop_ = false;
   th_ = std::thread(&CollectorRunner::loop, this);
 }
