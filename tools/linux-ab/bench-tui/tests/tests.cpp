@@ -87,3 +87,34 @@ TEST(json_roundtrip) {
   CHECK(v.find("args")->s == "-ngl 48 --n-cpu-moe 33");
   CHECK(v.find("nested")->arr[1].s == "x");
 }
+
+TEST(json_rejects_nonjson_numbers) {
+  JsonValue v;
+  CHECK(!json_parse("nan", v));
+  CHECK(!json_parse("inf", v));
+  CHECK(!json_parse("0x1F", v));
+  CHECK(!json_parse("+5", v));
+  CHECK(!json_parse(".5", v));
+  CHECK(!json_parse("01", v));
+  CHECK(!json_parse("1.", v));
+  CHECK(!json_parse("{\"r\":01}", v));
+  CHECK(!json_parse("{\"r\":nan}", v));
+}
+
+TEST(json_rejects_deep_nesting) {
+  JsonValue v;
+  std::string deep(200, '[');
+  deep += std::string(200, ']');
+  CHECK(!json_parse(deep, v));
+  std::string shallow(50, '[');
+  shallow += std::string(50, ']');
+  CHECK(json_parse(shallow, v));
+}
+
+TEST(json_int64_range) {
+  JsonValue v;
+  CHECK(!json_parse("99999999999999999999999", v));
+  CHECK(json_parse("-9223372036854775808", v));
+  CHECK(v.type == JsonValue::Type::Int);
+  CHECK(v.i == (-9223372036854775807LL - 1));
+}

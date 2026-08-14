@@ -2,6 +2,7 @@
 // Minimal JSON value for bench-tui's flat config and record files.
 // Supports null, bool, int64, double, string, array, object. Not a general
 // JSON library; malformed or trailing content is a parse error.
+// \uXXXX escapes above the BMP (surrogate pairs) are not combined (minimal-scope limitation).
 #include <map>
 #include <string>
 #include <vector>

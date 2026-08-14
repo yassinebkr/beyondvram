@@ -1,4 +1,5 @@
 #include "json.h"
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -83,6 +84,14 @@ std::string json_stringify(const JsonValue &v) {
 namespace {
 struct Parser {
   const char *p;
+  int depth = 0;
+  // Nesting deeper than 128 levels is rejected to bound parser stack use.
+  struct Enter {
+    Parser &x;
+    bool ok;
+    explicit Enter(Parser &x) : x(x), ok(x.depth < 128) { if (ok) ++x.depth; }
+    ~Enter() { if (ok) --x.depth; }
+  };
   void ws() { while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') ++p; }
   bool lit(const char *w) {
     size_t n = std::strlen(w);
@@ -138,8 +147,49 @@ struct Parser {
     out = std::move(r);
     return true;
   }
+  bool number(JsonValue &out) {
+    // Strict JSON grammar: -?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?
+    const char *start = p;
+    if (*p == '-') ++p;
+    if (*p == '0') {
+      ++p;
+    } else if (*p >= '1' && *p <= '9') {
+      while (*p >= '0' && *p <= '9') ++p;
+    } else {
+      return false;
+    }
+    bool is_int = true;
+    if (*p == '.') {
+      is_int = false;
+      ++p;
+      if (*p < '0' || *p > '9') return false;
+      while (*p >= '0' && *p <= '9') ++p;
+    }
+    if (*p == 'e' || *p == 'E') {
+      is_int = false;
+      ++p;
+      if (*p == '+' || *p == '-') ++p;
+      if (*p < '0' || *p > '9') return false;
+      while (*p >= '0' && *p <= '9') ++p;
+    }
+    if (is_int) {
+      errno = 0;
+      char *end = nullptr;
+      long long iv = std::strtoll(start, &end, 10);
+      if (errno == ERANGE || end != p) return false;
+      out = JsonValue::make_int(iv);
+    } else {
+      char *end = nullptr;
+      double dv = std::strtod(start, &end);
+      if (end != p) return false;
+      out = JsonValue::make_double(dv);
+    }
+    return true;
+  }
   bool value(JsonValue &out) {
     ws();
+    Enter enter(*this);
+    if (!enter.ok) return false;
     if (*p == '"') {
       std::string s;
       if (!string(s)) return false;
@@ -189,16 +239,7 @@ struct Parser {
     if (lit("true")) { out = JsonValue::make_bool(true); return true; }
     if (lit("false")) { out = JsonValue::make_bool(false); return true; }
     if (lit("null")) { out = JsonValue::make_null(); return true; }
-    char *end = nullptr;
-    double dv = std::strtod(p, &end);
-    if (end == p) return false;
-    bool is_int = true;
-    for (const char *q = p; q < end; ++q)
-      if (*q == '.' || *q == 'e' || *q == 'E') { is_int = false; break; }
-    if (is_int) out = JsonValue::make_int((long long)dv);
-    else out = JsonValue::make_double(dv);
-    p = end;
-    return true;
+    return number(out);
   }
 };
 }  // namespace
