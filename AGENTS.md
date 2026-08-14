@@ -88,6 +88,9 @@ tools/llama-moe-cache/  Gitignored FATE-fork clone (commit 77c8767, AGPL-3.0) fo
 tools/wsl2-ab/          WSL2 secondary-testbench A/B scripts (ab_paired.sh, ab_hybrid.sh);
                         vhdx/ and tarballs are gitignored; the WSL2 distro is a test bench
                         only, never a replacement for the native Windows b10355 reference
+tools/linux-ab/         Bench-OS provisioning (SETUP.md, bench_linux.sh) and bench-tui/
+                        (control-center TUI; spec docs/superpowers/specs/2026-08-14-bench-tui-design.md,
+                        plan docs/superpowers/plans/2026-08-14-bench-tui.md)
 tools/ik_llama.cpp/     Gitignored ik_llama.cpp clone (HEAD 981e5ea) for the experiment-3
                         engine A/B; local MSVC+CUDA build via tools/build-scripts/build-ik.bat
 tests/                 Pytest suite: fixture, rows, timeline, checksums, Windows I/O adapter
