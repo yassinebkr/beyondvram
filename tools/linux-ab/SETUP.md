@@ -46,27 +46,84 @@ shrink to its SizeMax. Persistent caps usually come from the pagefile or
 hibernate file near the partition end: `powercfg /h off` plus temporarily
 setting no paging file, reboot, retry, then restore.
 
-Debian installs into the freed space: guided partitioning, use largest
-continuous free space, all files in one partition, no swap (64 GiB RAM;
-a swap partition would only tempt paging during benches).
+## 3. Install (step by step)
 
-## 3. Install
+Boot the USB via the firmware boot menu (pick the UEFI entry for the stick).
+The installer runs in text mode; answers in order:
 
-- Tasksel: only "standard system utilities" — no desktop.
-- Enable `non-free-firmware` + `non-free` repos, then:
-  `apt install nvidia-driver firmware-misc-nonfree build-essential cmake git ntfs-3g`
-- Windows dual-boot note: no BitLocker on the system partition (checked
-  2026-08-14), so GRUB chainloading is uncomplicated; still record the
-  recovery-key situation before resizing if that ever changes.
+1. Language/locale/keymap — anything; the bench only cares about defaults.
+2. Network: hostname `beyondvram-bench`, domain blank. DHCP is fine.
+3. Root password: set one. Debian then does not force a sudo setup; `su -`
+   works. Create the normal user when asked.
+4. Partitioning. Swapless takes the manual path: "Manual" → in the free space
+   on the data HDD create ONE ext4 partition mounted at `/`, nothing else.
+   With 32→64 GiB RAM a swap partition only tempts paging during benches.
+   ("Guided — use the largest continuous free space" → "All files in one
+   partition" also works but adds a swap area; disable it post-install with
+   `swapoff -a` plus removing the fstab line.) Leave every Windows partition
+   untouched. The installer detects the existing EFI System Partition on the
+   NVMe and reuses it for GRUB — verify in the partitioning summary that the
+   ESP is "used as EFI System Partition" and is NOT marked for formatting.
+5. Tasksel: ONLY "standard system utilities" — no desktop environment.
+6. GRUB installs to the ESP when asked. After reboot, pick the OS from the
+   firmware boot menu ("debian" vs "Windows Boot Manager"); do not depend on
+   os-prober. If a GRUB menu entry for Windows is wanted anyway:
+   `GRUB_DISABLE_OS_PROBER=false` in /etc/default/grub, then `update-grub`.
+7. First boot, as root:
+
+   ```bash
+   # if the netinst already added non-free components, this is a no-op:
+   sed -i '/^deb / s/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list
+   apt update && apt full-upgrade -y
+   apt install -y nvidia-driver firmware-misc-nonfree build-essential cmake git ntfs-3g curl
+   reboot
+   nvidia-smi    # must list the 3070 Ti
+   ```
+
+   The nvidia-driver package pulls DKMS + kernel headers automatically.
+   Secure Boot must stay off or the unsigned module refuses to load.
+8. Windows dual-boot note: no BitLocker on the system partition (checked
+   2026-08-14), so GRUB chainloading is uncomplicated; still record the
+   recovery-key situation if that ever changes.
+
+### Optional GUI (only if the box becomes the daily driver)
+
+The bench needs no GUI. This block adds a minimal one without a desktop
+environment:
+
+```bash
+apt install -y xinit openbox xterm
+# VSCodium .deb from github.com/VSCodium/vscodium/releases (amd64):
+curl -LO <latest codium amd64 .deb URL> && apt install -y ./codium_*.deb
+echo 'openbox-session' > ~/.xinitrc && startx
+```
+
+### Kimi Code CLI on the bench box
+
+```bash
+curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash
+kimi          # /login on first launch (OAuth device flow or API key)
+```
+
+The install script needs no pre-installed Node.js. Sessions are stored per
+working directory under `~/.kimi-code/sessions/<workDirKey>/` and resume with
+`kimi --continue` / `kimi --session` — on the same machine and path only;
+cross-OS session migration is not a documented flow. The repo is the
+continuity layer: `git clone https://github.com/yassinebkr/beyondvram.git`
+and start a fresh session — AGENTS.md, docs/, and this file carry the full
+state. The Windows-side session stays intact for the Windows side.
+(Docs: kimi.com/code/docs/en — getting-started, sessions, data-locations.)
 
 ## 4. Bench payload
 
 ```bash
-mkdir -p /opt /root/models
-tar xzf llama-b10355-bin-ubuntu-x64.tar.gz -C /opt   # from tools/wsl2-ab/
-# Copy models over NTFS (in-kernel ntfs3), then unmount — benches must read
-# from ext4 only, never mmap through FUSE/NTFS during a measured run:
+mkdir -p /opt /root/models /mnt/win
+git clone https://github.com/yassinebkr/beyondvram.git   # bench script + docs
+# Copy models and the llama.cpp tarball over NTFS (in-kernel ntfs3), then
+# unmount — benches must read from ext4 only, never mmap through FUSE/NTFS
+# during a measured run:
 mount -t ntfs3 /dev/nvme0n1p3 /mnt/win
+tar xzf /mnt/win/Users/yassi/Documents/code/BeyondVram/tools/wsl2-ab/llama-b10355-bin-ubuntu-x64.tar.gz -C /opt
 cp /mnt/win/Users/yassi/Documents/code/BeyondVram/models/gpt-oss-20b-GGUF/gpt-oss-20b-MXFP4.gguf /root/models/
 # optionally the two Qwen3-30B files for the Track-1/#4 arms
 umount /mnt/win
