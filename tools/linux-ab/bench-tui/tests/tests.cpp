@@ -2,6 +2,7 @@
 // Exit code is 0 when nothing failed, 1 otherwise.
 #include "collectors.h"
 #include "config.h"
+#include "format.h"
 #include "fsutil.h"
 #include "json.h"
 #include "run_manager.h"
@@ -427,4 +428,17 @@ TEST(run_manager_detach) {
     int st = 0;
     waitpid(pid, &st, 0);
   }
+}
+
+TEST(format_units) {
+  CHECK(format_gib(512) == "512 MiB");
+  CHECK(format_gib(2048) == "2.00 GiB");
+  CHECK(format_mbs(512) == "512 KiB/s");
+  CHECK(format_mbs(2048) == "2.0 MiB/s");
+  CHECK(format_mbs(3.0 * 1048576) == "3.00 GiB/s");
+  CHECK(format_duration(754) == "12:34");
+  CHECK(format_duration(3725) == "1:02:05");
+  CHECK(format_duration(-1) == "--:--");
+  CHECK(format_pct(42.4f) == "42%");
+  CHECK(format_ts(44.472772) == "44.47");
 }
