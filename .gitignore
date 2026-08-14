@@ -27,3 +27,6 @@ Thumbs.db
 
 # bench-tui local build tree
 tools/linux-ab/bench-tui/build/
+
+# Local-only operator notes (never published)
+tools/linux-ab/continue-on-linux.md
