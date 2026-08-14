@@ -60,7 +60,7 @@ private:
   std::chrono::steady_clock::time_point arm_t0_{};
   std::thread th_;
   bool thread_done_ = true;
-  bool stop_all_ = false, term_req_ = false, detach_req_ = false;
+  std::atomic<bool> stop_all_ = false, term_req_ = false, detach_req_ = false;
   pid_t child_pid_ = -1;
   unsigned spawn_seq_ = 0;
 };

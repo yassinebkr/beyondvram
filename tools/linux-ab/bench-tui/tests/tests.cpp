@@ -422,7 +422,9 @@ TEST(run_manager_detach) {
     auto recs = rm.records();
     CHECK(recs.size() == 1 && recs[0].note == "detached" && recs[0].exit_code == -1);
   }
-  kill(pid, SIGKILL);  // clean up the detached child
-  int st = 0;
-  waitpid(pid, &st, 0);
+  if (pid > 0) {
+    kill(pid, SIGKILL);  // clean up the detached child
+    int st = 0;
+    waitpid(pid, &st, 0);
+  }
 }

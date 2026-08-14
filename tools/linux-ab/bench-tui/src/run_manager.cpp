@@ -71,11 +71,12 @@ std::string run_record_to_jsonl(const RunRecord &r) {
   return json_stringify(JsonValue::make_obj(std::move(m)));
 }
 
-static void append_line(const std::string &path, const std::string &line) {
+static bool append_line(const std::string &path, const std::string &line) {
   FILE *f = std::fopen(path.c_str(), "a");
-  if (!f) return;
+  if (!f) return false;
   std::fprintf(f, "%s\n", line.c_str());
   std::fclose(f);
+  return true;
 }
 
 RunManager::RunManager(std::string out_dir, std::string bin_dir)
@@ -226,12 +227,13 @@ void RunManager::run_loop() {
         }
       }
       std::string line = run_record_to_jsonl(rec);
+      if (!append_line(out_dir_ + "/runs.jsonl", line) && rec.note.empty())
+        rec.note = "jsonl-append-failed";
       {
         std::lock_guard<std::mutex> lk(mu_);
         records_.push_back(rec);
         status_.rep_seconds.push_back(secs);
       }
-      append_line(out_dir_ + "/runs.jsonl", line);
       if (stop_all_) break;
     }
     std::lock_guard<std::mutex> lk(mu_);
@@ -258,6 +260,12 @@ int RunManager::spawn_and_wait(const Preset &p, int rep, RunRecord &rec) {
     if (fd_err >= 0) close(fd_err);
     return -1;
   }
+  std::string bin = p.binary.find('/') != std::string::npos ? p.binary : bin_dir_ + "/" + p.binary;
+  std::vector<std::string> parts = split_args(p.args);
+  std::vector<char *> av;
+  av.push_back((char *)bin.c_str());
+  for (auto &s : parts) av.push_back((char *)s.c_str());
+  av.push_back(nullptr);
   pid_t pid = fork();
   if (pid < 0) {
     rec.note = "fork-failed";
@@ -271,13 +279,9 @@ int RunManager::spawn_and_wait(const Preset &p, int rep, RunRecord &rec) {
     dup2(fd_err, STDERR_FILENO);
     close(fd_out);
     close(fd_err);
-    std::string bin = p.binary.find('/') != std::string::npos ? p.binary : bin_dir_ + "/" + p.binary;
-    std::vector<std::string> parts = split_args(p.args);
-    std::vector<char *> av;
-    av.push_back((char *)bin.c_str());
-    for (auto &s : parts) av.push_back((char *)s.c_str());
-    av.push_back(nullptr);
     execvp(bin.c_str(), av.data());
+    const char msg[] = "bench-tui: execvp failed\n";
+    (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
     _exit(127);
   }
   close(fd_out);
@@ -313,6 +317,7 @@ int RunManager::spawn_and_wait(const Preset &p, int rep, RunRecord &rec) {
     }
     pid_t r = waitpid(pid, &st, WNOHANG);
     if (r == pid) break;
+    if (r < 0 && errno == ECHILD) break;  // child already gone
     bool term = false, det = false;
     {
       std::lock_guard<std::mutex> lk(mu_);
