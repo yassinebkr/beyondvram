@@ -12,6 +12,9 @@ tools/wsl2-ab/*.zip
 results/real_layer/
 results/*.zip
 
+# Regenerable imatrix binary (116 MB) — rebuilt by mixed_precision_plan.py --imatrix
+results/moe-locality/imatrix-*.dat
+
 # Python / test caches
 __pycache__/
 .pytest_cache/

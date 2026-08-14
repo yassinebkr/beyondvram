@@ -4,7 +4,7 @@
 
 BeyondVRAM is a measurement-first consumer-hardware LLM research workspace. Its first dense `NVMe -> RAM -> pinned staging -> VRAM` streaming track is archived: it established correctness but was storage-bound and not competitive with a practical llama.cpp Q4 baseline on this hardware. See `docs/archive-dense-streaming.md` before proposing work in that archived direction.
 
-Track 1 (MoE expert locality) is **closed**: expert-routing locality measured (strong), and all four beyond-stock speedups measured **negative** — sync expert cache (19.67 baseline vs 18.73/15.04 tok/s), async predictive prefetch (predictor structurally vacuous), frequency-static residency (VRAM-capped), and speculative decoding (29.0 vs 29.5 tok/s). Practical optimum: `-ngl 48 --n-cpu-moe 33` at ~33–35 tok/s. A post-closure external-claim check (ongunm/llama-moe-cache FATE fork, claiming 33.74→64.45 tok/s) was measured **non-reproducible**: corrupt output as shipped (staging race), and 4.05 vs 27.08 tok/s at 54% pool-size-invariant hit once corrected — the same reactive-routing wall on an independent implementation. See `docs/moe-track-plan.md` before proposing MoE work.
+Track 1 (MoE expert locality) is **closed**: expert-routing locality measured (strong), and all four beyond-stock speedups measured **negative** — sync expert cache (19.67 baseline vs 18.73/15.04 tok/s), async predictive prefetch (predictor structurally vacuous), frequency-static residency (VRAM-capped), and speculative decoding (29.0 vs 29.5 tok/s). Practical optimum: `-ngl 48 --n-cpu-moe 33` at ~33–35 tok/s — **revised by post-closure experiment 4** (`docs/next-experiments.md`): trace-guided per-layer mixed precision (layers 12–35 experts at Q3_K, `models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid24-q3k.gguf`) at `-ngl 48 --n-cpu-moe 30` measures **40.44 vs 32.94 tok/s (1.228× interleaved A/B, +0.40% PPL)** — the first positive beyond-stock speedup of the project. A post-closure external-claim check (ongunm/llama-moe-cache FATE fork, claiming 33.74→64.45 tok/s) was measured **non-reproducible**: corrupt output as shipped (staging race), and 4.05 vs 27.08 tok/s at 54% pool-size-invariant hit once corrected — the same reactive-routing wall on an independent implementation. See `docs/moe-track-plan.md` before proposing MoE work.
 
 Track 2 (dense RAM-resident partial offload) has its **baseline**: dense Qwen3-32B Q4_K_M peaks at ~2.7 generation tok/s (ngl 22) — ~12× slower than the Track-1 MoE at similar total size, confirming sparse activation beats dense weights by an order of magnitude on this RAM-bound machine. See `docs/track2-dense-offload.md`.
 
@@ -54,6 +54,9 @@ experiments/moe_trace/  MoE expert-locality track: run_traces.py (10-prompt capt
                         prefetch_simulation.py (predictor hit-rate sim),
                         speculative_bench.py (llama-server draft vs no-draft),
                         fate_repro.py (FATE-fork claim check; --reparse rebuilds JSON from raw logs)
+                        mixed_precision_plan.py / mixed_precision_gate.py / mixed_precision_speed.py
+                        (exp-4 per-layer mixed precision: roofline plan, 4-model PPL gate,
+                        placement sweep + interleaved A/B), ik_hybrid_ab.py (ik hybrid rescue A/B)
 experiments/dense_offload/ Track 2: placement_sweep.py (dense Qwen3-32B -ngl sweep)
 experiments/low_bit/    Track 3: bench_quants.py, perplexity_quants.py
 experiments/gpt_oss/    Track 4: placement_grid.py (gpt-oss-20b -ngl x --n-cpu-moe; --refine),
@@ -71,7 +74,9 @@ models/                 Local checkpoints (Qwen3-8B, Qwen3-30B-A3B, Qwen3-32B, B
 results/moe-locality/   Raw expert traces (trace-*.jsonl), generated text, parity outputs,
                         locality-analysis.json, cache-cost-model.json, moe-cache-poc.json,
                         cache-stats-*.json, moe-cache-poc.patch + moe-cache-new-files/,
-                        fate-repro/ (FATE-fork matrix, per-rep logs, fork-patches.patch)
+                        fate-repro/ (FATE-fork matrix, per-rep logs, fork-patches.patch),
+                        mixed-precision-*.json + mixed-precision-mid24-*.txt (exp-4 roofline
+                        plan, PPL/speed gates, quantize override lists), ik-hybrid-ab.json
 tools/build-scripts/    Native build helpers (configure-trace-build.bat, build-trace.bat,
                         configure-ik.bat, build-ik.bat, build-fate.bat, kill-stale-llama.ps1)
 tools/llama.cpp-source/ llama.cpp pinned at dd1ea52 (b10355) + additive moe-trace example,
@@ -155,6 +160,7 @@ These rules come from the project's own documents; follow them when changing ben
 - Standard-library-first Python; third-party imports (NumPy, Pillow, PyTorch) are used only where the script genuinely needs them, and optional ones are imported lazily with graceful skip behavior (see `benchmark_cuda.py`).
 - Type hints on function signatures, `from __future__ import annotations`, module docstring stating purpose on the first line, `argparse` CLIs with MiB/KiB-suffixed flags, `pathlib.Path` for paths, `if __name__ == "__main__": main()` entry points.
 - Shared output logic lives in `benchmarks/system/common.py`; new benchmarks should reuse `write_rows`, `skipped_row`, `rebuild_summary`, and the fixed CSV field list rather than inventing a new output format.
+- Long-running child processes go through `run_live` in `benchmarks/system/common.py` (live stdout/stderr streaming, timestamped `[step i/N]` banners, Ctrl+C terminates the child, partial results are written with `status="interrupted"`, exit code 130); scripts default to verbose and expose `--quiet`.
 - Documentation and comments are written in English, in a measured, evidence-first tone: state what is measured versus hypothesized, cite sources for external claims, and mark provisional decisions as provisional.
 
 ## Security and operational considerations

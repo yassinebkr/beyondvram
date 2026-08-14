@@ -1,0 +1,169 @@
+{
+ "tool": "llama-bench; mainline b10355 CI vs ik 981e5ea local MSVC+CUDA",
+ "protocol": "-ngl 48, -p 128 -n 32 -r 3, arms alternating per round",
+ "hypothesis": "mainline IQ2_XXS CPU gemv is compute-bound; ik iqk kernels may convert the hybrid's byte cut into tg",
+ "summary_tg": {
+  "mainline-original": {
+   "tg_mean": 32.48,
+   "n": 3
+  },
+  "mainline-hybrid": {
+   "tg_mean": 33.49,
+   "n": 3
+  },
+  "ik-original": {
+   "tg_mean": 24.96,
+   "n": 3
+  },
+  "ik-hybrid": {
+   "tg_mean": 21.89,
+   "n": 3
+  }
+ },
+ "records": [
+  {
+   "round": 0,
+   "arm": "mainline-original",
+   "engine": "mainline",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 19.8,
+   "pp": 136.03,
+   "tg": 30.66,
+   "status": "ok"
+  },
+  {
+   "round": 0,
+   "arm": "mainline-hybrid",
+   "engine": "mainline",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 18.2,
+   "pp": 231.67,
+   "tg": 32.85,
+   "status": "ok"
+  },
+  {
+   "round": 0,
+   "arm": "ik-original",
+   "engine": "ik",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 21.4,
+   "pp": 121.68,
+   "tg": 25.22,
+   "status": "ok"
+  },
+  {
+   "round": 0,
+   "arm": "ik-hybrid",
+   "engine": "ik",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 20.2,
+   "pp": 126.64,
+   "tg": 20.68,
+   "status": "ok"
+  },
+  {
+   "round": 1,
+   "arm": "ik-hybrid",
+   "engine": "ik",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 11.7,
+   "pp": 135.84,
+   "tg": 21.36,
+   "status": "ok"
+  },
+  {
+   "round": 1,
+   "arm": "ik-original",
+   "engine": "ik",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 20.9,
+   "pp": 120.53,
+   "tg": 25.03,
+   "status": "ok"
+  },
+  {
+   "round": 1,
+   "arm": "mainline-hybrid",
+   "engine": "mainline",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 18.1,
+   "pp": 238.0,
+   "tg": 33.8,
+   "status": "ok"
+  },
+  {
+   "round": 1,
+   "arm": "mainline-original",
+   "engine": "mainline",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 18.9,
+   "pp": 155.67,
+   "tg": 34.1,
+   "status": "ok"
+  },
+  {
+   "round": 2,
+   "arm": "mainline-original",
+   "engine": "mainline",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 14.1,
+   "pp": 153.43,
+   "tg": 32.68,
+   "status": "ok"
+  },
+  {
+   "round": 2,
+   "arm": "mainline-hybrid",
+   "engine": "mainline",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 18.1,
+   "pp": 232.93,
+   "tg": 33.82,
+   "status": "ok"
+  },
+  {
+   "round": 2,
+   "arm": "ik-original",
+   "engine": "ik",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 20.9,
+   "pp": 146.08,
+   "tg": 24.63,
+   "status": "ok"
+  },
+  {
+   "round": 2,
+   "arm": "ik-hybrid",
+   "engine": "ik",
+   "model": "qwen3-30b-a3b-mid24-iq2xxs.gguf",
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 18.4,
+   "pp": 153.65,
+   "tg": 23.64,
+   "status": "ok"
+  }
+ ]
+}

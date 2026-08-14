@@ -1,0 +1,36 @@
+{
+ "status": "complete",
+ "tool": "llama-perplexity b10355 (unmodified)",
+ "corpus": "results/track3-low-bit/corpus-ppl-half.txt (imatrix-disjoint half; relative comparison only)",
+ "placement": "-ngl 48 --n-cpu-moe 33",
+ "records": [
+  {
+   "model": "original-q4km",
+   "rc": 0,
+   "wall_s": 22.9,
+   "ppl": 23.7802,
+   "ppl_stderr": 1.66108
+  },
+  {
+   "model": "control-requant-q4km",
+   "rc": 0,
+   "wall_s": 28.4,
+   "ppl": 23.7823,
+   "ppl_stderr": 1.66111
+  },
+  {
+   "model": "variant-mid24-iq2xxs",
+   "rc": 0,
+   "wall_s": 23.1,
+   "ppl": 24.7409,
+   "ppl_stderr": 1.72197
+  },
+  {
+   "model": "variant-mid24-q3k",
+   "rc": 0,
+   "wall_s": 28.0,
+   "ppl": 23.8766,
+   "ppl_stderr": 1.66101
+  }
+ ]
+}
