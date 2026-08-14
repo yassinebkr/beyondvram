@@ -14,6 +14,11 @@ MSVC); ik = tools/ik_llama.cpp/build/bin/llama-bench.exe (local MSVC + CUDA
 >=10% generation advantage at equal placement earns a full grid; otherwise
 recorded as parity/negative and closed.
 
+Per-run child stdout/stderr go to log files (raw evidence, not streamed);
+each arm banner prints the log paths so they can be tailed live. Ctrl+C
+terminates the running child, writes the manifest with
+status="interrupted", and exits with code 130.
+
 Output: results/gpt-oss/ik-ab-{engine}-{placement}-r{round}.json(+stderr).
 """
 
@@ -27,6 +32,9 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import terminate_child, ts  # noqa: E402
+
 MODEL = ROOT / "models/gpt-oss-20b-GGUF/gpt-oss-20b-MXFP4.gguf"
 OUT_DIR = ROOT / "results/gpt-oss"
 
@@ -42,6 +50,8 @@ PLACEMENTS = {
     "moe10": (24, 10),
 }
 
+MANIFEST = OUT_DIR / "ik-ab-manifest.json"
+
 
 def warm_cache(path: Path) -> None:
     """Read the model fully so every arm sees a warm page cache."""
@@ -50,21 +60,31 @@ def warm_cache(path: Path) -> None:
             pass
 
 
-def run_arm(engine: str, placement: str, round_idx: int) -> Path:
+def run_arm(engine: str, placement: str, round_idx: int,
+            step: int, total: int) -> Path:
     ngl, k = PLACEMENTS[placement]
     out = OUT_DIR / f"ik-ab-{engine}-{placement}-r{round_idx}.json"
     err = out.with_suffix(".stderr.txt")
+    label = f"[step {step}/{total}] {engine} {placement} r{round_idx}"
+    print(f"[{ts()}] {label}: warming cache", flush=True)
     warm_cache(MODEL)
     cmd = [str(ENGINES[engine]), "-m", str(MODEL),
            "-ngl", str(ngl), "--n-cpu-moe", str(k),
            "-p", "128", "-n", "32", "-r", "3", "-o", "json"]
+    print(f"[{ts()}] {label}: running (logs: {out} , {err})", flush=True)
     with open(out, "w") as fo, open(err, "w") as fe:
-        proc = subprocess.run(cmd, stdout=fo, stderr=fe)
-    if proc.returncode != 0:
-        print(f"[ik-ab] {engine} {placement} r{round_idx} FAILED rc={proc.returncode}",
-              file=sys.stderr)
+        proc = subprocess.Popen(cmd, stdout=fo, stderr=fe)
+        try:
+            rc = proc.wait()
+        except KeyboardInterrupt:
+            print(f"\n[{ts()}] {label} interrupt — terminating child",
+                  flush=True)
+            terminate_child(proc)
+            raise
+    if rc != 0:
+        print(f"[{ts()}] {label} FAILED rc={rc}", flush=True)
     else:
-        print(f"[ik-ab] {engine} {placement} r{round_idx} done", file=sys.stderr)
+        print(f"[{ts()}] {label} done", flush=True)
     return out
 
 
@@ -75,6 +95,20 @@ def ik_commit() -> str | None:
             capture_output=True, text=True, check=True).stdout.strip()
     except Exception:
         return None
+
+
+def write_manifest(placements: list[str], rounds: int, status: str) -> None:
+    manifest = {
+        "status": status,
+        "experiment": "next-experiments.md #3: ik_llama.cpp vs mainline b10355",
+        "model": MODEL.name,
+        "protocol": "-p 128 -n 32 -r 3, arms alternating per round, cache re-warmed per arm",
+        "engines": {k: str(v) for k, v in ENGINES.items()},
+        "ik_commit": ik_commit(),
+        "rounds": rounds, "placements": placements,
+        "written": time.strftime("%Y-%m-%d %H:%M %z"),
+    }
+    MANIFEST.write_text(json.dumps(manifest, indent=1))
 
 
 def main() -> None:
@@ -94,25 +128,34 @@ def main() -> None:
     if unknown:
         ap.error(f"unknown placements: {unknown}")
 
-    order = list(ENGINES)
-    for r in range(args.rounds):
-        engines = order if r % 2 == 0 else list(reversed(order))
-        for placement in placements:
-            print(f"[ik-ab] round {r} {placement}", file=sys.stderr)
-            for engine in engines:
-                run_arm(engine, placement, r)
+    total = args.rounds * len(placements) * len(ENGINES)
+    print(f"[{ts()}] ik A/B: {args.rounds} rounds x {len(placements)} "
+          f"placements x {len(ENGINES)} engines = {total} runs, "
+          f"model {MODEL.name}", flush=True)
+    print(f"[{ts()}] per-run logs -> {OUT_DIR}/ik-ab-<engine>-<placement>"
+          f"-r<round>.json(+.stderr.txt)", flush=True)
+    print(f"[{ts()}] manifest -> {MANIFEST} (Ctrl+C writes partial results)",
+          flush=True)
 
-    manifest = {
-        "experiment": "next-experiments.md #3: ik_llama.cpp vs mainline b10355",
-        "model": MODEL.name,
-        "protocol": "-p 128 -n 32 -r 3, arms alternating per round, cache re-warmed per arm",
-        "engines": {k: str(v) for k, v in ENGINES.items()},
-        "ik_commit": ik_commit(),
-        "rounds": args.rounds, "placements": placements,
-        "written": time.strftime("%Y-%m-%d %H:%M %z"),
-    }
-    (OUT_DIR / "ik-ab-manifest.json").write_text(json.dumps(manifest, indent=1))
-    print("[ik-ab] all done", file=sys.stderr)
+    order = list(ENGINES)
+    step = 0
+    try:
+        for r in range(args.rounds):
+            engines = order if r % 2 == 0 else list(reversed(order))
+            for placement in placements:
+                print(f"[{ts()}] [ik-ab] round {r} {placement}", flush=True)
+                for engine in engines:
+                    step += 1
+                    run_arm(engine, placement, r, step, total)
+    except KeyboardInterrupt:
+        write_manifest(placements, args.rounds, status="interrupted")
+        print(f"\n[{ts()}] interrupted after {step}/{total} runs — partial "
+              f"manifest -> {MANIFEST}", flush=True)
+        print(f"[{ts()}] completed per-run logs are in {OUT_DIR}", flush=True)
+        sys.exit(130)
+
+    write_manifest(placements, args.rounds, status="complete")
+    print(f"[{ts()}] [ik-ab] all done — manifest -> {MANIFEST}", flush=True)
 
 
 if __name__ == "__main__":

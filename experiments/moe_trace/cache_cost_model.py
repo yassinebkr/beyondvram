@@ -23,19 +23,27 @@ ideal-overlap column assumes transfer hides fully under CPU attention compute.
 
 Nothing here is measured end-to-end; it is arithmetic over measured inputs,
 with a sensitivity range on bandwidth (pageable vs pinned) and on the
-(c - g) anchor (+/-20%). Output: results/moe-locality/cache-cost-model.json.
+(c - g) anchor (+/-20%).
+
+Progress banners print per step. Ctrl+C writes the rows computed so far with
+status="interrupted" and exits with code 130.
+
+Output: results/moe-locality/cache-cost-model.json.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 from gguf import GGUFReader
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import ts  # noqa: E402
 MODEL = ROOT / "models" / "Qwen3-30B-A3B-GGUF" / "Qwen3-30B-A3B-Q4_K_M.gguf"
 ANALYSIS = ROOT / "results" / "moe-locality" / "locality-analysis.json"
 OUT = ROOT / "results" / "moe-locality" / "cache-cost-model.json"
@@ -70,54 +78,19 @@ def mean_hit_rates(analysis: dict, capacity: int) -> dict[int, float]:
     return {layer: h / n for layer, (h, n) in hits.items() if n}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cache-vram-gb", type=float, nargs="+",
-                        default=[0.5, 1.0, 2.0, 4.0],
-                        help="VRAM budgets for the expert cache")
-    args = parser.parse_args()
-
-    analysis = json.loads(ANALYSIS.read_text(encoding="utf-8"))
-    exp_bytes = expert_bytes_per_layer()
-    capacities = [int(c) for c in analysis["lru_capacities"]]
-
-    rows = []
-    for capacity in capacities:
-        hit = mean_hit_rates(analysis, capacity)
-        # misses and bytes summed over the 30 cached layers, per token
-        misses = {l: 8 * (1.0 - hit.get(l, 0.0)) for l in CACHED_LAYERS}
-        bytes_per_token = sum(misses[l] * exp_bytes[l] for l in CACHED_LAYERS)
-        cache_footprint_gb = sum(capacity * exp_bytes[l] for l in CACHED_LAYERS) / 1e9
-        for bw_name, bw in (("pinned", PINNED_GBS), ("pageable", PAGEABLE_GBS)):
-            transfer_ms = bytes_per_token / (bw * 1e9) * 1000
-            for anchor_scale in (0.8, 1.0, 1.2):
-                anchor = C_G_ANCHOR_MS * anchor_scale
-                saving = sum(max(0.0, anchor - misses[l] * exp_bytes[l] / (bw * 1e9) * 1000)
-                             for l in CACHED_LAYERS)
-                t_sync = T_BASELINE_MS - saving
-                rows.append({
-                    "capacity": capacity,
-                    "bandwidth": bw_name,
-                    "anchor_scale": anchor_scale,
-                    "mean_misses_per_token": sum(misses.values()) / len(CACHED_LAYERS),
-                    "bytes_per_token_mb": bytes_per_token / 1e6,
-                    "transfer_ms_per_token": transfer_ms,
-                    "cache_footprint_gb": cache_footprint_gb,
-                    "est_ms_per_token_sync": t_sync,
-                    "est_tok_s_sync": 1000 / t_sync if t_sync > 0 else None,
-                    "est_tok_s_ideal_overlap": 1000 / max(T_BASELINE_MS - sum(
-                        max(0.0, anchor) for l in CACHED_LAYERS), 1.0),
-                })
-
+def write_payload(rows: list[dict], exp_bytes: dict[int, float],
+                  budgets_gb: list[float], status: str) -> None:
     payload = {
+        "status": status,
         "inputs": {
             "t_baseline_ms_ngl18": T_BASELINE_MS,
             "c_minus_g_ms_per_layer": C_G_ANCHOR_MS,
             "pinned_h2d_gb_s": PINNED_GBS,
             "pageable_h2d_gb_s": PAGEABLE_GBS,
             "cached_layers": CACHED_LAYERS,
-            "expert_mb_per_layer": {str(l): round(exp_bytes[l] / 1e6, 3) for l in CACHED_LAYERS},
-            "cache_vram_budgets_gb": args.cache_vram_gb,
+            "expert_mb_per_layer": {str(l): round(exp_bytes[l] / 1e6, 3)
+                                    for l in CACHED_LAYERS if l in exp_bytes},
+            "cache_vram_budgets_gb": budgets_gb,
         },
         "rows": rows,
         "notes": [
@@ -129,18 +102,77 @@ def main() -> None:
     }
     OUT.write_text(json.dumps(payload, indent=1), encoding="utf-8")
 
-    print(f"c - g anchor: {C_G_ANCHOR_MS:.3f} ms/layer/token (measured)")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cache-vram-gb", type=float, nargs="+",
+                        default=[0.5, 1.0, 2.0, 4.0],
+                        help="VRAM budgets for the expert cache")
+    args = parser.parse_args()
+
+    print(f"[{ts()}] cache cost model: {ANALYSIS.name} + per-expert bytes "
+          f"from {MODEL.name}", flush=True)
+    print(f"[{ts()}] output -> {OUT} (Ctrl+C writes partial results)",
+          flush=True)
+
+    exp_bytes: dict[int, float] = {}
+    rows: list[dict] = []
+    try:
+        print(f"[{ts()}] [step 1/2] loading hit rates and GGUF expert bytes",
+              flush=True)
+        analysis = json.loads(ANALYSIS.read_text(encoding="utf-8"))
+        exp_bytes = expert_bytes_per_layer()
+        capacities = [int(c) for c in analysis["lru_capacities"]]
+
+        print(f"[{ts()}] [step 2/2] scoring {len(capacities)} capacities x "
+              f"2 bandwidths x 3 anchor scales", flush=True)
+        for capacity in capacities:
+            hit = mean_hit_rates(analysis, capacity)
+            # misses and bytes summed over the 30 cached layers, per token
+            misses = {l: 8 * (1.0 - hit.get(l, 0.0)) for l in CACHED_LAYERS}
+            bytes_per_token = sum(misses[l] * exp_bytes[l] for l in CACHED_LAYERS)
+            cache_footprint_gb = sum(capacity * exp_bytes[l] for l in CACHED_LAYERS) / 1e9
+            for bw_name, bw in (("pinned", PINNED_GBS), ("pageable", PAGEABLE_GBS)):
+                transfer_ms = bytes_per_token / (bw * 1e9) * 1000
+                for anchor_scale in (0.8, 1.0, 1.2):
+                    anchor = C_G_ANCHOR_MS * anchor_scale
+                    saving = sum(max(0.0, anchor - misses[l] * exp_bytes[l] / (bw * 1e9) * 1000)
+                                 for l in CACHED_LAYERS)
+                    t_sync = T_BASELINE_MS - saving
+                    rows.append({
+                        "capacity": capacity,
+                        "bandwidth": bw_name,
+                        "anchor_scale": anchor_scale,
+                        "mean_misses_per_token": sum(misses.values()) / len(CACHED_LAYERS),
+                        "bytes_per_token_mb": bytes_per_token / 1e6,
+                        "transfer_ms_per_token": transfer_ms,
+                        "cache_footprint_gb": cache_footprint_gb,
+                        "est_ms_per_token_sync": t_sync,
+                        "est_tok_s_sync": 1000 / t_sync if t_sync > 0 else None,
+                        "est_tok_s_ideal_overlap": 1000 / max(T_BASELINE_MS - sum(
+                            max(0.0, anchor) for l in CACHED_LAYERS), 1.0),
+                    })
+    except KeyboardInterrupt:
+        write_payload(rows, exp_bytes, args.cache_vram_gb, status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(rows)} rows) "
+              f"-> {OUT}", flush=True)
+        sys.exit(130)
+
+    write_payload(rows, exp_bytes, args.cache_vram_gb, status="complete")
+
+    print(f"c - g anchor: {C_G_ANCHOR_MS:.3f} ms/layer/token (measured)",
+          flush=True)
     print(f"expert size: {exp_bytes[18]/1e6:.2f} MB (layer 18); "
-          f"baseline {1000/T_BASELINE_MS:.2f} tok/s\n")
+          f"baseline {1000/T_BASELINE_MS:.2f} tok/s\n", flush=True)
     print(f"{'cap':>4} {'miss/tok':>8} {'MB/tok':>7} {'xfer ms':>8} {'GB vram':>8} "
-          f"{'tok/s sync(pinned)':>18} {'tok/s ideal':>11}")
+          f"{'tok/s sync(pinned)':>18} {'tok/s ideal':>11}", flush=True)
     for row in rows:
         if row["bandwidth"] == "pinned" and row["anchor_scale"] == 1.0:
             print(f"{row['capacity']:>4} {row['mean_misses_per_token']:>8.2f} "
                   f"{row['bytes_per_token_mb']:>7.1f} {row['transfer_ms_per_token']:>8.2f} "
                   f"{row['cache_footprint_gb']:>8.2f} {row['est_tok_s_sync']:>18.1f} "
-                  f"{row['est_tok_s_ideal_overlap']:>11.1f}")
-    print(f"\nwrote {OUT}")
+                  f"{row['est_tok_s_ideal_overlap']:>11.1f}", flush=True)
+    print(f"\n[{ts()}] wrote {OUT}", flush=True)
 
 
 if __name__ == "__main__":

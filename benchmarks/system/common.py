@@ -1,4 +1,4 @@
-"""Shared result-writing helpers for system characterization benchmarks."""
+"""Shared result-writing and live-subprocess helpers for characterization runs."""
 
 from __future__ import annotations
 
@@ -6,6 +6,9 @@ import csv
 import json
 import math
 import statistics
+import subprocess
+import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -104,4 +107,67 @@ def rebuild_summary() -> None:
 def dump_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def ts() -> str:
+    """Local HH:MM:SS timestamp for progress banners."""
+    return time.strftime("%H:%M:%S")
+
+
+def terminate_child(proc: subprocess.Popen) -> None:
+    """Terminate a child process, escalating to kill after a grace period."""
+    proc.terminate()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait(timeout=10)
+
+
+def run_live(cmd: list[str], label: str, quiet: bool = False,
+             timeout: int = 3600) -> dict:
+    """Run cmd, streaming child stdout/stderr live with a `  | ` prefix.
+
+    Returns {"rc", "stdout", "stderr", "wall_s"}. Ctrl+C terminates the child
+    and re-raises so the caller can persist partial results. A timeout also
+    terminates the child and reports rc=-1.
+    """
+    print(f"[{ts()}] {label} launch: {Path(str(cmd[0])).name} "
+          f"{' '.join(str(a) for a in cmd[1:3])} ...", flush=True)
+    proc = subprocess.Popen(
+        [str(c) for c in cmd], stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, errors="replace")
+    parts: dict[str, list[str]] = {"out": [], "err": []}
+
+    def drain(stream, key: str) -> None:
+        for line in stream:
+            parts[key].append(line)
+            if not quiet:
+                print(f"  | {line}", end="", flush=True)
+
+    threads = [
+        threading.Thread(target=drain, args=(proc.stdout, "out"), daemon=True),
+        threading.Thread(target=drain, args=(proc.stderr, "err"), daemon=True),
+    ]
+    start = time.perf_counter()
+    try:
+        for t in threads:
+            t.start()
+        rc = proc.wait(timeout=timeout)
+    except KeyboardInterrupt:
+        print(f"\n[{ts()}] {label} interrupt — terminating child", flush=True)
+        terminate_child(proc)
+        raise
+    except subprocess.TimeoutExpired:
+        print(f"\n[{ts()}] {label} timeout ({timeout}s) — terminating child",
+              flush=True)
+        terminate_child(proc)
+        rc = -1
+    for t in threads:
+        t.join(timeout=5)
+    wall = round(time.perf_counter() - start, 1)
+    print(f"[{ts()}] {label} done rc={rc} wall={wall}s", flush=True)
+    return {"rc": rc, "stdout": "".join(parts["out"]),
+            "stderr": "".join(parts["err"]), "wall_s": wall}
 

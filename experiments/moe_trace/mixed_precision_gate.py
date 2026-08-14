@@ -1,15 +1,20 @@
-"""Track 3: perplexity quality pass over a fixed local corpus.
+"""Next-experiments #4 quality gate: perplexity of mixed-precision variants.
 
-Quality is measured as llama-perplexity over a fixed corpus assembled from
-project documentation (consistent across models; a relative comparison, not
-an absolute benchmark). Runs each candidate plus the Q4_K_M dense anchor and
-the MoE anchor at their best known offload configs.
+Three-way same-corpus comparison on the perplexity half of the Track-3 corpus
+(results/track3-low-bit/corpus-ppl-half.txt) — the imatrix used for the
+IQ2_XXS layers was built from the OTHER half (corpus-imatrix-half.txt), so
+the gate never measures text the quantizer tuned for. All models run at the
+Track-1 measured optimum (-ngl 48 --n-cpu-moe 33).
+
+Models: original Q4_K_M anchor, the plain requantize control (isolates
+requantization loss), and the mixed-precision variant(s). Missing files are
+recorded as skipped rows, never fabricated.
 
 Child stdout/stderr stream live by default (--quiet suppresses). Ctrl+C
 terminates the running child, writes partial results to the output JSON with
 status="interrupted", and exits with code 130.
 
-Output: results/track3-low-bit/perplexity.json
+Output: results/moe-locality/mixed-precision-ppl.json
 """
 
 from __future__ import annotations
@@ -25,39 +30,27 @@ sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
 from common import run_live, ts  # noqa: E402
 
 PERP = ROOT / "tools/llama.cpp-b10355/llama-perplexity.exe"
-OUT = ROOT / "results/track3-low-bit/perplexity.json"
-CORPUS = ROOT / "results/track3-low-bit/corpus.txt"
+OUT = ROOT / "results/moe-locality/mixed-precision-ppl.json"
+CORPUS = ROOT / "results/track3-low-bit/corpus-ppl-half.txt"
 
 MODELS = [
-    # (id, path, extra args)
-    ("qwen3-32b-q4km", "models/Qwen3-32B-GGUF/Qwen3-32B-Q4_K_M.gguf", ["-ngl", "22"]),
-    ("qwen3-32b-q3km", "models/Qwen3-32B-GGUF/Qwen_Qwen3-32B-Q3_K_M.gguf", ["-ngl", "22"]),
-    ("qwen3-32b-iq2xxs", "models/Qwen3-32B-GGUF/Qwen_Qwen3-32B-IQ2_XXS.gguf", ["-ngl", "40"]),
-    ("bitnet-2b-i2s", "models/bitnet-b1.58-2B-4T/ggml-model-i2_s.gguf", ["-ngl", "99"]),
-    ("qwen3-30b-a3b-q4km", "models/Qwen3-30B-A3B-GGUF/Qwen3-30B-A3B-Q4_K_M.gguf",
-     ["-ngl", "48", "--n-cpu-moe", "33"]),
+    ("original-q4km", "models/Qwen3-30B-A3B-GGUF/Qwen3-30B-A3B-Q4_K_M.gguf"),
+    ("control-requant-q4km", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-q4km-requant-control.gguf"),
+    ("variant-mid24-iq2xxs", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid24-iq2xxs.gguf"),
+    ("variant-mid24-q3k", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid24-q3k.gguf"),
 ]
 
 PPL_RE = re.compile(r"Final estimate: PPL = ([\d.]+) \+/- ([\d.]+)")
-
-
-def build_corpus() -> None:
-    """Concatenate project docs into a fixed corpus (relative comparisons only)."""
-    parts = []
-    for name in ["README.md", "initial_prompt.md", "docs/moe-track-plan.md",
-                 "docs/system-characterization.md", "docs/model-selection.md"]:
-        path = ROOT / name
-        if path.exists():
-            parts.append(path.read_text(encoding="utf-8"))
-    CORPUS.parent.mkdir(parents=True, exist_ok=True)
-    CORPUS.write_text("\n\n".join(parts), encoding="utf-8")
+PLACEMENT = ["-ngl", "48", "--n-cpu-moe", "33"]
 
 
 def write_payload(records: list[dict], status: str) -> None:
     payload = {
         "status": status,
         "tool": "llama-perplexity b10355 (unmodified)",
-        "corpus": "results/track3-low-bit/corpus.txt (project docs; relative comparison only)",
+        "corpus": "results/track3-low-bit/corpus-ppl-half.txt (imatrix-disjoint half; "
+                  "relative comparison only)",
+        "placement": " ".join(PLACEMENT),
         "records": records,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -70,23 +63,23 @@ def main() -> None:
                     help="suppress live child output (banners still print)")
     args = ap.parse_args()
 
-    build_corpus()
     records: list[dict] = []
-    print(f"[{ts()}] perplexity pass: {len(MODELS)} models, corpus "
-          f"{CORPUS.name} (project docs, relative comparison only)", flush=True)
+    print(f"[{ts()}] quality gate: {len(MODELS)} models, corpus {CORPUS.name}, "
+          f"placement {' '.join(PLACEMENT)}", flush=True)
     print(f"[{ts()}] output -> {OUT} (Ctrl+C writes partial results)",
           flush=True)
     try:
-        for i, (model_id, rel_path, extra) in enumerate(MODELS, 1):
-            label = f"[{i}/{len(MODELS)}] {model_id}"
+        for i, (model_id, rel_path) in enumerate(MODELS, 1):
             model = ROOT / rel_path
+            label = f"[{i}/{len(MODELS)}] {model_id}"
             if not model.exists():
-                records.append({"model": model_id, "status": "missing"})
-                print(f"[{ts()}] {label}: SKIPPED (not found)", flush=True)
+                records.append({"model": model_id, "status": "skipped",
+                                "reason": "file not present"})
+                print(f"[{ts()}] {label}: SKIPPED (file not present)",
+                      flush=True)
                 continue
-            cmd = [str(PERP), "-m", str(model), "-f", str(CORPUS), *extra]
-            print(f"[{ts()}] [step {i}/{len(MODELS)}] {model_id}: measuring",
-                  flush=True)
+            cmd = [str(PERP), "-m", str(model), "-f", str(CORPUS), *PLACEMENT]
+            print(f"[{ts()}] {label}: measuring", flush=True)
             res = run_live(cmd, label, quiet=args.quiet)
             record = {"model": model_id, "rc": res["rc"],
                       "wall_s": res["wall_s"]}
@@ -110,6 +103,10 @@ def main() -> None:
 
     write_payload(records, status="complete")
     print(f"\n[{ts()}] wrote {OUT}", flush=True)
+    for r in records:
+        if "ppl" in r:
+            print(f"  {r['model']}: PPL {r['ppl']} +/- {r['ppl_stderr']}",
+                  flush=True)
 
 
 if __name__ == "__main__":

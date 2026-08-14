@@ -1,10 +1,15 @@
-"""Pack, stream, execute, and validate one Qwen3-8B decoder layer."""
+"""Pack, stream, execute, and validate one Qwen3-8B decoder layer.
+
+Progress banners are timestamped and flushed; Ctrl+C writes the partial result
+rows collected so far and exits with code 130.
+"""
 from __future__ import annotations
 
 import argparse
 import ctypes
 import json
 import math
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,7 +19,7 @@ import torch
 
 import bootstrap  # noqa: F401  (adds benchmarks/system to sys.path)
 from benchmark_storage import DirectReader
-from common import RAW_CSV, rebuild_summary, utc_now, write_rows
+from common import RAW_CSV, rebuild_summary, ts, utc_now, write_rows
 
 
 ALIGNMENT = 4096
@@ -169,37 +174,46 @@ def main() -> None:
     if args.layer < 0 or args.sequence_length < 1 or args.repetitions < 1:
         raise ValueError("layer >= 0, sequence-length >= 1, and repetitions >= 1 are required")
     manifest_path = args.package_dir / MANIFEST_NAME
-    if not manifest_path.exists():
-        manifest_path = pack_layer(args.model_dir, args.package_dir, args.layer)
-    if args.pack_only:
-        print(f"wrote {manifest_path}")
-        return
-    manifest, specs = load_manifest(manifest_path)
-    if manifest["layer_index"] != args.layer:
-        raise ValueError("package layer does not match --layer")
-    data_path = args.package_dir / manifest["data_file"]
-    payload = int(manifest["payload_bytes"])
-    file_bytes = int(manifest["file_bytes"])
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the streamed execution measurement")
-    reference, config = build_layer(args.model_dir / "config.json", args.layer, "cuda")
-    reference.load_state_dict(load_reference_state(args.model_dir, args.layer), strict=True)
-    reference.eval()
-    streamed, _ = build_layer(args.model_dir / "config.json", args.layer, "cuda")
-    streamed.eval()
-    pinned = torch.empty(file_bytes, dtype=torch.uint8, pin_memory=True)
-    device_bytes = torch.empty(file_bytes, dtype=torch.uint8, device="cuda")
-    reader = DirectReader(data_path.resolve(), file_bytes)
-    copy_stream = torch.cuda.Stream()
-    generator = torch.Generator(device="cuda").manual_seed(0xB30A0D)
-    hidden = torch.randn((1, args.sequence_length, config.hidden_size), device="cuda", dtype=torch.bfloat16,
-                         generator=generator)
-    position_ids = torch.arange(args.sequence_length, device="cuda").unsqueeze(0)
-    with torch.inference_mode():
-        reference_output = run_layer(reference, config, hidden, position_ids).detach()
-    rows = []
+    rows: list[dict] = []
+    reader = None
     try:
+        if not manifest_path.exists():
+            print(f"[{ts()}] packing layer {args.layer} from {args.model_dir} "
+                  f"-> {args.package_dir}", flush=True)
+            manifest_path = pack_layer(args.model_dir, args.package_dir, args.layer)
+        if args.pack_only:
+            print(f"wrote {manifest_path}", flush=True)
+            return
+        manifest, specs = load_manifest(manifest_path)
+        if manifest["layer_index"] != args.layer:
+            raise ValueError("package layer does not match --layer")
+        data_path = args.package_dir / manifest["data_file"]
+        payload = int(manifest["payload_bytes"])
+        file_bytes = int(manifest["file_bytes"])
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA is required for the streamed execution measurement")
+        print(f"[{ts()}] RLS layer stream: layer={args.layer} seq={args.sequence_length} "
+              f"repetitions={args.repetitions} package={data_path.name} "
+              f"({file_bytes} bytes, payload {payload} bytes)", flush=True)
+        print(f"[{ts()}] rows -> {RAW_CSV} (Ctrl+C writes partial results)", flush=True)
+        reference, config = build_layer(args.model_dir / "config.json", args.layer, "cuda")
+        reference.load_state_dict(load_reference_state(args.model_dir, args.layer), strict=True)
+        reference.eval()
+        streamed, _ = build_layer(args.model_dir / "config.json", args.layer, "cuda")
+        streamed.eval()
+        pinned = torch.empty(file_bytes, dtype=torch.uint8, pin_memory=True)
+        device_bytes = torch.empty(file_bytes, dtype=torch.uint8, device="cuda")
+        reader = DirectReader(data_path.resolve(), file_bytes)
+        copy_stream = torch.cuda.Stream()
+        generator = torch.Generator(device="cuda").manual_seed(0xB30A0D)
+        hidden = torch.randn((1, args.sequence_length, config.hidden_size), device="cuda", dtype=torch.bfloat16,
+                             generator=generator)
+        position_ids = torch.arange(args.sequence_length, device="cuda").unsqueeze(0)
+        with torch.inference_mode():
+            reference_output = run_layer(reference, config, hidden, position_ids).detach()
         for repetition in range(1, args.repetitions + 1):
+            print(f"[{ts()}] [step {repetition}/{args.repetitions}] direct read -> "
+                  f"RAM staging -> pinned H2D -> layer compute", flush=True)
             read_start = time.perf_counter()
             reader.seek(0)
             reader.read(file_bytes)
@@ -233,13 +247,19 @@ def main() -> None:
                 result_row("streamed Qwen decoder layer compute", workload, repetition, compute_seconds, compute_seconds, "s", operations=args.sequence_length),
                 result_row("reference versus streamed max abs error", workload, repetition, 0.0, max_abs, "abs_error", notes="exact BF16 byte package; expected zero"),
             ])
-            print(f"rep {repetition}: read={read_seconds:.3f}s stage={stage_seconds:.3f}s h2d={h2d_seconds:.3f}s compute={compute_seconds:.3f}s max_abs={max_abs:.6g}")
+            print(f"[{ts()}] rep {repetition}: read={read_seconds:.3f}s stage={stage_seconds:.3f}s h2d={h2d_seconds:.3f}s compute={compute_seconds:.3f}s max_abs={max_abs:.6g}", flush=True)
             if not passed:
                 raise AssertionError(f"streamed output differs from reference: max_abs={max_abs}")
+    except KeyboardInterrupt:
+        print(f"\n[{ts()}] interrupted — writing partial results ({len(rows)} rows) "
+              f"-> {RAW_CSV}", flush=True)
+        sys.exit(130)
     finally:
-        reader.close()
-        write_rows(RAW_CSV, rows)
-        rebuild_summary()
+        if reader is not None:
+            reader.close()
+        if rows:
+            write_rows(RAW_CSV, rows)
+            rebuild_summary()
 
 
 if __name__ == "__main__":

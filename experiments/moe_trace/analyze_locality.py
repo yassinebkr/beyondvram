@@ -11,6 +11,9 @@ Reports, per trace file and pooled across files:
 
 Raw aggregates (counts, histograms) are written alongside derived metrics;
 nothing is extrapolated beyond the recorded traces.
+
+Progress banners print per trace file. Ctrl+C writes partial aggregates to
+the output JSON with status="interrupted" and exits with code 130.
 """
 
 from __future__ import annotations
@@ -18,10 +21,14 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import ts  # noqa: E402
+
 TRACE_DIR = ROOT / "results" / "moe-locality"
 
 OVERLAP_DISTANCES = [1, 2, 4, 8, 16]
@@ -154,54 +161,11 @@ def pooled_lru(per_layer_results: list[dict]) -> dict:
             for capacity, (hits, total) in sorted(totals.items())}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--traces", type=Path, nargs="+", default=None,
-                        help="trace JSONL files (default: all trace-*.jsonl in results/moe-locality)")
-    args = parser.parse_args()
-
-    traces = args.traces or sorted(TRACE_DIR.glob("trace-*.jsonl"))
-    if not traces:
-        raise SystemExit(f"no trace files found in {TRACE_DIR}")
-
-    all_frequency, all_overlap, all_reuse, all_lru = [], [], [], []
-    per_file_summary = {}
-    for trace_path in traces:
-        per_layer = load_trace(trace_path)
-        name = trace_path.stem
-        frequency = expert_frequency(per_layer)
-        overlap = consecutive_overlap(per_layer)
-        reuse = reuse_distance(per_layer)
-        lru = lru_hit_rates(per_layer)
-        all_frequency.append(frequency)
-        all_overlap.append(overlap)
-        all_reuse.append(reuse)
-        all_lru.append(lru)
-
-        tokens = sum(len(v) for v in per_layer.values()) // max(len(per_layer), 1)
-        pooled_overlap1 = [
-            entry[1]["mean_overlap"] * entry[1]["pairs"]
-            for entry in overlap.values()
-            if entry[1]["mean_overlap"] is not None
-        ]
-        overlap1_pairs = sum(entry[1]["pairs"] for entry in overlap.values())
-        per_file_summary[name] = {
-            "tokens_per_layer": tokens,
-            "layers": len(per_layer),
-            "mean_consecutive_overlap": (sum(pooled_overlap1) / overlap1_pairs
-                                         if overlap1_pairs else None),
-        }
-        print(f"{name}: {len(per_layer)} layers, {tokens} tokens/layer, "
-              f"mean consecutive overlap {per_file_summary[name]['mean_consecutive_overlap']:.3f}")
-
-    pooled = pooled_lru(all_lru)
-    print("\npooled per-layer LRU hit rates (request-weighted):")
-    for capacity, hit_rate in pooled.items():
-        print(f"  capacity {capacity:4d}: {hit_rate:.4f}")
-
-    out_dir = traces[0].parent if args.traces else TRACE_DIR
-    out_path = out_dir / "locality-analysis.json"
+def write_payload(out_path: Path, traces: list[Path], per_file_summary: dict,
+                  pooled: dict, all_frequency: list, all_overlap: list,
+                  all_reuse: list, all_lru: list, status: str) -> None:
     payload = {
+        "status": status,
         "traces": [p.name for p in traces],
         "overlap_distances": OVERLAP_DISTANCES,
         "lru_capacities": LRU_CAPACITIES,
@@ -213,7 +177,78 @@ def main() -> None:
         "lru_hit_rates": all_lru,
     }
     out_path.write_text(json.dumps(payload, indent=1), encoding="utf-8")
-    print(f"\nwrote {out_path}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--traces", type=Path, nargs="+", default=None,
+                        help="trace JSONL files (default: all trace-*.jsonl in results/moe-locality)")
+    args = parser.parse_args()
+
+    traces = args.traces or sorted(TRACE_DIR.glob("trace-*.jsonl"))
+    if not traces:
+        raise SystemExit(f"no trace files found in {TRACE_DIR}")
+
+    out_dir = traces[0].parent if args.traces else TRACE_DIR
+    out_path = out_dir / "locality-analysis.json"
+    print(f"[{ts()}] locality analysis: {len(traces)} trace file(s), "
+          f"{len(LRU_CAPACITIES)} LRU capacities, {len(OVERLAP_DISTANCES)} "
+          f"overlap distances", flush=True)
+    print(f"[{ts()}] output -> {out_path} (Ctrl+C writes partial results)",
+          flush=True)
+
+    all_frequency, all_overlap, all_reuse, all_lru = [], [], [], []
+    per_file_summary = {}
+    processed: list[Path] = []
+    try:
+        for i, trace_path in enumerate(traces, 1):
+            name = trace_path.stem
+            print(f"[{ts()}] [file {i}/{len(traces)}] {name}: loading and "
+                  f"scoring", flush=True)
+            per_layer = load_trace(trace_path)
+            frequency = expert_frequency(per_layer)
+            overlap = consecutive_overlap(per_layer)
+            reuse = reuse_distance(per_layer)
+            lru = lru_hit_rates(per_layer)
+            all_frequency.append(frequency)
+            all_overlap.append(overlap)
+            all_reuse.append(reuse)
+            all_lru.append(lru)
+
+            tokens = sum(len(v) for v in per_layer.values()) // max(len(per_layer), 1)
+            pooled_overlap1 = [
+                entry[1]["mean_overlap"] * entry[1]["pairs"]
+                for entry in overlap.values()
+                if entry[1]["mean_overlap"] is not None
+            ]
+            overlap1_pairs = sum(entry[1]["pairs"] for entry in overlap.values())
+            per_file_summary[name] = {
+                "tokens_per_layer": tokens,
+                "layers": len(per_layer),
+                "mean_consecutive_overlap": (sum(pooled_overlap1) / overlap1_pairs
+                                             if overlap1_pairs else None),
+            }
+            processed.append(trace_path)
+            print(f"[{ts()}] [file {i}/{len(traces)}] {name}: {len(per_layer)} "
+                  f"layers, {tokens} tokens/layer, mean consecutive overlap "
+                  f"{per_file_summary[name]['mean_consecutive_overlap']:.3f}",
+                  flush=True)
+    except KeyboardInterrupt:
+        write_payload(out_path, processed, per_file_summary,
+                      pooled_lru(all_lru), all_frequency, all_overlap,
+                      all_reuse, all_lru, status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(processed)}/"
+              f"{len(traces)} files) -> {out_path}", flush=True)
+        sys.exit(130)
+
+    pooled = pooled_lru(all_lru)
+    print("\npooled per-layer LRU hit rates (request-weighted):", flush=True)
+    for capacity, hit_rate in pooled.items():
+        print(f"  capacity {capacity:4d}: {hit_rate:.4f}", flush=True)
+
+    write_payload(out_path, traces, per_file_summary, pooled, all_frequency,
+                  all_overlap, all_reuse, all_lru, status="complete")
+    print(f"\n[{ts()}] wrote {out_path}", flush=True)
 
 
 if __name__ == "__main__":

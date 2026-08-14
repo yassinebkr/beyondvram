@@ -24,6 +24,9 @@ Model-agnostic; runs on Qwen3 (48L) and gpt-oss (24L) traces alike.
 Pooled metrics are request-weighted across layers and files. Nothing is
 extrapolated beyond the recorded traces.
 
+Progress banners print per trace file. Ctrl+C writes partial results to the
+output JSON with status="interrupted" and exits with code 130.
+
 Usage:
     .venv/Scripts/python.exe experiments/gpt_oss/analyze_predictability.py \
         --traces results/gpt-oss/traces/trace-*.jsonl --out results/gpt-oss/predictability.json
@@ -38,8 +41,11 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "moe_trace"))
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "experiments" / "moe_trace"))
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
 from analyze_locality import load_trace  # noqa: E402
+from common import ts  # noqa: E402
 
 
 def sets_by_layer_pos(per_layer) -> dict[int, dict[int, frozenset]]:
@@ -102,6 +108,26 @@ def summarize(acc_all: dict[str, list[int]]) -> dict:
     return out
 
 
+def write_payload(out: Path, paths: list[str], per_file: dict,
+                  acc_all: dict[str, list[int]], status: str) -> dict:
+    payload = {
+        "status": status,
+        "traces": [Path(p).name for p in paths],
+        "predictors": {
+            "temporal-1": "E(L,t-1) -> E(L,t)",
+            "cross-layer": "E(L-1,t) -> E(L,t)",
+            "fate-union": "E(L-1,t) | E(L,t-1) -> E(L,t) (FATE fork heuristic)",
+            "fate-union-2": "E(L-1,t) | E(L,t-1) | E(L,t-2) -> E(L,t)",
+            "oracle-lastk": "union of last k same-layer sets -> E(L,t), k=2,4,8",
+        },
+        "per_file": per_file,
+        "pooled": summarize(acc_all),
+    }
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -116,42 +142,50 @@ def main() -> None:
     if not paths:
         raise SystemExit(f"no trace files matched: {args.traces}")
 
+    print(f"[{ts()}] predictability analysis: {len(paths)} trace file(s), "
+          f"5 predictor families", flush=True)
+    print(f"[{ts()}] output -> {args.out} (Ctrl+C writes partial results)",
+          flush=True)
+
     acc_all: dict[str, list[int]] = defaultdict(lambda: [0, 0, 0])
     per_file = {}
-    for path in paths:
-        per_layer = load_trace(Path(path))
-        acc = score_trace(per_layer)
-        for name, vals in acc.items():
-            for i in range(3):
-                acc_all[name][i] += vals[i]
-        tokens = sum(len(v) for v in per_layer.values()) // max(len(per_layer), 1)
-        per_file[Path(path).stem] = {"layers": len(per_layer), "tokens_per_layer": tokens}
-        union = acc.get("fate-union", [0, 0, 0])
-        recall = union[0] / union[1] if union[1] else None
-        print(f"{Path(path).stem}: {len(per_layer)} layers, {tokens} tokens/layer, "
-              f"fate-union recall {recall:.3f}" if recall is not None else
-              f"{Path(path).stem}: {len(per_layer)} layers, {tokens} tokens/layer")
+    processed: list[str] = []
+    try:
+        for i, path in enumerate(paths, 1):
+            stem = Path(path).stem
+            print(f"[{ts()}] [file {i}/{len(paths)}] {stem}: loading and "
+                  f"scoring", flush=True)
+            per_layer = load_trace(Path(path))
+            acc = score_trace(per_layer)
+            for name, vals in acc.items():
+                for j in range(3):
+                    acc_all[name][j] += vals[j]
+            tokens = sum(len(v) for v in per_layer.values()) // max(len(per_layer), 1)
+            per_file[stem] = {"layers": len(per_layer), "tokens_per_layer": tokens}
+            processed.append(path)
+            union = acc.get("fate-union", [0, 0, 0])
+            recall = union[0] / union[1] if union[1] else None
+            line = (f"{len(per_layer)} layers, {tokens} tokens/layer, "
+                    f"fate-union recall {recall:.3f}" if recall is not None else
+                    f"{len(per_layer)} layers, {tokens} tokens/layer")
+            print(f"[{ts()}] [file {i}/{len(paths)}] {stem}: {line}",
+                  flush=True)
+    except KeyboardInterrupt:
+        write_payload(args.out, processed, per_file, acc_all,
+                      status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(processed)}/"
+              f"{len(paths)} files) -> {args.out}", flush=True)
+        sys.exit(130)
 
-    payload = {
-        "traces": [Path(p).name for p in paths],
-        "predictors": {
-            "temporal-1": "E(L,t-1) -> E(L,t)",
-            "cross-layer": "E(L-1,t) -> E(L,t)",
-            "fate-union": "E(L-1,t) | E(L,t-1) -> E(L,t) (FATE fork heuristic)",
-            "fate-union-2": "E(L-1,t) | E(L,t-1) | E(L,t-2) -> E(L,t)",
-            "oracle-lastk": "union of last k same-layer sets -> E(L,t), k=2,4,8",
-        },
-        "per_file": per_file,
-        "pooled": summarize(acc_all),
-    }
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    payload = write_payload(args.out, paths, per_file, acc_all,
+                            status="complete")
 
-    print("\npooled predictors (request-weighted):")
-    print(f"  {'predictor':<14} {'recall':>7} {'over-fetch':>10}")
+    print("\npooled predictors (request-weighted):", flush=True)
+    print(f"  {'predictor':<14} {'recall':>7} {'over-fetch':>10}", flush=True)
     for name, s in payload["pooled"].items():
-        print(f"  {name:<14} {s['recall']:7.3f} {s['over_fetch']:10.2f}")
-    print(f"\nwrote {args.out}")
+        print(f"  {name:<14} {s['recall']:7.3f} {s['over_fetch']:10.2f}",
+              flush=True)
+    print(f"\n[{ts()}] wrote {args.out}", flush=True)
 
 
 if __name__ == "__main__":

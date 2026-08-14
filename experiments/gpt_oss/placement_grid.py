@@ -15,18 +15,25 @@ tokens, 32 generated, 3 repetitions, mmap, f16 KV. Failures (e.g. OOM at
 Smoke result already on record (stock b10355 llama-completion, default --fit,
 47 generated tokens): 29.52 tok/s, coherent output — MXFP4 on sm_86 works.
 
-Output: results/gpt-oss/placement-grid.json
+Child stdout/stderr stream live by default (--quiet suppresses). Ctrl+C
+terminates the running child, writes partial results to the output JSON with
+status="interrupted", and exits with code 130.
+
+Output: results/gpt-oss/placement-grid.json (placement-grid-refine.json with
+--refine)
 """
 
 from __future__ import annotations
 
+import argparse
 import json
-import subprocess
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import run_live, ts  # noqa: E402
+
 BENCH = ROOT / "tools/llama.cpp-b10355/llama-bench.exe"
 MODEL = ROOT / "models/gpt-oss-20b-GGUF/gpt-oss-20b-MXFP4.gguf"
 OUT = ROOT / "results/gpt-oss/placement-grid.json"
@@ -52,49 +59,10 @@ REFINE = [
 ]
 
 
-def main() -> None:
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    refine = "--refine" in sys.argv
-    grid = REFINE if refine else GRID
-    reps = "5" if refine else "3"
-    out = OUT.parent / "placement-grid-refine.json" if refine else OUT
-    records = []
-    for ngl, ncpu in grid:
-        cmd = [
-            str(BENCH), "-m", str(MODEL),
-            "-ngl", str(ngl), "--n-cpu-moe", str(ncpu),
-            "-p", "128", "-n", "32", "-r", reps, "-o", "json",
-        ]
-        print(f"[grid] ngl={ngl} n-cpu-moe={ncpu}", flush=True)
-        start = time.perf_counter()
-        proc = subprocess.run(cmd, capture_output=True, text=True,
-                              stdin=subprocess.DEVNULL, timeout=1800)
-        wall = time.perf_counter() - start
-        record = {"ngl": ngl, "n_cpu_moe": ncpu, "rc": proc.returncode,
-                  "wall_s": round(wall, 1)}
-        if proc.returncode == 0:
-            try:
-                rows = json.loads(proc.stdout)
-                record["rows"] = [
-                    {"test": r.get("test"), "n_prompt": r.get("n_prompt"),
-                     "n_gen": r.get("n_gen"), "avg_ns": r.get("avg_ns"),
-                     "stddev_ns": r.get("stddev_ns"), "avg_ts": r.get("avg_ts"),
-                     "stddev_ts": r.get("stddev_ts")}
-                    for r in rows
-                ]
-                gen = [r["avg_ts"] for r in record["rows"] if r.get("n_gen")]
-                pp = [r["avg_ts"] for r in record["rows"] if r.get("n_prompt")]
-                print(f"  ok: pp={pp[0]:.1f} tg={gen[0]:.2f} tok/s", flush=True)
-            except json.JSONDecodeError:
-                record["status"] = "parse_error"
-                record["stdout_head"] = proc.stdout[:300]
-        else:
-            record["status"] = "error"
-            record["stderr_tail"] = proc.stderr[-400:]
-            print(f"  FAILED rc={proc.returncode}: {proc.stderr[-200:]!r}", flush=True)
-        records.append(record)
-
+def write_payload(out: Path, grid: list, reps: str, records: list[dict],
+                  status: str) -> None:
     payload = {
+        "status": status,
         "bench": "llama-bench b10355 (unmodified)",
         "model": MODEL.name,
         "model_facts": "gpt-oss-20b: 24 layers, 32 experts (trace-verified), top-4, 21B total / 3.6B active, native MXFP4, 13.22 MB/expert -> 1.27 GB expert bytes/token",
@@ -108,7 +76,71 @@ def main() -> None:
         "records": records,
     }
     out.write_text(json.dumps(payload, indent=1), encoding="utf-8")
-    print(f"\nwrote {out}")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--refine", action="store_true",
+                    help="run the 3-point refinement grid (5 reps) instead of "
+                         "the full grid")
+    ap.add_argument("--quiet", action="store_true",
+                    help="suppress live child output (banners still print)")
+    args = ap.parse_args()
+
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    grid = REFINE if args.refine else GRID
+    reps = "5" if args.refine else "3"
+    out = OUT.parent / "placement-grid-refine.json" if args.refine else OUT
+    records: list[dict] = []
+    mode = "refinement" if args.refine else "full"
+    print(f"[{ts()}] placement grid ({mode}): {len(grid)} (ngl, n-cpu-moe) "
+          f"points, {reps} reps, model {MODEL.name}, bench {BENCH.name}",
+          flush=True)
+    print(f"[{ts()}] output -> {out} (Ctrl+C writes partial results)",
+          flush=True)
+    try:
+        for i, (ngl, ncpu) in enumerate(grid, 1):
+            label = f"[step {i}/{len(grid)}] ngl={ngl} n-cpu-moe={ncpu}"
+            cmd = [
+                str(BENCH), "-m", str(MODEL),
+                "-ngl", str(ngl), "--n-cpu-moe", str(ncpu),
+                "-p", "128", "-n", "32", "-r", reps, "-o", "json",
+            ]
+            print(f"[{ts()}] {label}: measuring", flush=True)
+            res = run_live(cmd, label, quiet=args.quiet, timeout=1800)
+            record = {"ngl": ngl, "n_cpu_moe": ncpu, "rc": res["rc"],
+                      "wall_s": res["wall_s"]}
+            if res["rc"] == 0:
+                try:
+                    rows = json.loads(res["stdout"])
+                    record["rows"] = [
+                        {"test": r.get("test"), "n_prompt": r.get("n_prompt"),
+                         "n_gen": r.get("n_gen"), "avg_ns": r.get("avg_ns"),
+                         "stddev_ns": r.get("stddev_ns"), "avg_ts": r.get("avg_ts"),
+                         "stddev_ts": r.get("stddev_ts")}
+                        for r in rows
+                    ]
+                    gen = [r["avg_ts"] for r in record["rows"] if r.get("n_gen")]
+                    pp = [r["avg_ts"] for r in record["rows"] if r.get("n_prompt")]
+                    print(f"[{ts()}] {label}: ok pp={pp[0]:.1f} "
+                          f"tg={gen[0]:.2f} tok/s", flush=True)
+                except json.JSONDecodeError:
+                    record["status"] = "parse_error"
+                    record["stdout_head"] = res["stdout"][:300]
+            else:
+                record["status"] = "error"
+                record["stderr_tail"] = res["stderr"][-400:]
+                print(f"[{ts()}] {label}: FAILED rc={res['rc']}: "
+                      f"{res['stderr'][-200:]!r}", flush=True)
+            records.append(record)
+    except KeyboardInterrupt:
+        write_payload(out, grid, reps, records, status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(records)} "
+              f"rows) -> {out}", flush=True)
+        sys.exit(130)
+
+    write_payload(out, grid, reps, records, status="complete")
+    print(f"\n[{ts()}] wrote {out}", flush=True)
 
 
 if __name__ == "__main__":

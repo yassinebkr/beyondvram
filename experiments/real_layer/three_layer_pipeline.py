@@ -1,9 +1,14 @@
-"""Validate serial and overlapped streaming of Qwen3-8B decoder layers 0--2."""
+"""Validate serial and overlapped streaming of Qwen3-8B decoder layers 0--2.
+
+Progress banners are timestamped and flushed; Ctrl+C writes the partial result
+rows collected so far and exits with code 130.
+"""
 from __future__ import annotations
 
 import argparse
 import ctypes
 import math
+import sys
 import threading
 import time
 from pathlib import Path
@@ -13,7 +18,7 @@ import torch
 
 import bootstrap  # noqa: F401
 from benchmark_storage import DirectReader
-from common import RAW_CSV, rebuild_summary, write_rows
+from common import RAW_CSV, rebuild_summary, ts, write_rows
 from qwen_layer_stream import (
     MANIFEST_NAME, assign_buffer_views, build_layer, load_manifest, load_reference_state,
     pack_layer, result_row, run_layer,
@@ -35,6 +40,7 @@ def ensure_packages(model_dir: Path, package_root: Path, layers: list[int]):
         directory = package_root / f"layer{index:02d}"
         manifest_path = directory / MANIFEST_NAME
         if not manifest_path.exists():
+            print(f"[{ts()}] packing layer {index} -> {directory}", flush=True)
             pack_layer(model_dir, directory, index)
         manifest, specs = load_manifest(manifest_path)
         packages.append((directory / manifest["data_file"], int(manifest["file_bytes"]), specs))
@@ -122,22 +128,39 @@ def main() -> None:
     if args.repetitions < 1: raise ValueError("repetitions must be positive")
     if not torch.cuda.is_available(): raise RuntimeError("CUDA required")
     layers = [0, 1, 2]; CONFIG_PATH = args.model_dir / "config.json"
-    packages = ensure_packages(args.model_dir, args.package_root, layers)
-    STREAMED = [build_layer(CONFIG_PATH, index, "cuda")[0].eval() for index in layers]
-    hidden = torch.randn((1, 1, 4096), device="cuda", dtype=torch.bfloat16, generator=torch.Generator(device="cuda").manual_seed(0xB30A0D))
-    positions = torch.zeros((1, 1), dtype=torch.long, device="cuda")
-    reference, config = reference_chain(args.model_dir, layers, hidden, positions)
+    variants = (("serial", run_serial), ("storage_overlap", run_overlapped))
+    total = len(variants) * args.repetitions
+    print(f"[{ts()}] three-layer stream: model={args.model_dir} layers=0-2 "
+          f"variants={[name for name, _ in variants]} repetitions={args.repetitions} "
+          f"({total} runs)", flush=True)
+    print(f"[{ts()}] packages -> {args.package_root}; rows -> {RAW_CSV} "
+          f"(Ctrl+C writes partial results)", flush=True)
     rows = []
-    for variant, runner in (("serial", run_serial), ("storage_overlap", run_overlapped)):
-        for repetition in range(1, args.repetitions + 1):
-            start = time.perf_counter(); output, times = runner(packages, layers, config, hidden, positions); makespan = time.perf_counter() - start
-            error = (output.float() - reference.float()).abs().max().item()
-            workload = "qwen3-8b;layers=0-2;seq=1;scheduler=v2"
-            for stage, seconds in times.items(): rows.append(result_row(f"three-layer {variant} {stage}", workload, repetition, seconds, seconds, "s", operations=3))
-            rows += [result_row(f"three-layer {variant} makespan", workload, repetition, makespan, makespan, "s", operations=3), result_row(f"three-layer {variant} max abs error", workload, repetition, 0.0, error, "abs_error")]
-            print(f"{variant} rep {repetition}: makespan={makespan:.3f}s max_abs={error:.6g}")
-            if not math.isfinite(error) or error != 0: raise AssertionError(f"correctness failed: {error}")
-    write_rows(RAW_CSV, rows); rebuild_summary()
+    step = 0
+    try:
+        packages = ensure_packages(args.model_dir, args.package_root, layers)
+        STREAMED = [build_layer(CONFIG_PATH, index, "cuda")[0].eval() for index in layers]
+        hidden = torch.randn((1, 1, 4096), device="cuda", dtype=torch.bfloat16, generator=torch.Generator(device="cuda").manual_seed(0xB30A0D))
+        positions = torch.zeros((1, 1), dtype=torch.long, device="cuda")
+        reference, config = reference_chain(args.model_dir, layers, hidden, positions)
+        for variant, runner in variants:
+            for repetition in range(1, args.repetitions + 1):
+                step += 1
+                print(f"[{ts()}] [step {step}/{total}] {variant} rep {repetition}", flush=True)
+                start = time.perf_counter(); output, times = runner(packages, layers, config, hidden, positions); makespan = time.perf_counter() - start
+                error = (output.float() - reference.float()).abs().max().item()
+                workload = "qwen3-8b;layers=0-2;seq=1;scheduler=v2"
+                for stage, seconds in times.items(): rows.append(result_row(f"three-layer {variant} {stage}", workload, repetition, seconds, seconds, "s", operations=3))
+                rows += [result_row(f"three-layer {variant} makespan", workload, repetition, makespan, makespan, "s", operations=3), result_row(f"three-layer {variant} max abs error", workload, repetition, 0.0, error, "abs_error")]
+                print(f"[{ts()}] {variant} rep {repetition}: makespan={makespan:.3f}s max_abs={error:.6g}", flush=True)
+                if not math.isfinite(error) or error != 0: raise AssertionError(f"correctness failed: {error}")
+    except KeyboardInterrupt:
+        print(f"\n[{ts()}] interrupted — writing partial results ({len(rows)} rows) "
+              f"-> {RAW_CSV}", flush=True)
+        sys.exit(130)
+    finally:
+        if rows:
+            write_rows(RAW_CSV, rows); rebuild_summary()
 
 
 if __name__ == "__main__": main()

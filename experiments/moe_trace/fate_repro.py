@@ -11,23 +11,30 @@ Parity gate is NOT in this script: output equivalence (fork --fate off vs
 stock b10355, and --fate on vs off, token-exact at temp 0) is checked first
 with direct runs; do not trust speed numbers before parity passes.
 
+Child stdout/stderr stream live by default (--quiet suppresses). Ctrl+C
+terminates the running child, writes partial results to the output JSON with
+status="interrupted", and exits with code 130.
+
 Output: results/moe-locality/fate-repro/fate-repro.json + per-rep raw logs.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
-import subprocess
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import run_live, ts  # noqa: E402
+
 EXE = ROOT / "tools/llama-moe-cache/build/bin/llama-completion.exe"
 MODEL = ROOT / "models/Qwen3-30B-A3B-GGUF/Qwen3-30B-A3B-Q4_K_M.gguf"
 OUT_DIR = ROOT / "results/moe-locality/fate-repro"
+OUT_JSON = OUT_DIR / "fate-repro.json"
 
 # Pool sizes bracket the fork author's 2048 MB (1.44x working set on his
 # 12 GB card) down to below the 1418 MB per-token working set, where LRU
@@ -101,65 +108,9 @@ def summarize(records: list[dict]) -> None:
             print(f"{config_name:>6}: {mean(vals):.2f} +/- {stdev(vals):.2f} tok/s (n={len(vals)}){hit_str}")
 
 
-def reparse() -> None:
-    """Rebuild fate-repro.json from the saved per-rep raw logs.
-
-    Parsing is deterministic post-processing; the 12-run GPU matrix is not
-    re-executed. Raw .stderr.txt logs remain the source of truth.
-    """
-    path = OUT_DIR / "fate-repro.json"
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    for record in payload["records"]:
-        stem = f"fate-{record['config']}-p{PROMPTS.index(record['prompt'])}-r{record['rep']}"
-        stderr_path = OUT_DIR / f"{stem}.stderr.txt"
-        if not stderr_path.exists():
-            print(f"[reparse] missing {stderr_path.name}")
-            continue
-        record.update(parse_metrics(stderr_path.read_text(encoding="utf-8", errors="replace")))
-    path.write_text(json.dumps(payload, indent=1), encoding="utf-8")
-    print(f"reparsed {path}")
-    summarize(payload["records"])
-
-
-def main() -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    if "--reparse" in sys.argv:
-        reparse()
-        return
-    records = []
-    for config_name, cache_mb in CONFIGS:
-        for prompt in PROMPTS:
-            for rep in range(REPS):
-                cmd = [
-                    str(EXE), "-m", str(MODEL), "-p", prompt,
-                    "-n", str(N_PREDICT), "--seed", "42", "--temp", "0",
-                    "-no-cnv",
-                ]
-                if cache_mb is not None:
-                    cmd += ["--fate", "--fate-cache", cache_mb]
-                tag = f"{config_name} | {prompt[:24]}... | rep {rep}"
-                print(f"[run] {tag}", flush=True)
-                start = time.perf_counter()
-                env = {**os.environ, **EXTRA_ENV}
-                proc = subprocess.run(cmd, capture_output=True, text=True,
-                                      stdin=subprocess.DEVNULL, timeout=1800, env=env)
-                wall = time.perf_counter() - start
-                record = {
-                    "config": config_name, "prompt": prompt, "rep": rep,
-                    "rc": proc.returncode, "wall_s": round(wall, 1),
-                    "status": "ok" if proc.returncode == 0 else "error",
-                    **parse_metrics(proc.stderr),
-                }
-                if proc.returncode != 0:
-                    record["stderr_tail"] = proc.stderr[-800:]
-                records.append(record)
-                print(f"  rc={proc.returncode} tok/s={record['tok_per_s']} "
-                      f"hit={record['fate_hit_rate_pct']} wall={wall:.0f}s", flush=True)
-                stem = f"fate-{config_name}-p{PROMPTS.index(prompt)}-r{rep}"
-                (OUT_DIR / f"{stem}.out.txt").write_text(proc.stdout, encoding="utf-8")
-                (OUT_DIR / f"{stem}.stderr.txt").write_text(proc.stderr, encoding="utf-8")
-
+def write_payload(records: list[dict], status: str) -> None:
     payload = {
+        "status": status,
         "exe": "llama-completion from ongunm/llama-moe-cache (AGPL-3.0, depth-1 clone 2026-08-13)",
         "claim_under_test": "Qwen3-30B-A3B Q4_K_M 33.74 -> 64.45 tok/s, 99.50% hit, RTX 4070 Ti 12 GB",
         "this_machine": "RTX 3070 Ti 8 GiB, Zen 3 6c/12t, 32 GiB DDR4-3600, Windows 11",
@@ -176,9 +127,93 @@ def main() -> None:
         ],
         "records": records,
     }
-    out = OUT_DIR / "fate-repro.json"
-    out.write_text(json.dumps(payload, indent=1), encoding="utf-8")
-    print(f"\nwrote {out}")
+    OUT_JSON.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+
+
+def reparse() -> None:
+    """Rebuild fate-repro.json from the saved per-rep raw logs.
+
+    Parsing is deterministic post-processing; the 12-run GPU matrix is not
+    re-executed. Raw .stderr.txt logs remain the source of truth.
+    """
+    payload = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+    for record in payload["records"]:
+        stem = f"fate-{record['config']}-p{PROMPTS.index(record['prompt'])}-r{record['rep']}"
+        stderr_path = OUT_DIR / f"{stem}.stderr.txt"
+        if not stderr_path.exists():
+            print(f"[reparse] missing {stderr_path.name}")
+            continue
+        record.update(parse_metrics(stderr_path.read_text(encoding="utf-8", errors="replace")))
+    OUT_JSON.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    print(f"reparsed {OUT_JSON}")
+    summarize(payload["records"])
+
+
+def main() -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    if "--reparse" in sys.argv:
+        reparse()
+        return
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--quiet", action="store_true",
+                    help="suppress live child output (banners still print)")
+    args = ap.parse_args()
+
+    n_total = len(CONFIGS) * len(PROMPTS) * REPS
+    records: list[dict] = []
+    print(f"[{ts()}] FATE repro: {len(CONFIGS)} configs x {len(PROMPTS)} "
+          f"prompts x {REPS} reps = {n_total} runs "
+          f"({EXE.name}, {MODEL.name}, n_predict={N_PREDICT}, seed 42, "
+          f"temp 0)", flush=True)
+    print(f"[{ts()}] env: {EXTRA_ENV}; output -> {OUT_JSON} plus per-rep raw "
+          f"logs in {OUT_DIR}", flush=True)
+    print(f"[{ts()}] Ctrl+C writes partial results with "
+          f"status=\"interrupted\"", flush=True)
+    # run_live children inherit the parent environment, so EXTRA_ENV is
+    # applied to the parent once; each child receives the same variables the
+    # old per-run env merge produced.
+    os.environ.update(EXTRA_ENV)
+    try:
+        step = 0
+        for config_name, cache_mb in CONFIGS:
+            for prompt in PROMPTS:
+                for rep in range(REPS):
+                    step += 1
+                    cmd = [
+                        str(EXE), "-m", str(MODEL), "-p", prompt,
+                        "-n", str(N_PREDICT), "--seed", "42", "--temp", "0",
+                        "-no-cnv",
+                    ]
+                    if cache_mb is not None:
+                        cmd += ["--fate", "--fate-cache", cache_mb]
+                    label = (f"[step {step}/{n_total}] fate-{config_name}-"
+                             f"p{PROMPTS.index(prompt)}-r{rep}")
+                    print(f"[{ts()}] {label}: {prompt[:24]}...", flush=True)
+                    res = run_live(cmd, label, quiet=args.quiet, timeout=1800)
+                    record = {
+                        "config": config_name, "prompt": prompt, "rep": rep,
+                        "rc": res["rc"], "wall_s": res["wall_s"],
+                        "status": "ok" if res["rc"] == 0 else "error",
+                        **parse_metrics(res["stderr"]),
+                    }
+                    if res["rc"] != 0:
+                        record["stderr_tail"] = res["stderr"][-800:]
+                    records.append(record)
+                    print(f"[{ts()}] {label}: rc={res['rc']} "
+                          f"tok/s={record['tok_per_s']} "
+                          f"hit={record['fate_hit_rate_pct']} "
+                          f"wall={res['wall_s']}s", flush=True)
+                    stem = f"fate-{config_name}-p{PROMPTS.index(prompt)}-r{rep}"
+                    (OUT_DIR / f"{stem}.out.txt").write_text(res["stdout"], encoding="utf-8")
+                    (OUT_DIR / f"{stem}.stderr.txt").write_text(res["stderr"], encoding="utf-8")
+    except KeyboardInterrupt:
+        write_payload(records, status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(records)} "
+              f"rows) -> {OUT_JSON}", flush=True)
+        sys.exit(130)
+
+    write_payload(records, status="complete")
+    print(f"\n[{ts()}] wrote {OUT_JSON}", flush=True)
     summarize(records)
 
 

@@ -4,15 +4,18 @@ Runs both sequentially on the same fixed prompt with greedy decoding and compare
 32-token continuation. Writes raw outputs to results/moe-locality/parity-*.txt.
 (llama-cli is unusable for this at b10355: it stays in an interactive input loop even
 with -no-cnv and stdin closed; llama-completion is the non-interactive equivalent.)
+
+Child stdout/stderr stream live by default (--quiet suppresses). Ctrl+C
+terminates the running child and exits with code 130.
 """
+import argparse
 import os
-import subprocess
 import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-env = dict(os.environ)
-env["MOE_TRACE_OUT"] = str(root / "results/moe-locality/parity-trace.jsonl")
+sys.path.insert(0, str(root / "benchmarks" / "system"))
+from common import run_live, ts  # noqa: E402
 
 prompt = "The capital of France is"
 common = [
@@ -21,29 +24,54 @@ common = [
 ]
 
 out_dir = root / "results/moe-locality"
-out_dir.mkdir(parents=True, exist_ok=True)
 
-trace = subprocess.run(
-    [str(root / "tools/llama.cpp-source/build/bin/llama-moe-trace.exe"), *common],
-    env=env, capture_output=True, text=True, timeout=1800, stdin=subprocess.DEVNULL,
-)
-print("trace rc:", trace.returncode, flush=True)
-(out_dir / "parity-trace-out.txt").write_text(trace.stdout, encoding="utf-8")
-(out_dir / "parity-trace-stderr.txt").write_text(trace.stderr, encoding="utf-8")
-if trace.returncode != 0:
-    sys.exit("trace run failed; see parity-trace-stderr.txt")
 
-cli = subprocess.run(
-    [str(root / "tools/llama.cpp-b10355/llama-completion.exe"), *common, "-no-cnv"],
-    env=env, capture_output=True, text=True, timeout=1800, stdin=subprocess.DEVNULL,
-)
-print("cli rc:", cli.returncode, flush=True)
-(out_dir / "parity-cli-out.txt").write_text(cli.stdout, encoding="utf-8")
-(out_dir / "parity-cli-stderr.txt").write_text(cli.stderr, encoding="utf-8")
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--quiet", action="store_true",
+                    help="suppress live child output (banners still print)")
+    args = ap.parse_args()
 
-t_out, c_out = trace.stdout.strip(), cli.stdout.strip()
-print("TRACE OUT:", repr(t_out[:300]))
-print("CLI   OUT:", repr(c_out[:300]))
-match = t_out == c_out or t_out in c_out or c_out in t_out
-print("MATCH:", match)
-sys.exit(0 if match else 1)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    # run_live inherits the process environment; the instrumented build reads
+    # MOE_TRACE_OUT, so set it process-wide exactly as the old env copy did.
+    os.environ["MOE_TRACE_OUT"] = str(out_dir / "parity-trace.jsonl")
+
+    print(f"[{ts()}] parity check: 2 runs, prompt {prompt!r}, 32 tokens, "
+          f"greedy, seed 42, -ngl 18", flush=True)
+    print(f"[{ts()}] output -> {out_dir}{os.sep}parity-*.txt "
+          f"(Ctrl+C terminates the running child)", flush=True)
+
+    try:
+        label = "[step 1/2] llama-moe-trace (instrumented)"
+        print(f"[{ts()}] {label}", flush=True)
+        trace = run_live(
+            [str(root / "tools/llama.cpp-source/build/bin/llama-moe-trace.exe"), *common],
+            label, quiet=args.quiet, timeout=1800)
+        (out_dir / "parity-trace-out.txt").write_text(trace["stdout"], encoding="utf-8")
+        (out_dir / "parity-trace-stderr.txt").write_text(trace["stderr"], encoding="utf-8")
+        if trace["rc"] != 0:
+            sys.exit("trace run failed; see parity-trace-stderr.txt")
+
+        label = "[step 2/2] llama-completion b10355 (reference)"
+        print(f"[{ts()}] {label}", flush=True)
+        cli = run_live(
+            [str(root / "tools/llama.cpp-b10355/llama-completion.exe"), *common, "-no-cnv"],
+            label, quiet=args.quiet, timeout=1800)
+        (out_dir / "parity-cli-out.txt").write_text(cli["stdout"], encoding="utf-8")
+        (out_dir / "parity-cli-stderr.txt").write_text(cli["stderr"], encoding="utf-8")
+    except KeyboardInterrupt:
+        print(f"\n[{ts()}] interrupted — completed parity outputs remain in "
+              f"{out_dir}", flush=True)
+        sys.exit(130)
+
+    t_out, c_out = trace["stdout"].strip(), cli["stdout"].strip()
+    print("TRACE OUT:", repr(t_out[:300]), flush=True)
+    print("CLI   OUT:", repr(c_out[:300]), flush=True)
+    match = t_out == c_out or t_out in c_out or c_out in t_out
+    print("MATCH:", match, flush=True)
+    sys.exit(0 if match else 1)
+
+
+if __name__ == "__main__":
+    main()

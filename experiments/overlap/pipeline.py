@@ -1,13 +1,19 @@
-"""OVR: layer-streaming overlap experiment — storage/H2D/compute scheduling."""
+"""OVR: layer-streaming overlap experiment — storage/H2D/compute scheduling.
+
+Progress banners are timestamped and flushed; Ctrl+C writes the partial result
+rows collected so far, still removes the temporary fixture unless --keep-file,
+and exits with code 130.
+"""
 from __future__ import annotations
 
 import argparse
 import ctypes
+import sys
 import time
 from pathlib import Path
 
 import bootstrap  # noqa: F401  (adds benchmarks/system to sys.path)
-from common import RAW_CSV, RESULTS_DIR, rebuild_summary, write_rows
+from common import RAW_CSV, RESULTS_DIR, rebuild_summary, ts, write_rows
 
 from block_fixture import (
     DEFAULT_BLOCKS,
@@ -95,18 +101,26 @@ def main() -> None:
         return
 
     fixture_bytes = args.blocks * FP16_LAYER_BYTES
-    if not (args.file.exists() and args.file.stat().st_size == fixture_bytes):
-        print(f"writing fixture: {args.file} ({fixture_bytes} bytes)")
-        write_fixture(args.file, fixture_bytes)
-
-    device = torch.device("cuda:0")
     runners = {
         "sync": variants.run_sync,
         "double_buffer": variants.run_double_buffer,
         "three_stage": variants.run_three_stage,
     }
+    total = len(args.sizes) * len(runners) * args.repetitions
+    print(f"[{ts()}] OVR overlap pipeline: sizes={args.sizes} blocks={args.blocks} "
+          f"matmul={args.matmul_size} repetitions={args.repetitions} "
+          f"variants={list(runners)} ({total} passes)", flush=True)
+    print(f"[{ts()}] fixture={args.file} ({fixture_bytes} bytes); rows -> {RAW_CSV}; "
+          f"timeline -> {TIMELINE_CSV} (Ctrl+C writes partial results)", flush=True)
     rows: list[dict] = []
+    step = 0
     try:
+        if not (args.file.exists() and args.file.stat().st_size == fixture_bytes):
+            print(f"[{ts()}] writing fixture: {args.file} ({fixture_bytes} bytes)",
+                  flush=True)
+            write_fixture(args.file, fixture_bytes)
+
+        device = torch.device("cuda:0")
         for label in args.sizes:
             block_bytes = SIZES[label]
             workload_label = f"{label};blocks={args.blocks};matmul={args.matmul_size}"
@@ -127,6 +141,9 @@ def main() -> None:
                 torch.cuda.synchronize()
                 for variant, runner in runners.items():
                     for repetition in range(1, args.repetitions + 1):
+                        step += 1
+                        print(f"[{ts()}] [step {step}/{total}] {label}/{variant} "
+                              f"rep {repetition}", flush=True)
                         storage.reset()
                         ctx.sums.zero_()
                         torch.cuda.reset_peak_memory_stats(device)
@@ -153,10 +170,14 @@ def main() -> None:
                                        process_working_set_bytes(), "psapi WorkingSetSize after pass"),
                         ])
                         write_timeline(TIMELINE_CSV, variant, workload_label, repetition, times.as_dict())
-                        print(f"{label}/{variant} rep {repetition}: makespan {makespan:.3f}s "
-                              f"({payload / makespan / 1e9:.3f} GB/s payload)")
+                        print(f"[{ts()}] {label}/{variant} rep {repetition}: makespan {makespan:.3f}s "
+                              f"({payload / makespan / 1e9:.3f} GB/s payload)", flush=True)
             finally:
                 storage.close()
+    except KeyboardInterrupt:
+        print(f"\n[{ts()}] interrupted — writing partial results ({len(rows)} rows) "
+              f"-> {RAW_CSV}", flush=True)
+        sys.exit(130)
     except Exception as exc:
         if not rows or rows[-1].get("status") != "error":
             rows.append(error_row("overlap pipeline", ",".join(args.sizes), repr(exc)))

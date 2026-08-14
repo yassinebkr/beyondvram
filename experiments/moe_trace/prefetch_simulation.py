@@ -12,16 +12,23 @@ from the real traces:
     capacity R per layer;
   - for several residual capacities R.
 
+Progress banners print per trace file. Ctrl+C writes partial results with
+status="interrupted" and exits with code 130.
+
 Output: results/moe-locality/prefetch-simulation.json
 """
 
 from __future__ import annotations
 
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks" / "system"))
+from common import ts  # noqa: E402
+
 TRACE_DIR = ROOT / "results/moe-locality"
 OUT = TRACE_DIR / "prefetch-simulation.json"
 RESIDUAL_CAPACITIES = [4, 8, 16, 24]
@@ -61,26 +68,56 @@ def simulate(per_layer, residual_cap: int) -> tuple[float, int, int]:
     return (hits / total if total else 0.0), hits, total
 
 
-def main() -> None:
-    traces = sorted(TRACE_DIR.glob("trace-*.jsonl"))
-    totals = {r: [0, 0] for r in RESIDUAL_CAPACITIES}
-    for path in traces:
-        per_layer = load_trace(path)
-        for r in RESIDUAL_CAPACITIES:
-            rate, hits, total = simulate(per_layer, r)
-            totals[r][0] += hits
-            totals[r][1] += total
-    result = {r: h / n for r, (h, n) in totals.items()}
-    print("combined predictor + LRU-residual hit rates (pooled, all layers):")
-    for r, rate in result.items():
-        print(f"  residual {r:3d} (+8 prefetched): {rate:.4f}")
-    OUT.write_text(json.dumps({
+def write_payload(traces: list[Path], totals: dict[int, list[int]],
+                  status: str) -> dict:
+    result = {r: (h / n if n else None) for r, (h, n) in totals.items()}
+    payload = {
+        "status": status,
         "scheme": "predict E(t+1)=E(t), LRU residual per layer",
         "residual_capacities": RESIDUAL_CAPACITIES,
         "hit_rates": {str(r): v for r, v in result.items()},
         "traces": [p.name for p in traces],
-    }, indent=1), encoding="utf-8")
-    print(f"wrote {OUT}")
+    }
+    OUT.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    return payload
+
+
+def main() -> None:
+    traces = sorted(TRACE_DIR.glob("trace-*.jsonl"))
+    if not traces:
+        raise SystemExit(f"no trace files found in {TRACE_DIR}")
+    print(f"[{ts()}] prefetch simulation: {len(traces)} trace file(s), "
+          f"residual capacities {RESIDUAL_CAPACITIES}", flush=True)
+    print(f"[{ts()}] output -> {OUT} (Ctrl+C writes partial results)",
+          flush=True)
+
+    totals = {r: [0, 0] for r in RESIDUAL_CAPACITIES}
+    processed: list[Path] = []
+    try:
+        for i, path in enumerate(traces, 1):
+            print(f"[{ts()}] [file {i}/{len(traces)}] {path.stem}: simulating",
+                  flush=True)
+            per_layer = load_trace(path)
+            for r in RESIDUAL_CAPACITIES:
+                rate, hits, total = simulate(per_layer, r)
+                totals[r][0] += hits
+                totals[r][1] += total
+            processed.append(path)
+            print(f"[{ts()}] [file {i}/{len(traces)}] {path.stem}: {total} "
+                  f"requests x {len(RESIDUAL_CAPACITIES)} capacities",
+                  flush=True)
+    except KeyboardInterrupt:
+        write_payload(processed, totals, status="interrupted")
+        print(f"\n[{ts()}] interrupted — partial results ({len(processed)}/"
+              f"{len(traces)} files) -> {OUT}", flush=True)
+        sys.exit(130)
+
+    payload = write_payload(traces, totals, status="complete")
+    print("combined predictor + LRU-residual hit rates (pooled, all layers):",
+          flush=True)
+    for r, rate in payload["hit_rates"].items():
+        print(f"  residual {int(r):3d} (+8 prefetched): {rate:.4f}", flush=True)
+    print(f"[{ts()}] wrote {OUT}", flush=True)
 
 
 if __name__ == "__main__":
