@@ -38,6 +38,8 @@ MODELS = [
     ("control-requant-q4km", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-q4km-requant-control.gguf"),
     ("variant-mid24-iq2xxs", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid24-iq2xxs.gguf"),
     ("variant-mid24-q3k", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid24-q3k.gguf"),
+    ("variant-mid32-q3k", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid32-q3k.gguf"),
+    ("variant-mid40-q3k", "models/Qwen3-30B-A3B-GGUF/qwen3-30b-a3b-mid40-q3k.gguf"),
 ]
 
 PPL_RE = re.compile(r"Final estimate: PPL = ([\d.]+) \+/- ([\d.]+)")
@@ -45,13 +47,30 @@ PLACEMENT = ["-ngl", "48", "--n-cpu-moe", "33"]
 
 
 def write_payload(records: list[dict], status: str) -> None:
+    """Write the gate JSON, merging into any existing rows by model id.
+
+    A filtered (--only) run replaces only the rows it measured; rows from
+    earlier runs for other models are preserved.
+    """
+    by_model: dict[str, dict] = {}
+    if OUT.exists():
+        try:
+            prior = json.loads(OUT.read_text(encoding="utf-8"))
+            for r in prior.get("records", []):
+                by_model[r.get("model", "")] = r
+        except json.JSONDecodeError:
+            pass
+    by_model.update({r["model"]: r for r in records})
+    order = {model_id: i for i, (model_id, _) in enumerate(MODELS)}
+    merged = sorted(by_model.values(),
+                    key=lambda r: order.get(r.get("model", ""), len(order)))
     payload = {
         "status": status,
         "tool": "llama-perplexity b10355 (unmodified)",
         "corpus": "results/track3-low-bit/corpus-ppl-half.txt (imatrix-disjoint half; "
                   "relative comparison only)",
         "placement": " ".join(PLACEMENT),
-        "records": records,
+        "records": merged,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=1), encoding="utf-8")
@@ -61,17 +80,27 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--quiet", action="store_true",
                     help="suppress live child output (banners still print)")
+    ap.add_argument("--only", default="",
+                    help="comma-separated model-id substrings; default: all models")
     args = ap.parse_args()
 
+    models = MODELS
+    if args.only:
+        keep = [s.strip() for s in args.only.split(",") if s.strip()]
+        models = [m for m in MODELS if any(s in m[0] for s in keep)]
+        if not models:
+            ap.error(f"--only matched nothing; known ids: "
+                     f"{', '.join(m[0] for m in MODELS)}")
+
     records: list[dict] = []
-    print(f"[{ts()}] quality gate: {len(MODELS)} models, corpus {CORPUS.name}, "
-          f"placement {' '.join(PLACEMENT)}", flush=True)
-    print(f"[{ts()}] output -> {OUT} (Ctrl+C writes partial results)",
-          flush=True)
+    print(f"[{ts()}] quality gate: {len(models)}/{len(MODELS)} models selected, "
+          f"corpus {CORPUS.name}, placement {' '.join(PLACEMENT)}", flush=True)
+    print(f"[{ts()}] output -> {OUT} (merges into existing rows; Ctrl+C "
+          f"writes partial results)", flush=True)
     try:
-        for i, (model_id, rel_path) in enumerate(MODELS, 1):
+        for i, (model_id, rel_path) in enumerate(models, 1):
             model = ROOT / rel_path
-            label = f"[{i}/{len(MODELS)}] {model_id}"
+            label = f"[{i}/{len(models)}] {model_id}"
             if not model.exists():
                 records.append({"model": model_id, "status": "skipped",
                                 "reason": "file not present"})

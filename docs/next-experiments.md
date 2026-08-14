@@ -71,4 +71,37 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Verdict: real but narrow — a per-workload flag, not a roofline mover.** +9.9% at 60% acceptance is genuine free speed, but only on highly repetitive/structured output (code, tables, templates); verification is exact so it is lossless, and a non-firing mode costs ~0.4%. The mechanism (literal n-gram lookup) implies the gain shrinks on open-ended prose — not separately measured, and it does not touch the bandwidth wall (accepted tokens still re-read the same experts in the verify pass). Recorded as a usable per-workload option (`--spec-type ngram-simple`), carried into the 120b protocol as the code-workload variant; no further bench rounds on the 20b.
 
+## 6 — Bare-metal Linux OS-tax A/B (PLANNED — boot target pending)
+
+**Question.** Experiment 2 measured no Linux advantage under WSL2, but WSL2 is not bare metal (virtualized memory manager, drvfs mounts, paravirtualized GPU). External same-hardware relays claim double-digit Windows→Linux llama.cpp gains. Does a minimal bare-metal Linux beat native Windows 11 on this machine — same llama.cpp version, same model file, same flags?
+
+**Design.** Minimal Debian netinst (no desktop environment; xinit + VSCodium only if the box becomes the daily driver — this is a testbench, not an OS fork). llama.cpp b10355 built natively; the WSL2 Ubuntu build is reusable if the glibc matches. The model file must sit on ext4: mmap page-ins during the bench must not cross NTFS/FUSE, or load-time noise contaminates the measured tok/s. Arms: Windows native vs Linux native on stock Q4_K_M (48,33) and the mid24-Q3_K variant (48,30), llama-bench -p 128 -n 32 -r 5. Interleaving across reboots is impossible, so drift control is ≥3 alternating boot cycles per OS with BIOS state recorded per arm (XMP, RAM clocks, governor).
+
+**Decision rule.** ≥10% tg advantage on identical configs justifies the dual-boot as the bench OS for the 64 GiB / gpt-oss-120b phase; below that, native Windows stays the reference host. The RAM-overclock lever (BIOS-level, OS-independent) folds into whichever OS wins. A custom image or installer is out of scope until the tax is measured.
+
+## 7 — Mixed-precision follow-ons: wider bands and imatrix assist (IN PROGRESS — started 2026-08-14)
+
+**Question.** Experiment 4 passed at mid24-Q3_K (1.228× tg, +0.40% PPL, 0.90 roofline conversion). Two free levers remain: band width (more Q3_K layers = fewer bytes per token) and imatrix-assisted quantization (better quality at equal bytes). How wide can the Q3_K band get before the quality gate fails?
+
+**Protocol.** The #4 two-gate protocol, unchanged: quality gate on the imatrix-disjoint corpus half (`mixed_precision_gate.py --only <id>`, merges into the cumulative gate JSON), speed gate (`mixed_precision_speed.py --hybrid … --tag …`) with the interleaved A/B anchored on stock Q4_K_M at (48,33). Steps in order, each gated by the previous:
+- 7a mid32-Q3_K (layers 8–39, 96 override lines) — roofline ~1.5×.
+- 7b mid40-Q3_K (layers 4–43, 120 override lines) — roofline ~1.7×; runs only if 7a passes quality.
+- 7c imatrix-assisted Q3_K band (the existing gitignored imatrix, regenerable) — the fallback if a wider band fails quality; then retry width with imatrix.
+- 7d per-matrix-kind band (ffn_down stays Q4_K/Q6_K, gate/up at Q3_K) — the second fallback, expressible with the same override mechanism.
+
+**Decision rule.** Ship the widest band that passes both gates (PPL within a few % of the Q4_K_M anchor AND tg ≥1.15× over the stock anchor; a new band must additionally beat the mid24-Q3_K reference by ≥10% to justify switching). Everything learned transfers to gpt-oss-120b (MXFP4 bands) once the RAM lands.
+
+## 8 — Teacher-model distillation and routing-consistency training (SCOPING — license gate first)
+
+**Question.** The reactive-routing wall and the bandwidth wall are both properties of the stock checkpoints. A checkpoint trained or fine-tuned for predictable routing (or fewer active bytes) removes the wall at the source instead of scheduling around it. What is runnable on this box, and what needs external compute?
+
+**Scope, ordered by feasibility:**
+- 8a Pre-attention routing probes (ETH-style linear probes on captured hidden states; reported 93–97% exact-match, no public code). Requires extending the moe-trace build to dump layer inputs — a native rebuild, hours not days. The probe training itself is logistic-regression-scale and fits this machine.
+- 8b Routing-consistency LoRA (StickyMoE-style; switch-rate cuts up to 59%, code released). Compute-heavy; dubious on 8 GiB VRAM + 64 GiB RAM. Reassess after the upgrade.
+- 8c Full distillation from GLM/Kimi-class teachers into a smaller active-byte student. Off-box by definition. The license review of teacher outputs comes first — GLM and Kimi licenses attach conditions to synthetic training data; Qwen3 is Apache-2.0.
+
+**Decision rule.** 8a ships only if probe recall beats the measured id-history ceiling (0.53–0.63, `results/gpt-oss/predictability.json`) by a margin that justifies a predictor-backed cache — which would reopen the async-prefetch design with a real predictor. 8b/8c produce written assessments, not code, until the hardware or the licenses allow.
+
+**Program order (2026-08-14).** #7 runs first — pure local compute, highest expected value per hour, and it deepens the only positive result so far. #6 executes once the boot target is decided, before the RAM arrives, so the OS question is settled before the 120b phase. #8a starts when #7's gates leave the machine idle. The 64 GiB install then re-characterizes B01–B07 and opens gpt-oss-120b with the mixed-precision two-gate protocol already proven on the 30B.
+
 Experiments 2 and 3 are independent secondary setups. Experiment 4 no longer depends on 3: stock b10355 `llama-quantize` already has per-tensor control (`--tensor-type name=ggml_type`, repeatable; `--tensor-type-file` for long lists), verified 2026-08-14. One hard constraint discovered: GGUF stores experts packed per layer (`blk.N.ffn_*_exps.weight`, one type per tensor), so per-expert-within-layer precision is inexpressible in any ggml engine without a fork; experiment 4 operates at per-layer granularity (trace-driven hot/cold layer split, or GGUF-level transplant of whole packed tensors between two official quants — which also avoids the `--allow-requantize` quality warning, since no high-precision source exists locally).
