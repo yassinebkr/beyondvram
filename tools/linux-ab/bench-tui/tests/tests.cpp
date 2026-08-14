@@ -4,11 +4,14 @@
 #include "config.h"
 #include "fsutil.h"
 #include "json.h"
+#include "run_manager.h"
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <deque>
 #include <map>
 #include <string>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -307,4 +310,119 @@ TEST(config_load_drops_and_clamps) {
   std::vector<AgentSpec> agents;
   CHECK(load_agents(agents_path, agents));
   CHECK(agents.size() == 1 && agents[0].name == "b");
+}
+
+TEST(scan_llama_processes_fake_proc) {
+  std::string base = make_tmp_dir();
+  ensure_dir(base + "/1234");
+  ensure_dir(base + "/1235");
+  write_file(base + "/1234/comm", "llama-bench\n");
+  write_file(base + "/1235/comm", "bash\n");
+  auto pids = scan_llama_processes(base);
+  CHECK(pids.size() == 1 && pids[0] == 1234);
+}
+
+TEST(parse_bench_json_fixture) {
+  const char *bench =
+      "[\n  {\"n_prompt\": 128, \"n_gen\": 0, \"avg_ts\": 157.667},\n"
+      "  {\"n_prompt\": 0, \"n_gen\": 32, \"avg_ts\": 44.47}\n]\n";
+  double tg = -2, pp = -2;
+  CHECK(parse_llama_bench_json(bench, tg, pp));
+  CHECK(pp > 157.6 && pp < 157.7);
+  CHECK(tg > 44.4 && tg < 44.5);
+  CHECK(!parse_llama_bench_json("not json", tg, pp));
+}
+
+TEST(run_manager_queue_edit) {
+  std::string base = make_tmp_dir();
+  RunManager rm(base, "/bin");
+  Preset a;
+  a.name = "a";
+  a.binary = "/bin/echo";
+  a.args = "x";
+  a.repeats = 1;
+  Preset b = a;
+  b.name = "b";
+  rm.enqueue({a});
+  rm.enqueue({b});
+  CHECK(rm.queue_snapshot().size() == 2);
+  CHECK(rm.remove_queued(0));
+  auto q = rm.queue_snapshot();
+  CHECK(q.size() == 1 && q[0].preset.name == "b");
+  CHECK(!rm.remove_queued(5));
+}
+
+TEST(run_manager_echo_record) {
+  std::string base = make_tmp_dir();
+  RunManager rm(base, "/bin");
+  Preset p;
+  p.name = "t 1";
+  p.binary = "/bin/echo";
+  p.args = "[{\"n_gen\":32,\"avg_ts\":44.5}]";
+  p.repeats = 1;
+  rm.enqueue({p});
+  CHECK(rm.start());
+  for (int i = 0; i < 100 && rm.records().empty(); ++i) usleep(50000);
+  auto recs = rm.records();
+  CHECK(recs.size() == 1);
+  CHECK(recs[0].exit_code == 0);
+  CHECK(recs[0].label == "t 1");
+  CHECK(recs[0].tg_ts > 44.4 && recs[0].tg_ts < 44.6);
+  CHECK(file_exists(recs[0].log_path) && file_exists(recs[0].output_json_path));
+  bool ok = false;
+  std::string line = slurp(base + "/runs.jsonl", ok);
+  JsonValue v;
+  CHECK(ok && json_parse(line, v));
+  CHECK(v.find("label")->s == "t 1");
+  // a finished run manager accepts a second start
+  rm.enqueue({p});
+  CHECK(rm.start());
+  for (int i = 0; i < 100 && rm.records().size() < 2; ++i) usleep(50000);
+  CHECK(rm.records().size() == 2);
+}
+
+TEST(run_manager_stop) {
+  std::string base = make_tmp_dir();
+  RunManager rm(base, "/bin");
+  Preset p;
+  p.name = "sleeper";
+  p.binary = "/bin/sleep";
+  p.args = "30";
+  p.repeats = 1;
+  rm.enqueue({p});
+  CHECK(rm.start());
+  for (int i = 0; i < 100 && !rm.status().active; ++i) usleep(20000);
+  CHECK(rm.active_pid() > 0);
+  rm.stop();
+  for (int i = 0; i < 300 && rm.records().empty(); ++i) usleep(50000);
+  auto recs = rm.records();
+  CHECK(recs.size() == 1);
+  CHECK(recs[0].exit_code == -15 || recs[0].exit_code == -9);
+  CHECK(recs[0].note == "stopped");
+}
+
+TEST(run_manager_detach) {
+  std::string base = make_tmp_dir();
+  pid_t pid = -1;
+  {
+    RunManager rm(base, "/bin");
+    Preset p;
+    p.name = "sleeper";
+    p.binary = "/bin/sleep";
+    p.args = "30";
+    p.repeats = 1;
+    rm.enqueue({p});
+    CHECK(rm.start());
+    for (int i = 0; i < 100 && !rm.status().active; ++i) usleep(20000);
+    pid = (pid_t)rm.active_pid();
+    CHECK(pid > 0);
+    rm.detach();
+    for (int i = 0; i < 200 && rm.status().active; ++i) usleep(50000);
+    CHECK(!rm.status().active);
+    auto recs = rm.records();
+    CHECK(recs.size() == 1 && recs[0].note == "detached" && recs[0].exit_code == -1);
+  }
+  kill(pid, SIGKILL);  // clean up the detached child
+  int st = 0;
+  waitpid(pid, &st, 0);
 }
