@@ -31,6 +31,13 @@
    "wall_s": 28.0,
    "ppl": 23.8766,
    "ppl_stderr": 1.66101
+  },
+  {
+   "model": "variant-mid32-q3k",
+   "rc": 0,
+   "wall_s": 98.4,
+   "ppl": 23.8832,
+   "ppl_stderr": 1.66028
   }
  ]
 }

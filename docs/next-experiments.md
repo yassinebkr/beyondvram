@@ -79,7 +79,7 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Decision rule.** ≥10% tg advantage on identical configs justifies the dual-boot as the bench OS for the 64 GiB / gpt-oss-120b phase; below that, native Windows stays the reference host. The RAM-overclock lever (BIOS-level, OS-independent) folds into whichever OS wins. A custom image or installer is out of scope until the tax is measured.
 
-## 7 — Mixed-precision follow-ons: wider bands and imatrix assist (IN PROGRESS — started 2026-08-14)
+## 7 — Mixed-precision follow-ons: wider bands and imatrix assist (IN PROGRESS — 7a PASS 2026-08-14)
 
 **Question.** Experiment 4 passed at mid24-Q3_K (1.228× tg, +0.40% PPL, 0.90 roofline conversion). Two free levers remain: band width (more Q3_K layers = fewer bytes per token) and imatrix-assisted quantization (better quality at equal bytes). How wide can the Q3_K band get before the quality gate fails?
 
@@ -90,6 +90,8 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 - 7d per-matrix-kind band (ffn_down stays Q4_K/Q6_K, gate/up at Q3_K) — the second fallback, expressible with the same override mechanism.
 
 **Decision rule.** Ship the widest band that passes both gates (PPL within a few % of the Q4_K_M anchor AND tg ≥1.15× over the stock anchor; a new band must additionally beat the mid24-Q3_K reference by ≥10% to justify switching). Everything learned transfers to gpt-oss-120b (MXFP4 bands) once the RAM lands.
+
+**7a measurement — mid32-Q3_K (2026-08-14).** Quality gate: **PASS** — 23.88 ± 1.66 vs original 23.78 (+0.43%; mid24 was +0.40% — widening the band costs almost nothing in quality). Speed gate (`mixed-precision-speed-mid32.json`): **PASS** — sweep peaks at K=28 (tg 42.77; K=24 32.75, K=44 32.67), interleaved 3-round A/B at (48,28) vs stock at (48,33): **43.79 vs 35.27 = 1.242×**. Versus the mid24 reference (1.228×) the wider band adds +1.1% relative — below the 10% switch threshold, so the mid24-Q3_K file stays the reference configuration for now. Roofline conversion slipped from 0.90 (mid24) to ~0.83 (mid32 vs its ~1.5× roofline): the wider band's capacity gain is partly eaten by the placement optimum moving to K=28. First HDD-load wall time after the models/ move to the HDD is ~95–113 s per cold arm (warm runs ~11 s); measured tg/pp are unaffected — the weights are RAM-resident by the time measurement starts. 7b (mid40) proceeds on the strength of the flat quality curve.
 
 ## 8 — Teacher-model distillation and routing-consistency training (SCOPING — license gate first)
 

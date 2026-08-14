@@ -1,0 +1,184 @@
+{
+ "status": "complete",
+ "tool": "llama-bench b10355 (unmodified); -p 128 -n 32 -r 3, mmap, f16 KV",
+ "hybrid": "qwen3-30b-a3b-mid32-q3k.gguf",
+ "original": "Qwen3-30B-A3B-Q4_K_M.gguf",
+ "phase1_sweep_k": [
+  24,
+  28,
+  30,
+  32,
+  36,
+  40,
+  44
+ ],
+ "phase2_ab_tg": {
+  "hybrid": {
+   "mean": 43.79,
+   "n": 3
+  },
+  "original": {
+   "mean": 35.27,
+   "n": 3
+  }
+ },
+ "tg_gain_vs_original": 1.242,
+ "decision_rule": ">=1.15 tg gain at best placement (docs/next-experiments.md #4)",
+ "records": [
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 24,
+   "rc": 0,
+   "wall_s": 15.9,
+   "pp": 99.09,
+   "tg": 32.75,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 11.3,
+   "pp": 216.03,
+   "tg": 42.77,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 30,
+   "rc": 0,
+   "wall_s": 11.0,
+   "pp": 214.48,
+   "tg": 41.75,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 32,
+   "rc": 0,
+   "wall_s": 11.4,
+   "pp": 198.89,
+   "tg": 40.94,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 36,
+   "rc": 0,
+   "wall_s": 11.7,
+   "pp": 177.47,
+   "tg": 36.24,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 40,
+   "rc": 0,
+   "wall_s": 11.8,
+   "pp": 169.57,
+   "tg": 33.65,
+   "status": "ok"
+  },
+  {
+   "phase": "sweep",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 44,
+   "rc": 0,
+   "wall_s": 11.6,
+   "pp": 155.04,
+   "tg": 32.67,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 0,
+   "arm": "hybrid",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 11.5,
+   "pp": 213.93,
+   "tg": 41.37,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 0,
+   "arm": "original",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 112.8,
+   "pp": 166.48,
+   "tg": 35.51,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 1,
+   "arm": "original",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 13.3,
+   "pp": 160.56,
+   "tg": 34.45,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 1,
+   "arm": "hybrid",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 93.2,
+   "pp": 216.57,
+   "tg": 45.54,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 2,
+   "arm": "hybrid",
+   "model": "qwen3-30b-a3b-mid32-q3k.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 28,
+   "rc": 0,
+   "wall_s": 11.3,
+   "pp": 211.46,
+   "tg": 44.47,
+   "status": "ok"
+  },
+  {
+   "phase": "ab",
+   "round": 2,
+   "arm": "original",
+   "model": "Qwen3-30B-A3B-Q4_K_M.gguf",
+   "ngl": 48,
+   "n_cpu_moe": 33,
+   "rc": 0,
+   "wall_s": 113.0,
+   "pp": 157.67,
+   "tg": 35.85,
+   "status": "ok"
+  }
+ ]
+}
