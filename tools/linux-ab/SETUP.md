@@ -5,33 +5,37 @@ A testbench, not an OS fork: stock netinst, no desktop environment.
 
 ## 1. Media
 
-- ISO: `debian-13.6.0-amd64-netinst.iso` (verify against
-  `SHA256SUMS` in the same directory before flashing).
+- ISO: `debian-13.6.0-amd64-netinst.iso`, stored on the data HDD (verify
+  against `SHA256SUMS` from the Debian mirror before flashing; sha256
+  verified 2026-08-14).
 - Flash to a USB stick with any raw writer (Rufus in dd mode, balenaEtcher,
   or `dd`). The machine boots UEFI; Secure Boot off for the NVIDIA driver.
 
 ## 2. Partition
 
-The system partition on the NVMe is shrunk by ~60 GB (admin PowerShell):
+Route taken on this machine (2026-08-14): the NVMe system partition would not
+shrink at all — the shrink engine reported zero shrinkable space
+(`Get-PartitionSupportedSize`: SizeMax equal to the current partition size),
+capped by immovable pagefile/hibernate data at the partition tail — so a
+~150 GB partition was carved from the data HDD instead. Cold model loads from
+the HDD cost ~95–113 s per bench arm; steady-state tok/s is unaffected
+(weights are RAM-resident by the time measurement starts).
+
+The Debian installer needs unallocated space: delete the freshly created NTFS
+volume in diskmgmt.msc (right-click → Delete Volume) before booting the
+installer, or point the installer's manual partitioning at it.
+
+For the NVMe route on a machine that does allow shrinking (admin PowerShell):
 
 ```powershell
 Resize-Partition -DriveLetter <system-drive> -Size <target>
 ```
 
-Measured on this machine (2026-08-14): the initial shrink cap was **zero** —
-`Get-PartitionSupportedSize -DriveLetter <system-drive>` reported SizeMax equal to the
-current partition size (zero shrinkable space) — so the
-pagefile/hibernate removal below is mandatory on this box, not optional.
-
-If the resize fails with `StorageWMI 4097` ("shrink size is too big"), immovable
-files near the partition end cap the shrink below 60 GB. Query the real ceiling
-with `Get-PartitionSupportedSize -DriveLetter <system-drive>` and shrink to that SizeMax, or
-read the cap directly in diskmgmt.msc → Shrink Volume. Persistent caps
-usually come from the pagefile or hibernate file near the partition end:
-`powercfg /h off` plus temporarily setting no paging file, reboot, retry, then
-restore. Fallback: carve the Linux partition from the data HDD instead — first-load
-wall time per cold bench arm rises, steady-state tok/s is unaffected (weights
-are RAM-resident by the time measurement starts).
+If that fails with `StorageWMI 4097` ("shrink size is too big"), query the real
+ceiling with `Get-PartitionSupportedSize -DriveLetter <system-drive>` and
+shrink to its SizeMax. Persistent caps usually come from the pagefile or
+hibernate file near the partition end: `powercfg /h off` plus temporarily
+setting no paging file, reboot, retry, then restore.
 
 Debian installs into the freed space: guided partitioning, use largest
 continuous free space, all files in one partition, no swap (64 GiB RAM;
@@ -42,9 +46,9 @@ a swap partition would only tempt paging during benches).
 - Tasksel: only "standard system utilities" — no desktop.
 - Enable `non-free-firmware` + `non-free` repos, then:
   `apt install nvidia-driver firmware-misc-nonfree build-essential cmake git ntfs-3g`
-- Windows dual-boot note: the system partition has no BitLocker (checked 2026-08-14), so GRUB
-  chainloading is uncomplicated; still record the recovery-key situation
-  before resizing if that ever changes.
+- Windows dual-boot note: no BitLocker on the system partition (checked
+  2026-08-14), so GRUB chainloading is uncomplicated; still record the
+  recovery-key situation before resizing if that ever changes.
 
 ## 4. Bench payload
 
