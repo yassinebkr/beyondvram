@@ -170,6 +170,8 @@ TEST(fsutil_ensure_dir_rejects_file) {
   std::string base = make_tmp_dir();
   write_file(base + "/f", "x");
   CHECK(!ensure_dir(base + "/f"));
+  CHECK(!ensure_dir(base + "/f/g"));
+  CHECK(!ensure_dir(base + "/f/"));
   CHECK(ensure_dir(base + "/subdir"));
 }
 
@@ -285,4 +287,24 @@ TEST(collector_runner_double_start) {
   r.stop();
   CollectorSnapshot s = snapshot_from(st);
   CHECK(s.mem.total_mb > 0);
+}
+
+TEST(config_load_drops_and_clamps) {
+  std::string base = make_tmp_dir();
+  std::string presets_path = base + "/presets.json";
+  write_file(presets_path,
+             "[{\"name\":\"\",\"binary\":\"llama-bench\",\"args\":\"x\"},"
+             "{\"name\":\"ok\",\"binary\":\"llama-bench\",\"args\":\"x\",\"repeats\":0},"
+             "{\"name\":\"n\\u0000ul\",\"binary\":\"llama-bench\",\"args\":\"x\"}]");
+  std::vector<Preset> presets;
+  CHECK(load_presets(presets_path, presets));
+  CHECK(presets.size() == 1);
+  CHECK(presets[0].name == "ok" && presets[0].repeats == 1);
+  std::string agents_path = base + "/agents.json";
+  write_file(agents_path,
+             "[{\"name\":\"a\",\"command\":\"\"},"
+             "{\"name\":\"b\",\"command\":\"sh\",\"workdir\":\"/\"}]");
+  std::vector<AgentSpec> agents;
+  CHECK(load_agents(agents_path, agents));
+  CHECK(agents.size() == 1 && agents[0].name == "b");
 }

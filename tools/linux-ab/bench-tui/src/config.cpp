@@ -1,9 +1,10 @@
 #include "config.h"
 #include "fsutil.h"
+#include <algorithm>
 
 static std::string jstr(const JsonValue &o, const char *k) {
   const JsonValue *v = o.find(k);
-  return (v && v->type == JsonValue::Type::Str) ? v->s : "";
+  return (v && v->type == JsonValue::Type::Str && v->s.find('\0') == std::string::npos) ? v->s : "";
 }
 static long long jint(const JsonValue &o, const char *k, long long dflt) {
   const JsonValue *v = o.find(k);
@@ -26,7 +27,7 @@ bool load_presets(const std::string &path, std::vector<Preset> &out) {
     p.model_path = jstr(e, "model_path");
     p.binary = jstr(e, "binary");
     p.args = jstr(e, "args");
-    p.repeats = (int)jint(e, "repeats", 1);
+    p.repeats = (int)std::min<long long>(std::max<long long>(jint(e, "repeats", 1), 1), 1000000);
     if (p.name.empty() || p.binary.empty()) continue;  // entries without identity are dropped
     out.push_back(std::move(p));
   }
