@@ -1,10 +1,12 @@
 // bench-tui unit tests. Single-file CHECK runner; TEST blocks self-register.
 // Exit code is 0 when nothing failed, 1 otherwise.
+#include "fsutil.h"
 #include "json.h"
 #include <cstdio>
 #include <deque>
 #include <map>
 #include <string>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 
@@ -117,4 +119,46 @@ TEST(json_int64_range) {
   CHECK(json_parse("-9223372036854775808", v));
   CHECK(v.type == JsonValue::Type::Int);
   CHECK(v.i == (-9223372036854775807LL - 1));
+}
+
+static std::string make_tmp_dir() {
+  char t[] = "/tmp/bench-tui-test-XXXXXX";
+  CHECK(mkdtemp(t) != nullptr);
+  return t;
+}
+
+TEST(fsutil_dirs) {
+  std::string base = make_tmp_dir();
+  CHECK(ensure_dir(base + "/a/b/c"));
+  CHECK(file_exists(base + "/a/b/c"));
+  CHECK(!file_exists(base + "/a/b/nope"));
+  CHECK(ensure_dir(base + "/a/b/c"));  // EEXIST stays true
+}
+
+TEST(fsutil_rw) {
+  std::string base = make_tmp_dir();
+  CHECK(write_file(base + "/x.txt", "hello\n"));
+  bool ok = false;
+  CHECK(slurp(base + "/x.txt", ok) == "hello\n" && ok);
+  bool ok2 = true;
+  slurp(base + "/missing", ok2);
+  CHECK(!ok2);
+}
+
+TEST(fsutil_scan_gguf) {
+  std::string base = make_tmp_dir();
+  write_file(base + "/b.gguf", "x");
+  write_file(base + "/a.gguf", "x");
+  write_file(base + "/c.txt", "x");
+  auto v = scan_gguf(base);
+  CHECK(v.size() == 2);
+  CHECK(v[0] == base + "/a.gguf" && v[1] == base + "/b.gguf");
+  CHECK(scan_gguf(base + "/nope").empty());
+}
+
+TEST(fsutil_labels_time) {
+  CHECK(sanitize_label("a b/c.d") == "a-b-c-d");
+  CHECK(sanitize_label("") == "run");
+  CHECK(utc_now().size() == 20 && utc_now().back() == 'Z');
+  CHECK(utc_stamp().size() == 16);
 }
