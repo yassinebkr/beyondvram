@@ -5,6 +5,7 @@
 #include "collectors.h"
 #include "config.h"
 #include "run_manager.h"
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,10 +26,13 @@ struct UiState {
   std::string models_dir;
   bool editing = false;               // preset editor open: global letter keys stand down
   bool confirming = false;            // quit-confirm bar open (run active)
+  int active_tab = 0;                 // current tab index, kept in sync by Tabs::on_change
+  std::function<void()> start_queue;  // set by the Runs tab; the global 's' key calls it
   // Modal/status rows live in main (outside the tabs) so every tab sees them;
   // the widgets are rebuilt with each App, so the pointers are re-assigned per loop.
   std::shared_ptr<cpptui::Label> banner_label;   // MEASUREMENT IN PROGRESS
   std::shared_ptr<cpptui::Label> quitbar_label;  // quit-confirm row
+  std::shared_ptr<cpptui::Label> help_label;     // per-tab key help row, refreshed by the runs timer
   std::shared_ptr<cpptui::Label> status_label;   // notice line, rendered every timer tick
   std::string pending_cmd, pending_dir;
   std::string last_agent_exit_text;  // "last agent exit: <rc>"; empty until the first agent exits

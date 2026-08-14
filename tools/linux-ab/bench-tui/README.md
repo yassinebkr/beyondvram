@@ -21,14 +21,34 @@ g++ (C++17), cmake, and make.
 Defaults: config `./bench-tui-config`, run output `./results/bench-tui`, llama binaries
 `/opt/llama-b10355`, models `~/models`.
 
-Keys: `1`/`2`/`3` switch tabs, `q` quits (confirm bar while a run is active: `s` stop and
-quit, `d` detach and quit, `c` cancel). While the preset editor is open, letter keys type
-into the form instead of triggering shortcuts. `Enter` on the Agents tab launches the
-selected agent fullscreen; exiting the agent returns to the TUI. Ctrl+C quits immediately;
-an active run is detached, never killed.
+## Keys
 
-The Runs tab buttons row is add / edit / del / queue / dequeue / start / stop: queue
-appends the selected preset to the run queue, dequeue removes the selected queued entry.
+Global: `1`/`2`/`3` switch tabs, `q` quits (confirm bar while a run is active: `s` stop and
+quit, `d` detach and quit, `c` cancel). Ctrl+C quits immediately; an active run is detached,
+never killed. A one-line help bar above the status line lists the keys of the current tab.
+
+Runs tab: `a` add preset, `e` edit selected, `x` delete selected (no confirm), `n` queue
+selected, `u` dequeue selected, `s` start the queue, `t` stop the active run. `Enter` on the
+preset table also queues the selected preset. Queue appends the selected preset to the run
+queue; dequeue removes the selected queued entry. The buttons row carries the same letters in
+brackets. Runs keys fire only on the Runs tab and stand down while the quit-confirm bar is
+open. While the preset editor is open, letter keys type into the form instead of triggering
+shortcuts: Tab moves focus between the fields and the save/cancel buttons, Enter presses the
+focused button.
+
+Agents tab: `Enter` launches the selected agent fullscreen; exiting the agent returns to the
+TUI. Agents are added by hand in `agents.json`, not in the TUI.
+
+Mouse reporting comes from the terminal, not the TUI: it works in WSL and desktop terminals,
+while a raw Linux console has no mouse unless gpm is installed. Every action also has a key.
+
+## Agents and API keys
+
+Agents are shell commands read from `agents.json` (`name`, `command`, `workdir`); the TUI
+never stores credentials. Each agent CLI authenticates itself through its own config or
+login flow - for kimi, run its `/login` flow once inside the shell agent, or export the
+CLI's documented API-key variable in `~/.bashrc`. The agent process inherits the TUI's
+environment, so an export in `~/.bashrc` is enough.
 
 ## Tests
 

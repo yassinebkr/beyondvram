@@ -550,3 +550,16 @@ TEST(run_manager_destructor_completes_stop) {
   CHECK(v.find("note") && v.find("note")->s == "stopped");
   CHECK(v.find("exit_code") && v.find("exit_code")->i == -9);
 }
+
+TEST(config_ensure_default_agents_rows) {
+  // A freshly ensured agents.json carries the shipped shell + kimi + codex rows
+  std::string base = make_tmp_dir();
+  std::string path = base + "/agents.json";
+  std::vector<AgentSpec> agents;
+  CHECK(ensure_agents_config(path, "/repo", agents));
+  CHECK(agents.size() == 3);
+  CHECK(agents[0].name == "kimi" && agents[0].command == "kimi");
+  CHECK(agents[1].name == "codex" && agents[1].command == "codex");
+  CHECK(agents[2].name == "shell" && agents[2].command == "${SHELL:-/bin/bash}");
+  CHECK(agents[0].workdir == "/repo" && agents[2].workdir == "/repo");
+}

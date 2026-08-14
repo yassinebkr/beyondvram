@@ -49,13 +49,13 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   refresh_presets();
 
   auto actions = std::make_shared<Horizontal>();
-  auto add_btn = std::make_shared<Button>("add");
-  auto edit_btn = std::make_shared<Button>("edit");
-  auto del_btn = std::make_shared<Button>("del");
-  auto queue_btn = std::make_shared<Button>("queue");
-  auto dequeue_btn = std::make_shared<Button>("dequeue");
-  auto start_btn = std::make_shared<Button>("start");
-  auto stop_btn = std::make_shared<Button>("stop");
+  auto add_btn = std::make_shared<Button>("[a]dd");
+  auto edit_btn = std::make_shared<Button>("[e]dit");
+  auto del_btn = std::make_shared<Button>("[x] del");
+  auto queue_btn = std::make_shared<Button>("[n] queue");
+  auto dequeue_btn = std::make_shared<Button>("[u] dequeue");
+  auto start_btn = std::make_shared<Button>("[s]tart");
+  auto stop_btn = std::make_shared<Button>("[t] stop");
   for (auto b : {add_btn, edit_btn, del_btn, queue_btn, dequeue_btn, start_btn, stop_btn})
     actions->add(b);
   left->add(actions);
@@ -158,17 +158,20 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
     presets_table->set_focus(true);
   });
 
-  add_btn->set_on_click([open_editor]() mutable { open_editor(-1); });
-  edit_btn->set_on_click([open_editor, presets_table]() mutable {
+  std::function<void()> do_add = [open_editor]() mutable { open_editor(-1); };
+  add_btn->set_on_click(do_add);
+  std::function<void()> do_edit = [open_editor, presets_table]() mutable {
     open_editor(presets_table->selected_index);
-  });
-  del_btn->set_on_click([&u, presets_table, refresh_presets]() mutable {
+  };
+  edit_btn->set_on_click(do_edit);
+  std::function<void()> do_del = [&u, presets_table, refresh_presets]() mutable {
     int idx = presets_table->selected_index;
     if (idx < 0 || idx >= (int)u.presets.size()) return;
     u.presets.erase(u.presets.begin() + idx);
     u.notice = save_presets(u.presets_path, u.presets) ? "presets saved" : "preset save failed";
     refresh_presets();
-  });
+  };
+  del_btn->set_on_click(do_del);  // no confirm, same as the 'x' key below
   auto queue_cb = [&u](int idx) {
     if (idx < 0 || idx >= (int)u.presets.size()) return;
     if (!file_exists(u.presets[idx].model_path)) {
@@ -178,9 +181,12 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
     u.runs->enqueue({u.presets[idx]});
     u.notice = "queued " + u.presets[idx].name;
   };
-  queue_btn->set_on_click([queue_cb, presets_table]() { queue_cb(presets_table->selected_index); });
+  std::function<void()> do_queue = [queue_cb, presets_table]() {
+    queue_cb(presets_table->selected_index);
+  };
+  queue_btn->set_on_click(do_queue);
   presets_table->on_submit = queue_cb;
-  start_btn->set_on_click([&u]() {
+  std::function<void()> do_start = [&u]() {
     std::vector<int> bad;
     if (u.runs->preflight(bad) > 0) {
       u.notice = "VRAM busy: llama-* pid(s):";
@@ -188,11 +194,31 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
       return;
     }
     u.notice = u.runs->start() ? "run started" : "start refused: queue empty or already running";
-  });
-  stop_btn->set_on_click([&u]() {
+  };
+  start_btn->set_on_click(do_start);
+  u.start_queue = do_start;  // the merged 's' key handler in main reuses this
+  std::function<void()> do_stop = [&u]() {
     u.runs->stop();
     u.notice = "stop requested";
-  });
+  };
+  stop_btn->set_on_click(do_stop);
+
+  // Runs-tab action keys: stand down while editing or confirming and on the other
+  // tabs; consume=false so letters still reach Input widgets in the editor.
+  // 's' (start) is registered in main: cpptui key bindings are last-wins per key,
+  // so start and the quit-confirm 's' share one handler that branches on u.confirming.
+  const bool eat = false;
+  auto runs_key = [&u](std::function<void()> fn) {
+    return [&u, fn]() {
+      if (u.editing || u.confirming || u.active_tab != 0) return;
+      fn();
+    };
+  };
+  app.register_key('a', runs_key(do_add), false, false, false, eat);
+  app.register_key('e', runs_key(do_edit), false, false, false, eat);
+  app.register_key('x', runs_key(do_del), false, false, false, eat);
+  app.register_key('n', runs_key(do_queue), false, false, false, eat);
+  app.register_key('t', runs_key(do_stop), false, false, false, eat);
 
   // right column: queue, live run, results
   auto right = std::make_shared<Vertical>();
@@ -202,14 +228,16 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   queue_table->columns = to_styled({"preset", "reps"});
   queue_table->min_height = 4;
   right->add(queue_table);
-  dequeue_btn->set_on_click([&u, queue_table]() {
+  std::function<void()> do_dequeue = [&u, queue_table]() {
     if (u.runs->status().active) {
       u.notice = "queue locked while a run is active";
       return;
     }
     u.notice = u.runs->remove_queued(queue_table->selected_index) ? "dequeued"
                                                                   : "dequeue: nothing selected";
-  });
+  };
+  dequeue_btn->set_on_click(do_dequeue);
+  app.register_key('u', runs_key(do_dequeue), false, false, false, eat);
   auto live = std::make_shared<Label>("idle");
   right->add(live);
   auto tps = std::make_shared<Sparkline>();
@@ -237,6 +265,21 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
       if (u.quitbar_label) u.quitbar_label->visible = false;
     }
     if (u.status_label) u.status_label->set_text(u.notice);
+    if (u.help_label) {  // refreshed off the timer: tracks tab switches and editor state
+      if (u.active_tab == 0)
+        u.help_label->set_text(
+            u.editing
+                ? "editing - Tab moves focus | letters type into fields | Enter presses the "
+                  "focused button | save/cancel close the editor"
+                : "1/2/3 tabs | a add | e edit | x del | n queue | u dequeue | s start | "
+                  "t stop | Enter queues | q quit");
+      else if (u.active_tab == 1)
+        u.help_label->set_text("1/2/3 tabs | q quit");
+      else
+        u.help_label->set_text(
+            "Enter launches the selected agent | agents are edited in agents.json (see README) "
+            "| q quit");
+    }
     u.runner->set_interval_ms(st.active ? 5000 : 1500);
     if (st.active)
       live->set_text("run: " + st.label + "  arm " + std::to_string(st.arm_index) + "/" +
@@ -358,7 +401,8 @@ std::shared_ptr<Widget> build_agents_tab(App &app, UiState &u) {
   (void)app;
   auto root = std::make_shared<Vertical>();
   root->add(std::make_shared<Label>(
-      "Agents - Enter launches fullscreen; exiting the agent returns here"));
+      "Agents - Enter launches fullscreen; exiting the agent returns here | add agents in "
+      "agents.json"));
   auto table = std::make_shared<TableScrollable>();
   table->columns = to_styled({"name", "command", "workdir"});
   for (const auto &a : u.agents) table->add_row({a.name, a.command, a.workdir});

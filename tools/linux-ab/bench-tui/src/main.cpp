@@ -15,6 +15,21 @@
 #include <unistd.h>
 using namespace cpptui;
 
+// Tabs without the vendored letter shortcuts: cpptui Tabs maps n/p/[/]/ to
+// next/prev tab whenever a tab button is focused, which collides with the
+// Runs-tab action keys (n = queue). Digit keys 1/2/3 and the mouse stay the
+// only tab switches, so the on-screen key help stays truthful.
+class BenchTabs : public Tabs {
+ public:
+  bool on_event(const Event &event) override {
+    if (event.is_key_event() && !event.ctrl && !event.alt &&
+        (event.key == 'n' || event.key == 'p' || event.key == '[' || event.key == ']' ||
+         event.key == '/'))
+      return false;
+    return Tabs::on_event(event);
+  }
+};
+
 // Runs a command on the real terminal while the TUI is down (Agents tab).
 // SIGINT is ignored in the parent for the duration: a Ctrl+C meant for the
 // agent must not kill the TUI. Ignored dispositions survive exec, so the
@@ -85,10 +100,11 @@ int main(int argc, char **argv) {
   for (;;) {
     u.editing = false;     // a rebuild must not inherit a stuck modal state
     u.confirming = false;
+    u.active_tab = 0;      // a fresh Tabs always starts on Runs
     App app;
     Theme::set_theme(Theme::Dark());
 
-    // banner/quitbar/status live outside the tabs so they show on every tab;
+    // banner/quitbar/help/status live outside the tabs so they show on every tab;
     // the tab timers reach them through UiState
     auto banner = std::make_shared<Label>("MEASUREMENT IN PROGRESS - quiet polling (5 s)");
     banner->visible = false;
@@ -97,18 +113,22 @@ int main(int argc, char **argv) {
         "run active - [s] stop run and quit   [d] detach and quit   [c] cancel");
     quitbar->visible = false;
     u.quitbar_label = quitbar;
+    auto help = std::make_shared<Label>("1/2/3 tabs | q quit");
+    u.help_label = help;
     auto status = std::make_shared<Label>(u.notice);
     u.status_label = status;
 
-    auto tabs = std::make_shared<Tabs>();
+    auto tabs = std::make_shared<BenchTabs>();
     tabs->add_tab("Runs", build_runs_tab(app, u));
     tabs->add_tab("System", build_system_tab(app, u));
     tabs->add_tab("Agents", build_agents_tab(app, u));
+    tabs->on_change = [&u](int i) { u.active_tab = i; };
 
     auto root = std::make_shared<Vertical>();
     root->add(banner);
     root->add(tabs);
     root->add(quitbar);
+    root->add(help);
     root->add(status);
 
     const bool eat = false;  // consume=false: letters must reach Input widgets when editing
@@ -126,13 +146,19 @@ int main(int argc, char **argv) {
                        }
                      },
                      false, false, false, eat);
+    // 's' is shared: cpptui key bindings are last-wins per key, so one handler
+    // branches on state - quit-confirm stop+quit while confirming, Runs-tab
+    // start otherwise (u.start_queue is set by build_runs_tab).
     app.register_key('s',
                      [&u] {
                        if (u.editing) return;
-                       if (!u.confirming) return;
-                       u.runs->stop();
-                       u.confirming = false;
-                       App::quit();
+                       if (u.confirming) {
+                         u.runs->stop();
+                         u.confirming = false;
+                         App::quit();
+                         return;
+                       }
+                       if (u.active_tab == 0 && u.start_queue) u.start_queue();
                      },
                      false, false, false, eat);
     app.register_key('d',
