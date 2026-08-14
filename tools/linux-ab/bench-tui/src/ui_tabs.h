@@ -11,6 +11,7 @@
 
 namespace cpptui {
 class App;
+class Label;
 class Widget;
 }  // namespace cpptui
 
@@ -23,6 +24,12 @@ struct UiState {
   std::vector<AgentSpec> agents;
   std::string models_dir;
   bool editing = false;               // preset editor open: global letter keys stand down
+  bool confirming = false;            // quit-confirm bar open (run active)
+  // Modal/status rows live in main (outside the tabs) so every tab sees them;
+  // the widgets are rebuilt with each App, so the pointers are re-assigned per loop.
+  std::shared_ptr<cpptui::Label> banner_label;   // MEASUREMENT IN PROGRESS
+  std::shared_ptr<cpptui::Label> quitbar_label;  // quit-confirm row
+  std::shared_ptr<cpptui::Label> status_label;   // notice line, rendered every timer tick
   std::string pending_cmd, pending_dir;
   int last_agent_exit = -1;
   std::string notice;

@@ -5,6 +5,7 @@
 #include "ui_tabs.h"
 #include "cpptui.hpp"
 #include <cerrno>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -15,17 +16,30 @@
 using namespace cpptui;
 
 // Runs a command on the real terminal while the TUI is down (Agents tab).
+// SIGINT is ignored in the parent for the duration: a Ctrl+C meant for the
+// agent must not kill the TUI. Ignored dispositions survive exec, so the
+// child resets SIGINT to SIG_DFL before launching the shell.
 static int run_on_terminal(const std::string &cmd, const std::string &dir) {
+  struct sigaction sa {}, old_sa {};
+  sa.sa_handler = SIG_IGN;
+  sigaction(SIGINT, &sa, &old_sa);
   pid_t pid = fork();
   if (pid == 0) {
+    signal(SIGINT, SIG_DFL);
     if (!dir.empty() && chdir(dir.c_str()) != 0) _exit(127);  // bad workdir = launch failure
     execl("/bin/sh", "sh", "-c", cmd.c_str(), (char *)nullptr);
     _exit(127);
   }
-  if (pid < 0) return -1;
-  int st = 0;
-  while (waitpid(pid, &st, 0) < 0 && errno == EINTR) {
+  if (pid < 0) {
+    sigaction(SIGINT, &old_sa, nullptr);
+    return -1;
   }
+  int st = 0;
+  pid_t w;
+  while ((w = waitpid(pid, &st, 0)) < 0 && errno == EINTR) {
+  }
+  sigaction(SIGINT, &old_sa, nullptr);
+  if (w < 0) return -1;  // waitpid failed: st holds no valid status
   if (WIFEXITED(st)) return WEXITSTATUS(st);
   if (WIFSIGNALED(st)) return -WTERMSIG(st);
   return -1;
@@ -73,60 +87,72 @@ int main(int argc, char **argv) {
   u.runner = &runner;
 
   for (;;) {
+    u.editing = false;     // a rebuild must not inherit a stuck modal state
+    u.confirming = false;
     App app;
     Theme::set_theme(Theme::Dark());
+
+    // banner/quitbar/status live outside the tabs so they show on every tab;
+    // the tab timers reach them through UiState
+    auto banner = std::make_shared<Label>("MEASUREMENT IN PROGRESS - quiet polling (5 s)");
+    banner->visible = false;
+    u.banner_label = banner;
+    auto quitbar = std::make_shared<Label>(
+        "run active - [s] stop run and quit   [d] detach and quit   [c] cancel");
+    quitbar->visible = false;
+    u.quitbar_label = quitbar;
+    auto status = std::make_shared<Label>(u.notice);
+    u.status_label = status;
+
     auto tabs = std::make_shared<Tabs>();
     tabs->add_tab("Runs", build_runs_tab(app, u));
     tabs->add_tab("System", build_system_tab(app, u));
     tabs->add_tab("Agents", build_agents_tab(app, u));
 
-    auto quitbar = std::make_shared<Label>(
-        "run active - [s] stop run and quit   [d] detach and quit   [c] cancel");
-    quitbar->visible = false;
-    auto status = std::make_shared<Label>(u.notice);
-    u.notice.clear();
     auto root = std::make_shared<Vertical>();
+    root->add(banner);
     root->add(tabs);
     root->add(quitbar);
     root->add(status);
 
-    auto confirming = std::make_shared<bool>(false);
     const bool eat = false;  // consume=false: letters must reach Input widgets when editing
     app.register_key('1', [&u, tabs] { if (!u.editing) tabs->select_tab(0); }, false, false, false, eat);
     app.register_key('2', [&u, tabs] { if (!u.editing) tabs->select_tab(1); }, false, false, false, eat);
     app.register_key('3', [&u, tabs] { if (!u.editing) tabs->select_tab(2); }, false, false, false, eat);
     app.register_key('q',
-                     [&u, quitbar, confirming] {
+                     [&u] {
                        if (u.editing) return;
                        if (u.runs->status().active) {
-                         *confirming = true;
-                         quitbar->visible = true;
+                         u.confirming = true;
+                         if (u.quitbar_label) u.quitbar_label->visible = true;
                        } else {
                          App::quit();
                        }
                      },
                      false, false, false, eat);
     app.register_key('s',
-                     [&u, confirming] {
-                       if (!*confirming) return;
+                     [&u] {
+                       if (u.editing) return;
+                       if (!u.confirming) return;
                        u.runs->stop();
-                       *confirming = false;
+                       u.confirming = false;
                        App::quit();
                      },
                      false, false, false, eat);
     app.register_key('d',
-                     [&u, confirming] {
-                       if (!*confirming) return;
+                     [&u] {
+                       if (u.editing) return;
+                       if (!u.confirming) return;
                        u.runs->detach();
-                       *confirming = false;
+                       u.confirming = false;
                        App::quit();
                      },
                      false, false, false, eat);
     app.register_key('c',
-                     [&u, quitbar, confirming] {
-                       if (u.editing || !*confirming) return;
-                       *confirming = false;
-                       quitbar->visible = false;
+                     [&u] {
+                       if (u.editing || !u.confirming) return;
+                       u.confirming = false;
+                       if (u.quitbar_label) u.quitbar_label->visible = false;
                      },
                      false, false, false, eat);
 

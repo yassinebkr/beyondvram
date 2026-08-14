@@ -28,10 +28,6 @@ std::string join_last(const std::vector<std::string> &v, size_t n) {
 std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   auto root = std::make_shared<Vertical>();
 
-  auto banner = std::make_shared<Label>("MEASUREMENT IN PROGRESS - quiet polling (5 s)");
-  banner->visible = false;
-  root->add(banner);
-
   auto body = std::make_shared<Horizontal>();
   root->add(body);
 
@@ -57,9 +53,11 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   auto edit_btn = std::make_shared<Button>("edit");
   auto del_btn = std::make_shared<Button>("del");
   auto queue_btn = std::make_shared<Button>("queue");
+  auto dequeue_btn = std::make_shared<Button>("dequeue");
   auto start_btn = std::make_shared<Button>("start");
   auto stop_btn = std::make_shared<Button>("stop");
-  for (auto b : {add_btn, edit_btn, del_btn, queue_btn, start_btn, stop_btn}) actions->add(b);
+  for (auto b : {add_btn, edit_btn, del_btn, queue_btn, dequeue_btn, start_btn, stop_btn})
+    actions->add(b);
   left->add(actions);
 
   // editor panel (hidden unless add/edit)
@@ -73,9 +71,11 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   auto ed_args = std::make_shared<Input>();
   ed_args->placeholder = "-m <model> -ngl 48 --n-cpu-moe 33 -p 128 -n 32 -r 5 -o json";
   auto ed_reps = std::make_shared<NumberInput>(1);
+  ed_reps->min_value = 1;
+  ed_reps->max_value = 100000;  // default max 100 would silently rewrite larger saved repeats
   editor->add(std::make_shared<Label>("name:"));
   editor->add(ed_name);
-  editor->add(std::make_shared<Label>("model (from --models-dir):"));
+  editor->add(std::make_shared<Label>("model (recorded as model_path; args must carry the matching -m):"));
   editor->add(ed_model);
   editor->add(std::make_shared<Label>("binary:"));
   editor->add(ed_binary);
@@ -118,12 +118,15 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
       ed_args->set_value("");
       ed_reps->set_value(1);
     }
+    // the editor and the quit-confirm bar never coexist
+    u.confirming = false;
+    if (u.quitbar_label) u.quitbar_label->visible = false;
     editor->visible = true;
     u.editing = true;
   };
 
   save_btn->set_on_click([&u, editor, ed_name, ed_model, ed_binary, ed_args, ed_reps, editing_idx,
-                          model_opts, refresh_presets]() mutable {
+                          model_opts, presets_table, refresh_presets]() mutable {
     Preset p;
     p.name = ed_name->get_value();
     int mi = ed_model->selected_index;
@@ -147,10 +150,12 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
     refresh_presets();
     editor->visible = false;
     u.editing = false;
+    presets_table->set_focus(true);
   });
-  cancel_btn->set_on_click([&u, editor]() {
+  cancel_btn->set_on_click([&u, editor, presets_table]() {
     editor->visible = false;
     u.editing = false;
+    presets_table->set_focus(true);
   });
 
   add_btn->set_on_click([open_editor]() mutable { open_editor(-1); });
@@ -197,6 +202,14 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   queue_table->columns = to_styled({"preset", "reps"});
   queue_table->min_height = 4;
   right->add(queue_table);
+  dequeue_btn->set_on_click([&u, queue_table]() {
+    if (u.runs->status().active) {
+      u.notice = "queue locked while a run is active";
+      return;
+    }
+    u.notice = u.runs->remove_queued(queue_table->selected_index) ? "dequeued"
+                                                                  : "dequeue: nothing selected";
+  });
   auto live = std::make_shared<Label>("idle");
   right->add(live);
   auto tps = std::make_shared<Sparkline>();
@@ -216,9 +229,14 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
 
   auto last_qs = std::make_shared<std::string>();
   auto last_n = std::make_shared<size_t>((size_t)-1);
-  app.add_timer(500, [&app, &u, banner, live, tps, tail, results, queue_table, last_qs, last_n]() {
+  app.add_timer(500, [&app, &u, live, tps, tail, results, queue_table, last_qs, last_n]() {
     RunStatus st = u.runs->status();
-    banner->visible = st.active;
+    if (u.banner_label) u.banner_label->visible = st.active;
+    if (!st.active && u.confirming) {  // run ended on its own: drop the stale confirm bar
+      u.confirming = false;
+      if (u.quitbar_label) u.quitbar_label->visible = false;
+    }
+    if (u.status_label) u.status_label->set_text(u.notice);
     u.runner->set_interval_ms(st.active ? 5000 : 1500);
     if (st.active)
       live->set_text("run: " + st.label + "  arm " + std::to_string(st.arm_index) + "/" +

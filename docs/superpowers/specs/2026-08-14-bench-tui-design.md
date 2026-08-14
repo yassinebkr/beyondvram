@@ -85,8 +85,8 @@ tools/linux-ab/bench-tui/
   the full flag string exactly as passed on the command line.
 - **Preset editor**: form built from cpp-tui Input/NumberInput/Dropdown widgets; the model field offers a
   dropdown populated by scanning a configured models directory for `*.gguf`. Saves back to `presets.json`.
-- **Queue**: add selected preset (with repeat count), reorder/remove while idle, start/stop. One run at a
-  time — concurrent runs are refused (single GPU).
+- **Queue**: add selected preset (with repeat count), remove while idle, start/stop. One run at a
+  time — concurrent runs are refused (single GPU). Reordering is out of scope for v1.
 - **Live view**: current preset and arm index, elapsed time, ETA estimated from completed repetitions of
   the same preset, tok/s sparkline fed by each completed test result, scrollable log tail of the active
   child.
@@ -132,6 +132,7 @@ tools/linux-ab/bench-tui/
    `MEASUREMENT IN PROGRESS` banner is shown.
 2. No second run can start while one is active; quitting the TUI during a run requires explicit
    confirmation and never kills the child implicitly — detach or terminate is an explicit choice.
+   Ctrl+C quits immediately without the confirm bar; an active run is detached, never killed.
 3. Telemetry is read-only; the app never calls any mutable NVML/nvidia-smi path.
 4. Runs are launched with the same pinned b10355 binaries and the same flag conventions as the existing
    scripts, so TUI-launched results remain comparable with every prior recorded run.
