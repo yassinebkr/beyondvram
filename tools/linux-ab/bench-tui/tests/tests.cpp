@@ -1,5 +1,6 @@
 // bench-tui unit tests. Single-file CHECK runner; TEST blocks self-register.
 // Exit code is 0 when nothing failed, 1 otherwise.
+#include "collectors.h"
 #include "config.h"
 #include "fsutil.h"
 #include "json.h"
@@ -205,4 +206,71 @@ TEST(config_agents) {
   std::vector<AgentSpec> out;
   CHECK(load_agents(path, out));
   CHECK(out.size() == 3 && out[2].workdir == "/repo");
+}
+
+TEST(parse_meminfo_fixture) {
+  MemSample m;
+  CHECK(parse_meminfo("MemTotal:       65536 kB\nMemAvailable:    32768 kB\nSwapTotal:        2048 kB\nSwapFree:         1024 kB\n", m));
+  CHECK(m.total_mb == 64 && m.avail_mb == 32 && m.swap_total_mb == 2 && m.swap_free_mb == 1);
+}
+
+TEST(parse_cpu_times_fixture) {
+  std::vector<std::pair<long long, long long>> v;
+  CHECK(parse_cpu_times("cpu  100 0 100 800 0 0 0 0 0 0\ncpu0 50 0 50 400 0 0 0 0 0 0\ncpu1 25 0 25 350 0 0 0 0 0 0\n", v));
+  CHECK(v.size() == 2);
+  CHECK(v[0].first == 100 && v[0].second == 500);
+  CHECK(v[1].first == 50 && v[1].second == 400);
+}
+
+TEST(parse_diskstats_fixture) {
+  std::map<std::string, std::pair<unsigned long long, unsigned long long>> m;
+  CHECK(parse_diskstats(
+      "   8       0 sda 100 0 2048 0 50 0 1024 0 0 0 0 0 0 0\n"
+      "   7       0 loop0 5 0 10 0 0 0 0 0 0 0 0 0 0 0\n"
+      " 259       0 nvme0n1 200 0 8192 0 100 0 4096 0 0 0 0 0 0 0\n", m));
+  CHECK(m.count("loop0") == 0);
+  CHECK(m["sda"].first == 2048 && m["sda"].second == 1024);
+  CHECK(m["nvme0n1"].first == 8192 && m["nvme0n1"].second == 4096);
+}
+
+TEST(parse_smi_csv_fixture) {
+  GpuSample g;
+  CHECK(parse_nvidia_smi_csv("12, 2048, 8191, 55, 98.5\n", g));
+  CHECK(g.available && g.util_pct == 12 && g.vram_used_mb == 2048 && g.vram_total_mb == 8191);
+  CHECK(g.temp_c == 55 && g.power_w == 99);  // 98.5 rounds to 99
+  CHECK(g.source == "nvidia-smi");
+}
+
+TEST(live_samplers_do_not_crash) {
+  CpuSampler cs;
+  cs.sample();
+  usleep(60000);
+  CpuSample c = cs.sample();
+  CHECK(!c.per_core.empty());
+  for (float f : c.per_core) CHECK(f >= 0.0f && f <= 100.0f);
+  MemSample m = sample_mem();
+  CHECK(m.total_mb > 0 && m.avail_mb >= 0);
+  GpuSampler gs;
+  GpuSample g1 = gs.sample();
+  if (g1.available) CHECK(g1.vram_total_mb > 0);
+}
+
+TEST(collector_runner_fills_state) {
+  CollectorState st;
+  {
+    CollectorRunner r(st);
+    r.set_interval_ms(50);
+    r.start();
+    usleep(300000);
+    r.stop();
+  }
+  CollectorSnapshot s = snapshot_from(st);
+  CHECK(s.mem.total_mb > 0);
+  CHECK(!s.ram_hist.empty() && s.ram_hist.size() <= 120);
+}
+
+TEST(push_hist_caps) {
+  std::deque<float> h;
+  for (int i = 0; i < 130; ++i) push_hist(h, (float)i);
+  CHECK(h.size() == 120 && h.front() == 10.0f);
 }
