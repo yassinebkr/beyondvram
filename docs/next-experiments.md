@@ -79,7 +79,7 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 
 **Decision rule.** ≥10% tg advantage on identical configs justifies the dual-boot as the bench OS for the 64 GiB / gpt-oss-120b phase; below that, native Windows stays the reference host. The RAM-overclock lever (BIOS-level, OS-independent) folds into whichever OS wins. A custom image or installer is out of scope until the tax is measured.
 
-## 7 — Mixed-precision follow-ons: wider bands and imatrix assist (IN PROGRESS — 7a PASS 2026-08-14)
+## 7 — Mixed-precision follow-ons (DONE 2026-08-14: plateau at mid40 — 1.272×, +0.39% PPL; reference stays mid24)
 
 **Question.** Experiment 4 passed at mid24-Q3_K (1.228× tg, +0.40% PPL, 0.90 roofline conversion). Two free levers remain: band width (more Q3_K layers = fewer bytes per token) and imatrix-assisted quantization (better quality at equal bytes). How wide can the Q3_K band get before the quality gate fails?
 
@@ -92,6 +92,10 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 **Decision rule.** Ship the widest band that passes both gates (PPL within a few % of the Q4_K_M anchor AND tg ≥1.15× over the stock anchor; a new band must additionally beat the mid24-Q3_K reference by ≥10% to justify switching). Everything learned transfers to gpt-oss-120b (MXFP4 bands) once the RAM lands.
 
 **7a measurement — mid32-Q3_K (2026-08-14).** Quality gate: **PASS** — 23.88 ± 1.66 vs original 23.78 (+0.43%; mid24 was +0.40% — widening the band costs almost nothing in quality). Speed gate (`mixed-precision-speed-mid32.json`): **PASS** — sweep peaks at K=28 (tg 42.77; K=24 32.75, K=44 32.67), interleaved 3-round A/B at (48,28) vs stock at (48,33): **43.79 vs 35.27 = 1.242×**. Versus the mid24 reference (1.228×) the wider band adds +1.1% relative — below the 10% switch threshold, so the mid24-Q3_K file stays the reference configuration for now. Roofline conversion slipped from 0.90 (mid24) to ~0.83 (mid32 vs its ~1.5× roofline): the wider band's capacity gain is partly eaten by the placement optimum moving to K=28. First HDD-load wall time after the models/ move to the HDD is ~95–113 s per cold arm (warm runs ~11 s); measured tg/pp are unaffected — the weights are RAM-resident by the time measurement starts. 7b (mid40) proceeds on the strength of the flat quality curve.
+
+**7b measurement — mid40-Q3_K (2026-08-14).** Quality gate: **PASS** — 23.87 ± 1.66 (+0.39%; the quality curve is flat across 24→40 quantized layers). Speed gate (`mixed-precision-speed-mid40.json`): **PASS** — sweep peak K=28 tg 46.12; interleaved 3-round A/B at (48,28) vs stock at (48,33): **45.74 vs 35.97 = 1.272×**. Relative gain over the mid24 reference: +3.6% — below the 10% switch threshold.
+
+**Verdict: DONE — the band technique plateaus at mid40.** Three bands pass both gates (1.228/1.242/1.272×; +0.40/+0.43/+0.39% PPL); each widening buys ~1–4% relative as roofline conversion slips (0.90 → 0.83 → ~0.75): past mid24 the pace is set by the placement optimum and CPU-side Q3_K GEMV throughput, not by bytes alone. The mid24-Q3_K file stays the reference configuration per the pre-registered switch rule; mid40 is the better raw performer (45.7 tok/s, 13.5 GiB) where the extra 3.6% and the smaller file matter. 7c (imatrix assist) and 7d (per-matrix-kind) were fallbacks conditional on a quality failure that never occurred — recorded as not run, not dropped. The technique transfers to gpt-oss-120b (MXFP4 bands) when the 64 GiB tier exists.
 
 ## 8 — Teacher-model distillation and routing-consistency training (SCOPING — license gate first)
 

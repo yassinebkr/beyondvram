@@ -18,6 +18,16 @@ The system partition on the NVMe is shrunk by ~60 GB (admin PowerShell):
 Resize-Partition -DriveLetter <system-drive> -Size <target>
 ```
 
+If the resize fails with `StorageWMI 4097` ("shrink size is too big"), immovable
+files near the partition end cap the shrink below 60 GB. Query the real ceiling
+with `Get-PartitionSupportedSize -DriveLetter <system-drive>` and shrink to that SizeMax, or
+read the cap directly in diskmgmt.msc → Shrink Volume. Persistent caps
+usually come from the pagefile or hibernate file near the partition end:
+`powercfg /h off` plus temporarily setting no paging file, reboot, retry, then
+restore. Fallback: carve the Linux partition from the data HDD instead — first-load
+wall time per cold bench arm rises, steady-state tok/s is unaffected (weights
+are RAM-resident by the time measurement starts).
+
 Debian installs into the freed space: guided partitioning, use largest
 continuous free space, all files in one partition, no swap (64 GiB RAM;
 a swap partition would only tempt paging during benches).

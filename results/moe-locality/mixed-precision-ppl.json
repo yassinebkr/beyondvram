@@ -38,6 +38,13 @@
    "wall_s": 98.4,
    "ppl": 23.8832,
    "ppl_stderr": 1.66028
+  },
+  {
+   "model": "variant-mid40-q3k",
+   "rc": 0,
+   "wall_s": 16.1,
+   "ppl": 23.8731,
+   "ppl_stderr": 1.65739
   }
  ]
 }
