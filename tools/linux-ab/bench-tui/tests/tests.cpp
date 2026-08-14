@@ -3,6 +3,7 @@
 #include "fsutil.h"
 #include "json.h"
 #include <cstdio>
+#include <cstdlib>
 #include <deque>
 #include <map>
 #include <string>
@@ -161,4 +162,11 @@ TEST(fsutil_labels_time) {
   CHECK(sanitize_label("") == "run");
   CHECK(utc_now().size() == 20 && utc_now().back() == 'Z');
   CHECK(utc_stamp().size() == 16);
+}
+
+TEST(fsutil_ensure_dir_rejects_file) {
+  std::string base = make_tmp_dir();
+  write_file(base + "/f", "x");
+  CHECK(!ensure_dir(base + "/f"));
+  CHECK(ensure_dir(base + "/subdir"));
 }

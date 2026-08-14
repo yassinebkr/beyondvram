@@ -10,15 +10,22 @@
 
 bool file_exists(const std::string &path) { return access(path.c_str(), F_OK) == 0; }
 
+static bool mkdir_one(const std::string &p) {
+  if (mkdir(p.c_str(), 0755) == 0) return true;
+  if (errno != EEXIST) return false;
+  // EEXIST only counts when the existing path is a directory.
+  struct stat st;
+  return stat(p.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
+}
+
 bool ensure_dir(const std::string &path) {
   if (path.empty()) return false;
   std::string cur;
   for (char c : path) {
     cur += c;
-    if (c == '/' && cur.size() > 1 && mkdir(cur.c_str(), 0755) != 0 && errno != EEXIST)
-      return false;
+    if (c == '/' && cur.size() > 1 && !mkdir_one(cur)) return false;
   }
-  return mkdir(path.c_str(), 0755) == 0 || errno == EEXIST;
+  return mkdir_one(path);
 }
 
 std::string slurp(const std::string &path, bool &ok) {
