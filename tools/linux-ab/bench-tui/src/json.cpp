@@ -52,8 +52,13 @@ std::string json_stringify(const JsonValue &v) {
     case JsonValue::Type::Bool: return v.b ? "true" : "false";
     case JsonValue::Type::Int: return std::to_string(v.i);
     case JsonValue::Type::Double: {
+      // Shortest round-trip form: the first %.Ng (N = 6..17) that strtod reads
+      // back exactly; %.17g always qualifies for binary64.
       char b[32];
-      std::snprintf(b, sizeof b, "%.17g", v.d);
+      for (int prec = 6; prec <= 17; ++prec) {
+        std::snprintf(b, sizeof b, "%.*g", prec, v.d);
+        if (std::strtod(b, nullptr) == v.d) break;
+      }
       return b;
     }
     case JsonValue::Type::Str: return "\"" + json_escape(v.s) + "\"";

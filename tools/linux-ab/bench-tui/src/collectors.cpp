@@ -171,8 +171,12 @@ GpuSampler::GpuSampler() {
     p_power_ = dlsym(lib_, "nvmlDeviceGetPowerUsage");
     nvmlGetHandle_t p_handle = (nvmlGetHandle_t)dlsym(lib_, "nvmlDeviceGetHandleByIndex_v2");
     if (p_init && p_shutdown_ && p_util_ && p_mem_ && p_temp_ && p_power_ && p_handle &&
-        p_init() == 0 && p_handle(0, &dev_) == 0)
-      nvml_ok_ = true;
+        p_init() == 0) {
+      if (p_handle(0, &dev_) == 0)
+        nvml_ok_ = true;
+      else
+        ((nvmlShutdown_t)p_shutdown_)();  // a successful init is shut down on every exit path
+    }
   }
   if (!nvml_ok_)
     smi_available_ = (std::system("command -v nvidia-smi >/dev/null 2>&1") == 0);
@@ -265,8 +269,29 @@ void CollectorRunner::loop() {
       }
       if (m.total_mb > 0)
         push_hist(st_.ram_hist, 100.0f * (m.total_mb - m.avail_mb) / m.total_mb);
+      // Skip partitions when summing: a whole-disk row (sda, nvme0n1) already includes
+      // its partitions (sda1, nvme0n1p1); a name is a partition when it equals another
+      // listed disk plus a suffix (bare digits, or 'p'+digits for nvme/mmcblk).
       double kbs = 0;
-      for (const auto &ds : st_.disks) kbs += ds.read_kbs + ds.write_kbs;
+      for (const auto &ds : st_.disks) {
+        bool partition = false;
+        for (const auto &whole : st_.disks) {
+          const std::string &b = whole.device;
+          if (b.size() >= ds.device.size() || ds.device.compare(0, b.size(), b) != 0) continue;
+          std::string suf = ds.device.substr(b.size());
+          if (b.rfind("nvme", 0) == 0 || b.rfind("mmcblk", 0) == 0) {
+            if (suf[0] != 'p') continue;  // nvme0n12 is a disk, not a partition of nvme0n1
+            suf.erase(0, 1);
+          }
+          if (!suf.empty() &&
+              std::all_of(suf.begin(), suf.end(),
+                          [](char c) { return std::isdigit((unsigned char)c); })) {
+            partition = true;
+            break;
+          }
+        }
+        if (!partition) kbs += ds.read_kbs + ds.write_kbs;
+      }
       push_hist(st_.disk_hist, (float)(kbs / 1024.0));
     }
     int waited = 0;

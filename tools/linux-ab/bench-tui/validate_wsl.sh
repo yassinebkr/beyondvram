@@ -77,6 +77,15 @@ for i in 1 2 3; do run_rep bare "$i"; done
   "$BUILD/bench-tui --config-dir $V/cfg --out-dir $V/runs --bin-dir $LLAMA --models-dir $HOME/models" \
   "$V/idle.typescript" >/dev/null &
 TUI_PID=$!
+cleanup() {  # EXIT trap: no-op after normal teardown (PIDs dead, pidfile gone)
+  local rc=$?  # preserve the pending exit status; the trap must never mask a FAIL
+  kill "$TUI_PID" 2>/dev/null
+  [ ! -f "$V/.idle-writer.pid" ] || kill "$(cat "$V/.idle-writer.pid")" 2>/dev/null
+  wait "$TUI_PID" 2>/dev/null
+  rm -f "$V/.idle-writer.pid"
+  exit "$rc"
+}
+trap cleanup EXIT
 sleep 2
 kill -0 "$TUI_PID" 2>/dev/null || fail "idle TUI not running"
 for i in 1 2 3; do run_rep tui "$i"; done

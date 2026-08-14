@@ -31,7 +31,7 @@ struct UiState {
   std::shared_ptr<cpptui::Label> quitbar_label;  // quit-confirm row
   std::shared_ptr<cpptui::Label> status_label;   // notice line, rendered every timer tick
   std::string pending_cmd, pending_dir;
-  int last_agent_exit = -1;
+  std::string last_agent_exit_text;  // "last agent exit: <rc>"; empty until the first agent exits
   std::string notice;
 };
 

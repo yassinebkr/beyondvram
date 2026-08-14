@@ -20,7 +20,7 @@ struct RunRecord {
   std::string utc_start, utc_end, label, model_path, binary, args;
   std::string log_path, output_json_path, note;  // note: "", "stopped", "detached", spawn errors
   int exit_code = -1;                            // negative: -signal; -1 also used for detached
-  double tg_ts = -1, pp_ts = -1;                 // <0 = absent
+  double tg_ts = -1, pp_ts = -1;                 // <0 = absent (null in runs.jsonl)
 };
 
 struct RunStatus {
@@ -34,7 +34,7 @@ struct RunStatus {
 class RunManager {
 public:
   RunManager(std::string out_dir, std::string bin_dir);
-  ~RunManager();  // joins the worker; never kills an active child (detach semantics)
+  ~RunManager();  // joins the worker; detaches an active child, but completes an in-flight stop()
   void enqueue(QueuedRun r);
   bool remove_queued(size_t idx);
   bool start();   // false when already running or the queue is empty; re-joins a finished worker

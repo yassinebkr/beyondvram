@@ -446,3 +446,107 @@ TEST(format_units) {
   CHECK(format_duration(3600) == "1:00:00");
   CHECK(format_duration(0) == "0:00");
 }
+
+TEST(config_ensure_writes_defaults_when_missing) {
+  std::string base = make_tmp_dir();
+  std::string agents_path = base + "/agents.json";
+  std::vector<AgentSpec> agents;
+  CHECK(ensure_agents_config(agents_path, "/repo", agents));
+  CHECK(agents.size() == 3);  // shipped defaults in memory
+  bool ok = false;
+  JsonValue v;
+  CHECK(json_parse(slurp(agents_path, ok), v) && v.arr.size() == 3);  // and written to disk
+  std::string presets_path = base + "/presets.json";
+  std::vector<Preset> presets;
+  CHECK(ensure_presets_config(presets_path, presets));
+  CHECK(presets.empty());
+  CHECK(file_exists(presets_path));  // empty defaults written
+}
+
+TEST(config_ensure_preserves_malformed) {
+  std::string base = make_tmp_dir();
+  std::string agents_path = base + "/agents.json";
+  CHECK(write_file(agents_path, "{not json"));
+  std::vector<AgentSpec> agents;
+  CHECK(!ensure_agents_config(agents_path, "/repo", agents));  // malformed -> false
+  CHECK(agents.size() == 3);                                   // defaults in memory
+  bool ok = false;
+  CHECK(slurp(agents_path, ok) == "{not json");                // preserved byte-for-byte
+  std::string presets_path = base + "/presets.json";
+  CHECK(write_file(presets_path, "[{"));
+  std::vector<Preset> presets;
+  CHECK(!ensure_presets_config(presets_path, presets));
+  CHECK(presets.empty());
+  CHECK(slurp(presets_path, ok) == "[{");                      // preserved byte-for-byte
+}
+
+TEST(json_double_shortest_roundtrip) {
+  // 44.47-class value: prints short, not as 44.469999999999999 noise
+  std::string s = json_stringify(JsonValue::make_double(44.47));
+  CHECK(s == "44.47");
+  JsonValue v;
+  CHECK(json_parse(s, v) && v.type == JsonValue::Type::Double && v.d == 44.47);
+  double third = 1.0 / 3.0;  // needs full precision and still round-trips
+  std::string ts = json_stringify(JsonValue::make_double(third));
+  CHECK(std::strtod(ts.c_str(), nullptr) == third);
+}
+
+TEST(run_manager_stop_escalates_to_sigkill) {
+  std::string base = make_tmp_dir();
+  std::string script = base + "/stubborn.sh";
+  CHECK(write_file(script, "trap '' TERM\nexec sleep 30\n"));  // SIGTERM-ignoring child
+  RunManager rm(base, "/bin");
+  Preset p;
+  p.name = "stubborn";
+  p.binary = "/bin/sh";
+  p.args = script;  // single token: split_args needs no quoting
+  p.repeats = 1;
+  rm.enqueue({p});
+  CHECK(rm.start());
+  for (int i = 0; i < 100 && rm.active_pid() <= 0; ++i) usleep(20000);
+  pid_t pid = (pid_t)rm.active_pid();
+  CHECK(pid > 0);
+  rm.stop();
+  for (int i = 0; i < 200 && rm.records().empty(); ++i) usleep(50000);  // ~5 s grace + SIGKILL
+  auto recs = rm.records();
+  CHECK(recs.size() == 1);
+  CHECK(recs[0].exit_code == -9);  // SIGKILL after the grace window
+  CHECK(recs[0].note == "stopped");
+  CHECK(kill(pid, 0) != 0);        // dead and reaped, no zombie
+  bool ok = false;
+  std::string line = slurp(base + "/runs.jsonl", ok);
+  JsonValue v;
+  CHECK(ok && json_parse(line, v));
+  CHECK(v.find("tg_ts") && v.find("tg_ts")->type == JsonValue::Type::Null);  // no bench JSON
+  CHECK(v.find("pp_ts") && v.find("pp_ts")->type == JsonValue::Type::Null);
+}
+
+TEST(run_manager_destructor_completes_stop) {
+  // Regression: an explicit stop in flight must survive manager destruction;
+  // the destructor joins the worker, which finishes SIGTERM -> 5 s -> SIGKILL.
+  std::string base = make_tmp_dir();
+  std::string script = base + "/stubborn.sh";
+  CHECK(write_file(script, "trap '' TERM\nexec sleep 30\n"));
+  pid_t pid = -1;
+  {
+    RunManager rm(base, "/bin");
+    Preset p;
+    p.name = "stubborn";
+    p.binary = "/bin/sh";
+    p.args = script;
+    p.repeats = 1;
+    rm.enqueue({p});
+    CHECK(rm.start());
+    for (int i = 0; i < 100 && rm.active_pid() <= 0; ++i) usleep(20000);
+    pid = (pid_t)rm.active_pid();
+    CHECK(pid > 0);
+    rm.stop();
+  }  // ~RunManager: term_req_ set, so no detach; the worker completes the stop
+  CHECK(kill(pid, 0) != 0);  // SIGKILLed and reaped, no zombie
+  bool ok = false;
+  std::string line = slurp(base + "/runs.jsonl", ok);
+  JsonValue v;
+  CHECK(ok && json_parse(line, v));
+  CHECK(v.find("note") && v.find("note")->s == "stopped");
+  CHECK(v.find("exit_code") && v.find("exit_code")->i == -9);
+}

@@ -72,7 +72,7 @@ std::shared_ptr<Widget> build_runs_tab(App &app, UiState &u) {
   ed_args->placeholder = "-m <model> -ngl 48 --n-cpu-moe 33 -p 128 -n 32 -r 5 -o json";
   auto ed_reps = std::make_shared<NumberInput>(1);
   ed_reps->min_value = 1;
-  ed_reps->max_value = 100000;  // default max 100 would silently rewrite larger saved repeats
+  ed_reps->max_value = 1000000;  // matches the config.cpp loader clamp; the default max 100 would silently rewrite larger saved repeats
   editor->add(std::make_shared<Label>("name:"));
   editor->add(ed_name);
   editor->add(std::make_shared<Label>("model (recorded as model_path; args must carry the matching -m):"));
@@ -364,8 +364,7 @@ std::shared_ptr<Widget> build_agents_tab(App &app, UiState &u) {
   for (const auto &a : u.agents) table->add_row({a.name, a.command, a.workdir});
   table->min_height = 6;
   root->add(table);
-  root->add(std::make_shared<Label>(
-      u.last_agent_exit >= 0 ? "last agent exit: " + std::to_string(u.last_agent_exit) : ""));
+  root->add(std::make_shared<Label>(u.last_agent_exit_text));  // empty until the first agent exits
   table->on_submit = [&u](int idx) {
     if (idx < 0 || idx >= (int)u.agents.size()) return;
     u.pending_cmd = u.agents[idx].command;

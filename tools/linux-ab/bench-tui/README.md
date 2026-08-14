@@ -38,7 +38,10 @@ appends the selected preset to the run queue, dequeue removes the selected queue
 
 `validate_wsl.sh` runs build + unit tests + pty smoke + the measurement-contamination A/B
 (same tiny CPU-only llama-bench config, TUI idle vs absent, 3% tolerance gate). Override
-`BUILD`, `LLAMA`, `V` env vars to change paths.
+`BUILD`, `LLAMA`, `V` env vars to change paths. The battery gates the idle-TUI case only;
+the managed-run case (the TUI driving the bench, 100 ms log tail + 500 ms UI tick) is covered
+by the operator live test, which queues and starts the smoke preset, and any oddity there
+blocks the SETUP.md install section.
 
 ## Vendored dependency
 

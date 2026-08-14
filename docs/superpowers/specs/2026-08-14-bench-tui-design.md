@@ -143,8 +143,8 @@ tools/linux-ab/bench-tui/
 
 - Missing NVML and nvidia-smi → GPU panel "unavailable"; never invented values (record-don't-invent).
 - Missing or invalid `model_path` → preset refused at queue time with the reason displayed.
-- Child spawn failure → queue entry marked failed, log retained, queue continuation requires explicit
-  confirmation.
+- Child spawn failure → queue entry recorded as failed in `runs.jsonl`, log retained, and the queue
+  continues with the next entry.
 - Non-zero child exit → recorded as-is in `runs.jsonl`; log tail highlights the failure.
 - Malformed or absent JSON output → raw log remains viewable; record fields stay null.
 - Corrupt `presets.json`/`agents.json` → app starts with built-in defaults and reports the parse error;
@@ -167,7 +167,9 @@ presets.json / agents.json ◀──▶ config load at start, save on edit
 3. Tiny real run: queue a short llama-bench config against a small local GGUF; verify log capture, live
    view updates, stop-via-SIGTERM, and the results table row.
 4. Contamination check: paired A/B of the same short config, TUI active vs absent; tok/s must agree
-   within noise before the app is allowed near a measured run.
+   within noise before the app is allowed near a measured run. The battery gates the idle-TUI case;
+   the managed-run case is covered by the operator live test in item 5 (which queues and starts the
+   smoke preset), and any oddity there blocks the `tools/linux-ab/SETUP.md` install section.
 5. Rendered screenshots are posted for review, then a hands-on live test in WSL2 by the operator.
    Only after that explicit validation does `tools/linux-ab/SETUP.md` gain a bench-tui install section
    for the Debian bench box.

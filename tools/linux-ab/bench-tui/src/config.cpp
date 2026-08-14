@@ -86,3 +86,22 @@ std::vector<AgentSpec> default_agents(const std::string &repo_dir) {
           {"codex", "codex", repo_dir},
           {"shell", "${SHELL:-/bin/bash}", repo_dir}};
 }
+
+bool ensure_presets_config(const std::string &path, std::vector<Preset> &out) {
+  out.clear();
+  if (file_exists(path)) return load_presets(path, out);  // false: malformed, file preserved
+  save_presets(path, out);                                // absent: write empty defaults once
+  return true;
+}
+
+bool ensure_agents_config(const std::string &path, const std::string &repo_dir,
+                          std::vector<AgentSpec> &out) {
+  if (!file_exists(path)) {  // absent: write shipped defaults once
+    out = default_agents(repo_dir);
+    save_agents(path, out);
+    return true;
+  }
+  if (load_agents(path, out)) return true;
+  out = default_agents(repo_dir);  // malformed: defaults in memory, file preserved
+  return false;
+}

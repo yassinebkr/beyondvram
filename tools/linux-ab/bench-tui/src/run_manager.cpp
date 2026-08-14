@@ -66,8 +66,8 @@ std::string run_record_to_jsonl(const RunRecord &r) {
   m["output_json_path"] = JsonValue::make_str(r.output_json_path);
   m["exit_code"] = JsonValue::make_int(r.exit_code);
   if (!r.note.empty()) m["note"] = JsonValue::make_str(r.note);
-  if (r.tg_ts >= 0) m["tg_ts"] = JsonValue::make_double(r.tg_ts);
-  if (r.pp_ts >= 0) m["pp_ts"] = JsonValue::make_double(r.pp_ts);
+  m["tg_ts"] = r.tg_ts >= 0 ? JsonValue::make_double(r.tg_ts) : JsonValue::make_null();
+  m["pp_ts"] = r.pp_ts >= 0 ? JsonValue::make_double(r.pp_ts) : JsonValue::make_null();
   return json_stringify(JsonValue::make_obj(std::move(m)));
 }
 
@@ -88,7 +88,10 @@ RunManager::~RunManager() {
   {
     std::lock_guard<std::mutex> lk(mu_);
     stop_all_ = true;
-    if (child_pid_ > 0) detach_req_ = true;  // never kill a child implicitly
+    // Never kill a child implicitly: detach it. But when stop() was already
+    // requested, the worker completes that stop (SIGTERM -> 5 s -> SIGKILL)
+    // instead - detaching here would race it and mislabel the record.
+    if (child_pid_ > 0 && !term_req_) detach_req_ = true;
   }
   if (th_.joinable()) th_.join();
 }
@@ -306,6 +309,8 @@ int RunManager::spawn_and_wait(const Preset &p, int rep, RunRecord &rec) {
           for (auto &c : chunk)
             if (c == '\r') c = '\n';
           tail_partial_ += chunk;
+          if (tail_partial_.size() > 65536)
+            tail_partial_.erase(0, tail_partial_.size() - 65536);  // one huge \n-less line: keep the last 64 KiB
           size_t pos;
           while ((pos = tail_partial_.find('\n')) != std::string::npos) {
             push_tail(tail_partial_.substr(0, pos));
@@ -324,16 +329,16 @@ int RunManager::spawn_and_wait(const Preset &p, int rep, RunRecord &rec) {
       term = term_req_;
       det = detach_req_;
     }
-    if (det) {
+    if (term && !term_sent) {  // an explicit stop in flight wins over detach
+      kill(-pid, SIGTERM);  // the child is its own process-group leader (setsid)
+      term_sent = true;
+      kill_at = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    }
+    if (det && !term) {
       std::lock_guard<std::mutex> lk(mu_);
       rec.note = "detached";
       child_pid_ = -1;
       return -1;  // child keeps running; the record has no exit code
-    }
-    if (term && !term_sent) {
-      kill(-pid, SIGTERM);  // the child is its own process-group leader (setsid)
-      term_sent = true;
-      kill_at = std::chrono::steady_clock::now() + std::chrono::seconds(5);
     }
     if (term_sent && std::chrono::steady_clock::now() > kill_at) {
       kill(-pid, SIGKILL);
