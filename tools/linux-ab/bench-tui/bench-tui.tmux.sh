@@ -5,6 +5,8 @@ set -euo pipefail
 SESSION=${1:-bench}
 REPO=${2:-$HOME/beyondvram}
 HERE=$(cd "$(dirname "$0")" && pwd)
+[ -x "$HERE/build/bench-tui" ] || { echo "build first: cmake --build $HERE/build -j"; exit 1; }
+tmux has-session -t "$SESSION" 2>/dev/null && { echo "session '$SESSION' already exists: tmux attach -t $SESSION"; exit 1; }
 tmux new-session -d -s "$SESSION" -c "$REPO" -n tui "$HERE/build/bench-tui"
 tmux new-window -t "$SESSION" -n kimi -c "$REPO" "kimi; exec bash"
 tmux new-window -t "$SESSION" -n codex -c "$REPO" "codex; exec bash"

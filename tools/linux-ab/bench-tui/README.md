@@ -3,6 +3,10 @@
 Bench-OS control-center TUI: bench Runs control, System telemetry, Agents launcher.
 Design: docs/superpowers/specs/2026-08-14-bench-tui-design.md.
 
+A Windows checkout can give the shell scripts CRLF line endings; if so, run
+`sed -i 's/\r$//' validate_wsl.sh bench-tui.tmux.sh quickstart.sh` once first
+(assumes cwd is the bench-tui dir).
+
 ## Quick start (any Linux or WSL)
 
     tools/linux-ab/bench-tui/quickstart.sh
@@ -34,8 +38,7 @@ appends the selected preset to the run queue, dequeue removes the selected queue
 
 `validate_wsl.sh` runs build + unit tests + pty smoke + the measurement-contamination A/B
 (same tiny CPU-only llama-bench config, TUI idle vs absent, 3% tolerance gate). Override
-`BUILD`, `LLAMA`, `V` env vars to change paths. When the checkout has CRLF line endings,
-run `sed -i 's/\r$//' validate_wsl.sh bench-tui.tmux.sh quickstart.sh` once first.
+`BUILD`, `LLAMA`, `V` env vars to change paths.
 
 ## Vendored dependency
 
