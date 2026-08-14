@@ -24,3 +24,6 @@ tests/.pytest-tmp-*/
 
 # OS / editor
 Thumbs.db
+
+# bench-tui local build tree
+tools/linux-ab/bench-tui/build/
