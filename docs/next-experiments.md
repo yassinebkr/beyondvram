@@ -98,7 +98,7 @@ Native pure-CPU llama-bench on the same (0,0) config measured 15.57 ± 0.13 tok/
 **Scope, ordered by feasibility:**
 - 8a Pre-attention routing probes (ETH-style linear probes on captured hidden states; reported 93–97% exact-match, no public code). Requires extending the moe-trace build to dump layer inputs — a native rebuild, hours not days. The probe training itself is logistic-regression-scale and fits this machine.
 - 8b Routing-consistency LoRA (StickyMoE-style; switch-rate cuts up to 59%, code released). Compute-heavy; dubious on 8 GiB VRAM + 64 GiB RAM. Reassess after the upgrade.
-- 8c Full distillation from GLM/Kimi-class teachers into a smaller active-byte student. Off-box by definition. The license review of teacher outputs comes first — GLM and Kimi licenses attach conditions to synthetic training data; Qwen3 is Apache-2.0.
+- 8c Full distillation from GLM/Kimi-class teachers into a smaller active-byte student. Teacher training runs stay off-box by definition, but a small API-inference budget (tens of €) is allocated for teacher data generation, which makes the data side feasible before any new hardware. The license review of teacher outputs gates it — GLM and Kimi licenses attach conditions to synthetic training data; Qwen3 is Apache-2.0.
 
 **Decision rule.** 8a ships only if probe recall beats the measured id-history ceiling (0.53–0.63, `results/gpt-oss/predictability.json`) by a margin that justifies a predictor-backed cache — which would reopen the async-prefetch design with a real predictor. 8b/8c produce written assessments, not code, until the hardware or the licenses allow.
 
